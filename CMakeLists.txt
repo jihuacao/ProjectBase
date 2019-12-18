@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.5.1)
+project(ProjectBase VERSION 0.1.0 LANGUAGES C CXX)
+get_filename_component(project_include_dir ${ProjectBase_SOURCE_DIR} PATH)
+include_directories(${project_include_dir})
+message("${INCLUDE_DIRECTORIES}")
+set(CMAKE_CXX_FLAGS "-fvisibility=hidden ${CMAKE_CXX_FLAGS}")
+add_subdirectory(util)
+add_subdirectory(multi_language)
