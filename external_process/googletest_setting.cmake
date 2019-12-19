@@ -1,0 +1,5 @@
+message("processing google test setting")
+option(googletest_url "the git url of google test" https://github.com/google/googletest.git)
+option(googletest_tag "the tag of the git repo for google test" ec44c6c1675c25b9827aacd08c02433cccde7780)
+option(googletest_indlude_dir "the include of the google test")
+option(googletest_build "the ")
