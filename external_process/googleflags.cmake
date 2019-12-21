@@ -1,0 +1,7 @@
+message(${CMAKE_CURRENT_LIST_FILE})
+include(ExternalProject)
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+    message("WIN")
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    message("linux")
+endif()
