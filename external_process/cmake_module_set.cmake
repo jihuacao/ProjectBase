@@ -1,4 +1,4 @@
+# this script add the dir of cmake_module to the CMAKE_MODULE_PATH
 message(${CMAKE_CURRENT_LIST_FILE})
-#get_filename_component(this_abs_path ${CMAKE_CURRENT_LIST_DIR})
-set(CMAKE_MODULE_PATH /asdasd/ ${CMAKE_MODULE_PATH})
-set(${CMAKE_CXX_FLAGS} "asds ${CMAKE_CXX_FLAGS}")
+get_filename_component(ProjectBase_Root ${CMAKE_CURRENT_LIST_DIR} PATH)
+set(CMAKE_MODULE_PATH ${ProjectBase_Root}/cmake_module/ ${CMAKE_MODULE_PATH})
