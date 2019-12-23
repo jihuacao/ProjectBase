@@ -1,3 +1,3 @@
-option(external_install_path "the path for installing the external" /usr/local/)
-option(external_build_type "the type(release or debug) for building the external" ${CMAKE_BUILD_TYPE})
+set(external_install_path ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "the path for installing the external")
 option(external_build_shared "the lib link type for building the external" ON)
+set(external_download_dir ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "the dir for download the source of the third party repo")
