@@ -33,7 +33,6 @@
 
 # CMake
 CMakeCache*
-build*
 
 # vscode
 .vscode*

@@ -56,7 +56,10 @@ if(${gflags_version} STREQUAL "2.2.2")
 elseif(${gflags_version} STREQUAL "2.2.1")
     set(gflags_tag v2.2.2)
 endif()
-set(gflags_lib ${external_install_path}/lib/${gflags_lib_name})
+
+set(gflags_include ${external_install_path}/include)
+set(gflags_lib_dir ${external_install_path}/lib)
+set(gflags_lib ${gflags_lib_dir}/${gflags_lib_name})
 
 ExternalProject_Add(gflags
     PREFIX gflags
@@ -65,7 +68,8 @@ ExternalProject_Add(gflags
     DOWNLOAD_DIR ${external_download_dir}
     BUILD_IN_SOURCE 1
     BUILD_BYPRODUCTS ${gflags_lib_name} ${gflags_nothreads_lib_name}
-    INSTALL_COMMAND ""
+    INSTALL_COMMAND make install
+    BUILD_COMMAND make -j 8
     CMAKE_CACHE_ARGS
         -DCMAKE_BUILD_TYPE:STRING=${gflags_build_type}
         -DBUILD_PACKAGING:BOOL=OFF
@@ -75,4 +79,5 @@ ExternalProject_Add(gflags
         -DBUILD_gflags_nothreads_LIB:BOOL=ON
         -DREGISTER_BUILD_DIR:BOOL=OFF
         -DREGISTER_INSTALL_PREFIX:BOOL=OFF
+        -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_SOURCE_DIR}/install
 )
