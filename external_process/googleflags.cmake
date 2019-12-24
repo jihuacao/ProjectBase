@@ -98,7 +98,7 @@ ExternalProject_Add(gflags
     GIT_REPOSITORY ${gflags_url}
     GIT_TAG ${gflags_tag}
     DOWNLOAD_DIR ${external_download_dir}
-    BUILD_IN_SOURCE 1
+    BUILD_IN_SOURCE 0
     BUILD_BYPRODUCTS ${gflags_lib_name} ${gflags_nothreads_lib_name}
     INSTALL_COMMAND make install
     BUILD_COMMAND make -j 8

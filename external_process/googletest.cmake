@@ -9,10 +9,12 @@ set(gtest_url https://github.com/google/googletest.git)
 # this is a list contain versions which have the same behavior
 set(all_version "1.10.x" "1.8.x")
 set(uniform_version_one "1.10.x" "1.8.x")
-set(gtest_version "1.8.x" CACHE STRING "gtest version")
+set(gtest_version "1.10.x" CACHE STRING "gtest version")
 set_property(CACHE gtest_version PROPERTY STRINGS ${all_version})
 if(${gtest_version} STREQUAL "1.8.x")
     set(gtest_tag v1.8.x)
+if(${gtest_version} STREQUAL "1.10.x")
+    set(gtest_tag v1.10.x)
 else()
     message(FATAL_ERROR "unsupported gtest version: ${gtest_version}")
 endif()
@@ -86,9 +88,9 @@ set(gtest_lib ${gtest_lib_dir}/${gtest_lib_name})
 ExternalProject_Add(gtest
     PREFIX gtest
     GIT_REPOSITORY ${gtest_url}
-    GIT_TAG v1.8.x
+    GIT_TAG v1.10.x
     DOWNLOAD_DIR ${external_download_dir}
-    BUILD_IN_SOURCE 1
+    BUILD_IN_SOURCE 0
     BUILD_BYPRODUCTS ${gtest_lib_name} ${gtest_nothreads_lib_name}
     INSTALL_COMMAND make install
     BUILD_COMMAND make -j 8
@@ -100,7 +102,7 @@ ExternalProject_Add(gtest
         -DINSTALL_GTEST:BOOL=ON
         -Dgmock_build_tests:BOOL=OFF
         -Dgtest_build_samples:BOOL=OFF
-        -Dgtest_build_tests:BOOL=ON
+        -Dgtest_build_tests:BOOL=OFF
         -Dgtest_disable_pthreads:BOOL=OFF
         -Dgtest_force_shared_crt:BOOL=ON
         -Dgtest_hide_internal_symbols:BOOL=OFF
