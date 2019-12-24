@@ -5,6 +5,9 @@ get_filename_component(test_external_process_dir ${test_googletest_SOURCE_DIR} P
 get_filename_component(test_dir ${test_external_process_dir} PATH)
 get_filename_component(src_dir ${test_dir} PATH)
 
-set(CMAKE_MODULE_PATH ${src_dir}/external_process/)
-
-include(googletest_setting)
+set(CMAKE_MODULE_PATH ${src_dir}/external_process/ ${CMAKE_MODULE_PATH})
+include(cmake_module_set)
+message("module_path: ${CMAKE_MODULE_PATH}")
+include(external_setting)
+include(googletest)
+message("${gflags_lib_name}")
