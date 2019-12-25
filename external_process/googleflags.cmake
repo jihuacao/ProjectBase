@@ -1,5 +1,6 @@
 # base on gflags v2.2.2
 message(${CMAKE_CURRENT_LIST_FILE})
+set(with_gflags ON)
 include(popular_message)
 include(ExternalProject)
 project_base_system_message()
