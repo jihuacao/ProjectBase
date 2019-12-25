@@ -88,7 +88,7 @@ set(gtest_lib ${gtest_lib_dir}/${gtest_lib_name})
 ExternalProject_Add(gtest
     PREFIX gtest
     GIT_REPOSITORY ${gtest_url}
-    GIT_TAG v1.10.x
+    GIT_TAG ${gtest_tag}
     DOWNLOAD_DIR ${external_download_dir}
     BUILD_IN_SOURCE 0
     BUILD_BYPRODUCTS ${gtest_lib_name} ${gtest_nothreads_lib_name}
