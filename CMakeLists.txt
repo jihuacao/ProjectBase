@@ -19,6 +19,9 @@ set(PACKAGE_DESCRIPTION "")
 set(PACKAGE_URL "")
 project(${PACKAGE_NAME} VERSION ${PACKAGE_VERSION} LANGUAGES C CXX)
 
+# add cmake_module to CMAKE_MODULE_PATH
+set(cmake_module_dir ${ProjectBase_SOURCE_DIR}/cmake_module)
+set(CMAKE_MODULE_PATH ${cmake_module_dir} ${CMAKE_MODULE_PATH})
 
 get_filename_component(project_include_dir ${ProjectBase_SOURCE_DIR} PATH)
 include_directories(${project_include_dir})
@@ -26,8 +29,17 @@ message("${INCLUDE_DIRECTORIES}")
 set(CMAKE_CXX_FLAGS "-fvisibility=hidden -std=c++11 ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -Wall -g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -DNDEBUG")
-set(CMAKE_INSTALL_PREFIX, ${ProjectBase_SOURCE_DIR}/install)
+option(project_base_build_shared_lib "build the shared library or not" ON)
 
 # glog depend
+
+# build cmake_module
+add_subdirectory(cmake_module)
+# build_external_process
+add_subdirectory(external_process)
+# build cross_platform
+add_subdirectory(cross_platform)
+# build util
 add_subdirectory(util)
+# build multi_language
 add_subdirectory(multi_language)
