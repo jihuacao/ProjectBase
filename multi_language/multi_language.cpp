@@ -19,4 +19,4 @@ MultiLanguage::MultiLanguage(){}
 MultiLanguage::~MultiLanguage(){}
 void MultiLanguage::SetLanguageFold(const std::string& pth){}
 void MultiLanguage::SetLanguage(const Language& name){}
-const std::string& MultiLanguage::Extract(const LanguageIndex& index){return index;}
+const std::string MultiLanguage::Extract(const LanguageIndex& index){return std::string(index);}

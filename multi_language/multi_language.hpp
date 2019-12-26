@@ -42,7 +42,7 @@ public:
     void SetLanguageFold(const std::string& pth);
 public:
     const Languages& SupportedLanguages() const;
-    const std::string& Extract(const LanguageIndex& index);
+    const std::string Extract(const LanguageIndex& index);
     
 public:
     multi_language* _impl;
