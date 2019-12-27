@@ -1,75 +1,48 @@
 # base on gtest v2.2.2
 message(${CMAKE_CURRENT_LIST_FILE})
 set(with_gtest ON)
+set(module gtest)
 include(popular_message)
 project_base_system_message()
 include(ExternalProject)
 
-set(gtest_url https://github.com/google/googletest.git)
+set(${module}_url https://github.com/google/googletest.git)
 
 # this is a list contain versions which have the same behavior
-set(all_version "1.10.x" "1.8.x")
-set(uniform_version_one "1.10.x" "1.8.x")
-set(gtest_version "1.10.x" CACHE STRING "gtest version")
-set_property(CACHE gtest_version PROPERTY STRINGS ${all_version})
-if(${gtest_version} STREQUAL "1.8.x")
-    set(gtest_tag v1.8.x)
-if(${gtest_version} STREQUAL "1.10.x")
-    set(gtest_tag v1.10.x)
-else()
-    message(FATAL_ERROR "unsupported gtest version: ${gtest_version}")
-endif()
+include(external_setting)
+set(${module}_supported_version "1.10.x" "1.8.x")
+set(${module}_supported_tag "v1.10.x" "v1.8.x")
+version_selector(${module} ${module}_supported_version "1.10.x")
+message("${${module}_version}")
+version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
 
 # to get the gfalgs_build_type
-set(supported_gtest_build_type "FOLLOW_CMAKE_BUILD_TYPE" "Release" "Debug")
-set(gtest_build_type "FOLLOW_CMAKE_BUILD_TYPE" CACHE STRING "the specifical option for gtest, if the gtest_build_type is set")
-set_property(CACHE gtest_build_type PROPERTY STRINGS "Release" "Debug" "FOLLOW_CMAKE_BUILD_TYPE")
-if(gtest_build_type STREQUAL "")
-    set(gtest_build_type ${CMAKE_BUILD_TYPE})
-elseif(gtest_build_type STREQUAL "FOLLOW_CMAKE_BUILD_TYPE")
-    set(gtest_build_type ${CMAKE_BUILD_TYPE})
-elseif(${gtest_build_type} IN_LIST supported_gtest_build_type)
-else()
-    message(FATAL_ERROR "unsupported gtest_build_type: ${gtest_build_type}")
-endif()
+default_external_project_build_type(${module})
 
-# to get the _gtest_build_type shared or static
-set(gtest_build_shared "FOLLOW_EXTERNAL_BUILD_SHARED" CACHE STRING "specifical build the gtest in shared or follow in external_build_shared")
-set_property(CACHE gtest_build_shared PROPERTY STRINGS "ON" "OFF" "FOLLOW_EXTERNAL_BUILD_SHARED")
-if(gtest_build_shared STREQUAL "FOLLOW_EXTERNAL_BUILD_SHARED")
-    set(_gtest_build_shared ${external_build_shared})
-elseif(gtest_build_shared STREQUAL "")
-    set(_gtest_build_shared ${external_build_shared})
-elseif(gtest_build_shared STREQUAL "ON")
-    set(_gtest_build_shared ON)
-elseif(gtest_build_shared STREQUAL "OFF")
-    set(_gtest_build_shared OFF)
-else()
-    message(FATAL_ERROR "unsupported gtest_build_shared: ${gtest_build_shared}")
-endif()
+project_build_shared(${module})
 
-message("gtest: version->4{gtest_version} build in->${gtest_build_type} shared?->${_gtest_build_shared}")
+message("gtest: version->${${module}_version} build in->${${module}_build_type} shared?->${${module}_build_shared}")
 
 if(${gtest_version} IN_LIST uniform_version_one)
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        if(gtest_build_type STREQUAL "Debug")
+        if(${module}_build_type STREQUAL "Debug")
             set(gtest_lib_name gtestd.lib)
             set(gmock_lib_name gmockd.lib)
-        elseif(gtest_build_type STREQUAL "Release")
+        elseif(${module}_build_type STREQUAL "Release")
             set(gtest_lib_name gtest.lib)
             set(gmock_lib_name gmock.lib)
         endif()
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        if(gtest_build_type STREQUAL "Debug")
-            if(_gtest_build_shared)
+        if(${module}_build_type STREQUAL "Debug")
+            if(${module}_build_shared)
                 set(gtest_lib_name libgtestd.so)
                 set(gmock_lib_name libgmockd.so)
             else()
                 set(gtest_lib_name libgtestd.a)
                 set(gmock_lib_name libgmockd.a)
             endif()
-        elseif(gtest_build_type STREQUAL "Release")
-            if(_gtest_build_shared)
+        elseif(${module}_build_type STREQUAL "Release")
+            if(${module}_build_shared)
                 set(gtest_lib_name libgtest.so)
                 set(gmock_lib_name libgmock.so)
             else()
@@ -81,17 +54,17 @@ if(${gtest_version} IN_LIST uniform_version_one)
 else()
 endif()
 
-set(gtest_include ${external_install_path}/include)
-set(gtest_lib_dir ${external_install_path}/lib)
-set(gtest_lib ${gtest_lib_dir}/${gtest_lib_name})
+set(${module}_include ${external_install_path}/include)
+set(${module}_lib_dir ${external_install_path}/lib)
+set(${module}_lib ${gtest_lib_dir}/${gtest_lib_name})
 
-ExternalProject_Add(gtest
-    PREFIX gtest
-    GIT_REPOSITORY ${gtest_url}
-    GIT_TAG ${gtest_tag}
+ExternalProject_Add(
+    ${module}
+    PREFIX ${module} 
+    GIT_REPOSITORY ${${module}_url}
+    GIT_TAG ${${module}_tag}
     DOWNLOAD_DIR ${external_download_dir}
     BUILD_IN_SOURCE 0
-    BUILD_BYPRODUCTS ${gtest_lib_name} ${gtest_nothreads_lib_name}
     INSTALL_COMMAND make install
     BUILD_COMMAND make -j 8
     CMAKE_CACHE_ARGS
