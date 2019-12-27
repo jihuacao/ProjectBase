@@ -1,0 +1,9 @@
+##################################################################
+# this file provide a CMakeLists.txt for boost, in order to support
+# cmake external project
+# before use ExternalProject_Add please copy this file to the 
+# root path of the boost, and rename it to CMakeLists.txt
+##################################################################
+now supported:
+    1.71.0
+##################################################################
