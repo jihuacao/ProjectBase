@@ -43,3 +43,5 @@ add_subdirectory(cross_platform)
 add_subdirectory(util)
 # build multi_language
 add_subdirectory(multi_language)
+# build unified_type
+add_subdirectory(unified_type)
