@@ -3,6 +3,15 @@ option(external_build_shared "the lib link type for building the external" ON)
 set(external_download_dir ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "the dir for download the source of the third party repo")
 
 ##################################################################
+# macro
+##################################################################
+macro(project_build_shared project)
+    # to get the _gtest_build_type shared or static
+    set(${project}_build_shared ${external_build_shared} CACHE STRING "specifical build the gtest in shared or follow in external_build_shared")
+    set_property(CACHE ${project}_build_shared PROPERTY STRINGS "ON" "OFF")
+endmacro(project_build_shared)
+
+##################################################################
 # this macro set the project version selected variable tab
 # project: the name of the project
 # all_version: the versions which the process supported and can be choose
@@ -73,3 +82,39 @@ macro(default_external_project_build_type project)
     set(default_build_type "FOLLOW_CMAKE_BUILD_TYPE")
     external_project_build_type(${project} supported_build_type default_build_type)
 endmacro(default_external_project_build_type)
+
+
+##################################################################
+# this macro find the matched url and hash for the version
+# project: the module name
+# supported_version: the list which contains the supported version string
+# supported_url: the list which contains the supported url, corresponding to the supported version
+# supported_hash: the list which contains the supported hash, corresponding to the supported version
+##################################################################
+macro(version_url_hash_match project supported_version supported_url supported_hash version)
+    if(${${version}} IN_LIST ${supported_version})
+        list(LENGTH ${supported_version} ${project}_supported_version_length)
+        list(LENGTH ${supported_url} ${project}_supported_url_length)
+        list(LENGTH ${supported_hash} ${project}_supported_hash_length)
+        if((${${project}_supported_version_length} EQUAL ${${project}_supported_url_length}) AND (${${project}_supported_version_length} EQUAL ${${project}_supported_hash_length}))
+            list(FIND ${supported_version} ${${version}} matched_index)
+            if(NOT(${matched_index} EQUAL -1))
+                list(GET ${supported_url} ${matched_index} matched_url)
+                list(GET ${supported_hash} ${matched_index} matched_hash)
+                if((NOT(matched_url EQUAL -1)) AND (NOT(matched_hash EQUAL -1)))
+                    message(STATUS "find url ${matched_url} and hash ${matched_hash} for ${project}")
+                    set(${project}_url ${matched_url})
+                    set(${project}_hash ${matched_hash})
+                else()
+                    message(FATAL_ERROR "index: ${matched_index} not in supported_url: ${${supported_url}}")
+                endif()
+            else()
+                message(FATAL_ERROR "can not find ${${version}} in supported_version: ${${supported_version}}")
+            endif()
+        else()
+            message(FATAL_ERROR "${${project}} supported_version: ${${supported_version}} vs. supported_url: ${${supported_url}} vs. supported_hash: ${${supported_hash}}, should be in same length")
+        endif()
+    else()
+        message(FATAL_ERROR "version of ${${project}}: ${${version}} is not in the supported_version: ${${supported_version}}")
+    endif()
+endmacro(version_url_hash_match)
