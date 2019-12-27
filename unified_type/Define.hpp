@@ -2,7 +2,7 @@
 #define PROJECT_BASE_UNIFIED_TYPE_DEFINE_H
 #include <ProjectBase/cross_platform/util_method.hpp>
 #include <ProjectBase/cross_platform/symbol.hpp>
-#if defined(PROJECT_BASE_MULTI_LANGUAGE)
+#if defined(PROJECT_BASE_UNIFIED_TYPE)
 #define PROJECT_BASE_UNIFIED_TYPE_SYMBOL SYMBOL_EXPORT
 #else
 #define PROJECT_BASE_UNIFIED_TYPE_SYMBOL SYMBOL_IMPORT
