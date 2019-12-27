@@ -10,12 +10,12 @@ add_library(${${Obj}_target_name} ${${Obj}_build_link_type} ${DIR_LIB_SRCS})
 
 # install multilanguage
 ## header
-set(
-    multi_language_files
-    "multi_language.hpp"
-    "Define.hpp"
+file(
+    GLOB
+    ${Obj}_files
+    *.hpp
     )
-install(FILES ${multi_language_files} DESTINATION  ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/multi_language)
+install(FILES ${${Obj}_files} DESTINATION  ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${Obj})
 
 ## obj
 message("${CMAKE_CURRENT_LIST_DIR}")
