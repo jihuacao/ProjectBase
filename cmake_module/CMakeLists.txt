@@ -1,6 +1,8 @@
 ## install cmake_module
-set(
-    cmake_modules_files
-    "popular_message.cmake"
+set(module cmake_module)
+file(
+    GLOB
+    ${module}_files
+    *.cmake
     )
-install(FILES ${cmake_module_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
+install(FILES ${${module}_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${module})
