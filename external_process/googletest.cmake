@@ -1,6 +1,5 @@
 # base on gtest v2.2.2
 message(${CMAKE_CURRENT_LIST_FILE})
-set(with_gtest ON)
 set(module gtest)
 include(popular_message)
 project_base_system_message()

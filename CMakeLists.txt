@@ -33,6 +33,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -Wall -g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -DNDEBUG")
 option(project_base_build_shared_lib "build the shared library or not" ON)
 
+# gtest depend
+include(googletest)
 # boost depend
 include(boost)
 

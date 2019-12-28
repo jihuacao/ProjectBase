@@ -1,6 +1,6 @@
 set(external_install_path ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "the path for installing the external")
 option(external_build_shared "the lib link type for building the external" ON)
-set(external_download_dir ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "the dir for download the source of the third party repo")
+set(external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for download the source of the third party repo")
 
 ##################################################################
 # macro
@@ -118,3 +118,13 @@ macro(version_url_hash_match project supported_version supported_url supported_h
         message(FATAL_ERROR "version of ${${project}}: ${${version}} is not in the supported_version: ${${supported_version}}")
     endif()
 endmacro(version_url_hash_match)
+
+# ##################################################################
+# # this macro find the target package and check the version of the found target 
+# # is in the supported version or not
+# # target_name: the name of the target package ,use in the find_package
+# # supported_version: the versions which is fit to the project
+# ##################################################################
+# macro(check_env_package target_name supported_version)
+#     find_package(${${target_name}})
+# endmacro(check_env_package)
