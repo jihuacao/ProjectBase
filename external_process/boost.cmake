@@ -1,4 +1,8 @@
 message(${CMAKE_CURRENT_LIST_FILE})
+
+# find_package(boost 1.71 PATHS "/home/sins/Download/boost_1_71_0/install")
+# message(${boost_FOUND})
+
 set(with_boost ON)
 include(popular_message)
 project_base_system_message()
@@ -25,3 +29,20 @@ set(
 
 version_selector(${module} ${module}_all_version "1.71.0")
 version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
+
+# to get the gfalgs_build_type
+default_external_project_build_type(${module})
+
+project_build_shared(${module})
+
+# mkdir the 
+ExternalProject_Add(
+    boost
+    PREFIX boost-${${module}_version}
+    URL ${${module}_url}
+    URL_HASH:SHA256="${${module}_hash}"
+    DOWNLOAD_COMMAND axel -k -n 10 -av ${${module}_url}
+    DOWNLOAD_DIR "${external_download_dir}"
+
+    UPDATE_COMMAND ""
+)
