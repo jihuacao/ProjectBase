@@ -1,3 +1,5 @@
+include(popular_message)
+cmakelists_base_header()
 aux_source_directory(. DIR_LIB_SRCS)
 set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
 
@@ -14,7 +16,6 @@ file(GLOB ${module}_files *.hpp)
 install(FILES ${${module}_files} DESTINATION  ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${module})
 
 ## obj
-message("${CMAKE_CURRENT_LIST_DIR}")
 install(
     TARGETS
     ${${module}_target_name}

@@ -1,4 +1,4 @@
-message(${CMAKE_CURRENT_LIST_FILE})
+message(STATUS ${CMAKE_CURRENT_LIST_FILE})
 
 set(with_Boost ON)
 include(popular_message)
@@ -26,16 +26,24 @@ set(
 
 version_selector(${module} ${module}_all_version "1.71.0")
 
-get_property(out CACHE PROPERTY ${module}_version FULL_DOCS)
-message(STATUS ${out})
+# to get the Boost_build_type
+default_external_project_build_type(${module})
+
+# to get the Boost_build_shared
+project_build_shared(${module})
 
 # the BoostConfig.cmake config the Boost_INCLUDE_DIRS for include, 
 #
-set(Boost_USE_DEBUG_LIBS ON)
-set(Boost_DEBUG ON)
-find_package(${module} 1.71 REQUIRED COMPONENTS python CONFIG HINTS /home/sins/Download/boost_1_71_0/install/)
+# set(Boost_USE_DEBUG_LIBS ON)
+# set(${module}_USE_STATIC_LIBS OFF)
+# set(Boost_DEBUG ON)
+find_package(${module} 1.71 REQUIRED COMPONENTS filesystem CONFIG HINTS /home/sins/Download/boost_1_71_0/install/)
+message("libs:${${module}_LIBRARIES}")
 include_directories(${${module}_INCLUDE_DIRS})
 link_directories(${${module}_DIR}/lib)
+
+get_cmake_property(_variableNames VARIABLES)
+# message("sd:${_variableNames}")
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
 else()
@@ -43,11 +51,6 @@ endif()
 if(${module}_FOUND)
 else()
     version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
-
-    # to get the gfalgs_build_type
-    default_external_project_build_type(${module})
-
-    project_build_shared(${module})
 
     # mkdir the 
     ExternalProject_Add(

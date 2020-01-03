@@ -1,4 +1,6 @@
 ## install cmake_module
+include(popular_message)
+cmakelists_base_header()
 set(module cmake_module)
 file(
     GLOB

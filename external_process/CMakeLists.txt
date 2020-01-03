@@ -1,4 +1,5 @@
 ## install external_process
+message(STATUS ${CMAKE_CURRENT_LIST_FILE})
 set(module external_process)
 file(
     GLOB

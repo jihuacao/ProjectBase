@@ -24,14 +24,21 @@ set(cmake_module_dir ${ProjectBase_SOURCE_DIR}/cmake_module)
 set(CMAKE_MODULE_PATH ${cmake_module_dir} ${CMAKE_MODULE_PATH})
 set(external_process ${ProjectBase_SOURCE_DIR}/external_process)
 set(CMAKE_MODULE_PATH ${external_process} ${CMAKE_MODULE_PATH})
+include(popular_message)
+project_base_system_message()
 
-get_filename_component(project_include_dir ${ProjectBase_SOURCE_DIR} PATH)
-include_directories(${project_include_dir})
-message("${INCLUDE_DIRECTORIES}")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 set(CMAKE_CXX_FLAGS "-fvisibility=hidden -std=c++11 ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -Wall -g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -DNDEBUG")
+else()
+endif()
+
+get_filename_component(project_include_dir ${ProjectBase_SOURCE_DIR} PATH)
+include_directories(${project_include_dir})
+
 option(project_base_build_shared_lib "build the shared library or not" ON)
+option(build_test "build the test project or not" ON)
 
 # gtest depend
 include(googletest)
@@ -56,3 +63,9 @@ add_subdirectory(unified_type)
 add_subdirectory(function)
 # build function_ui
 add_subdirectory(function_ui)
+# build ui_style_config
+add_subdirectory(ui_style_config)
+
+if(${build_test})
+    add_subdirectory(test)
+endif()

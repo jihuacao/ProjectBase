@@ -11,7 +11,7 @@ namespace ProjectBase{
             public:
                 UIStyleConfig();
             public:
-                typedef void (*_widget_process_func)(QWidget* ptr);
+                typedef void (*_widget_process_func)(QWidt* ptr);
                 void ProcessWidget();
             private:
                 ProjectBase::ui_style_config::UIStyleConfig::_implement _impl;

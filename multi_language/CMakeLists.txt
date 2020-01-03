@@ -1,3 +1,4 @@
+message(STATUS ${CMAKE_CURRENT_LIST_FILE})
 aux_source_directory(. DIR_LIB_SRCS)
 set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_MULTI_LANGUAGE=1 ${CMAKE_CXX_FLAGS}")
 
@@ -18,7 +19,6 @@ file(
 install(FILES ${${Obj}_files} DESTINATION  ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${Obj})
 
 ## obj
-message("${CMAKE_CURRENT_LIST_DIR}")
 install(
     TARGETS
     ${${Obj}_target_name}

@@ -1,5 +1,5 @@
-
 ## install cross_platform
+message(STATUS ${CMAKE_CURRENT_LIST_FILE})
 set(module cross_platform)
 file(
     GLOB
