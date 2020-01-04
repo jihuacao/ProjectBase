@@ -12,7 +12,6 @@ include(external_setting)
 set(${module}_supported_version "1.10.x" "1.8.x")
 set(${module}_supported_tag "v1.10.x" "v1.8.x")
 version_selector(${module} ${module}_supported_version "1.10.x")
-message("${${module}_version}")
 version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
 
 # to get the gfalgs_build_type
@@ -62,14 +61,14 @@ ExternalProject_Add(
     PREFIX ${module} 
     GIT_REPOSITORY ${${module}_url}
     GIT_TAG ${${module}_tag}
-    DOWNLOAD_DIR ${external_download_dir}
+    SOURCE_DIR "${external_download_dir}/${module}"
     BUILD_IN_SOURCE 0
     INSTALL_COMMAND make install
     BUILD_COMMAND make -j 8
     CMAKE_CACHE_ARGS
         -DBUILD_GMOCK:BOOL=ON
-        -DBUILD_SHARED_LIBS:BOOL=${_gtest_build_shared}
-        -DCMAKE_BUILD_TYPE:STRING=${gtest_build_type}
+        -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
+        -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
         -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_SOURCE_DIR}/install
         -DINSTALL_GTEST:BOOL=ON
         -Dgmock_build_tests:BOOL=OFF

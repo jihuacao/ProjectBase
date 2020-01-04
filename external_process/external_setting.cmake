@@ -1,6 +1,9 @@
 set(external_install_path ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "the path for installing the external")
+message(STATUS "external_install_path: ${external_install_path}")
 option(external_build_shared "the lib link type for building the external" ON)
+message(STATUS "external_build_shared: ${external_build_shared}")
 set(external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for download the source of the third party repo")
+message(STATUS "external_download_dir: ${external_download_dir}")
 
 ##################################################################
 # macro
@@ -8,7 +11,12 @@ set(external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for
 macro(project_build_shared project)
     # to get the _gtest_build_type shared or static
     set(${project}_build_shared ${external_build_shared} CACHE STRING "specifical build the gtest in shared or follow in external_build_shared")
-    set_property(CACHE ${project}_build_shared PROPERTY STRINGS "ON" "OFF")
+    set_property(CACHE ${project}_build_shared PROPERTY STRINGS "ON" "OFF" "FOLLOW_EXTERNAL_BUILD_SHARED")
+    if("${${project}_build_shared}" STREQUAL "FOLLOW_EXTERNAL_BUILD_SHARED")
+        set(_${project}_build_shared ${external_build_shared})
+    else()
+        set(_${project}_build_shared ${${project}_build_shared})
+    endif()
 endmacro(project_build_shared)
 
 ##################################################################
@@ -69,9 +77,10 @@ macro(external_project_build_type project supported_build_type default_build_typ
     endif()
     set(${project}_build_type ${${default_build_type}} CACHE STRING "the specifical option for gtest, if the gtest_build_type is set")
     set_property(CACHE ${project}_build_type PROPERTY STRINGS ${${supported_build_type}})
-    if(gtest_build_type STREQUAL "FOLLOW_CMAKE_BUILD_TYPE")
-        set(gtest_build_type ${CMAKE_BUILD_TYPE})
-    elseif(${${project}_build_type} IN_LIST ${supported_build_type})
+    if("${${project}_build_type}" STREQUAL "FOLLOW_CMAKE_BUILD_TYPE")
+        set(_${project}_build_type ${CMAKE_BUILD_TYPE})
+    elseif("${${project}_build_type}" IN_LIST ${supported_build_type})
+        set(_${project}_build_type ${${project}_build_type})
     else()
         message(FATAL_ERROR "unsupported gtest_build_type: ${${project}_build_type}")
     endif()
