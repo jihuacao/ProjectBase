@@ -29,7 +29,7 @@ macro(obj_name_provide build_type shared_or_not obj_base_name)
     set(${${obj_base_name}}_target_name ${${obj_base_name}}${type}${opt})
 endmacro(obj_name_provide)
 
-macro(executable_name_provide build_type obj_base_naem)
+macro(executable_name_provide build_type obj_base_name)
     if("${${build_type}}" STREQUAL "Release")
         set(type )
     elseif("${${build_type}}" STREQUAL "Debug")
