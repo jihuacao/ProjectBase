@@ -1,15 +1,19 @@
 # base on glog v2.2.2
-message(${CMAKE_CURRENT_LIST_FILE})
 include(popular_message)
+include(external_setting)
+cmakelists_base_header()
 project_base_system_message()
 
-find_package(glog)
+set(module glog)
+set(${module}_supported_version 0.4.0)
+set(${module}_supported_tag v0.4.0)
+version_selector(${module} ${module}_supported_version "0.4.0")
 
-if(${glog_FOUND})
-    message("${CMAKE_INCLUDE_PATH}")
-    message("${CMAKE_FIND_ROOT_PATH}")
-    message("${glog_INCLUDE_DIRS}")
-    message("${glog_VERSION}")
+find_package(glog ${${module}_version} REQUIRED COMPONENTS glfags CONFIG PATHS /home/sins/Download/glog/build/install)
+
+message(STATUS ${${module}_FOUND})
+if(${${module}_FOUND})
+    message(STATUS ${${module}_ROOT})
 else()
     include(ExternalProject)
 
