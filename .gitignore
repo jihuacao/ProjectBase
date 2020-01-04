@@ -37,4 +37,4 @@ CMakeCache*
 # vscode
 .vscode*
 
-external/*
+*external
