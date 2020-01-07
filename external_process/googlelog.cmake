@@ -11,10 +11,29 @@ version_selector(${module} ${module}_supported_version 0.4.0)
 message(STATUS "CMAKE_PREFIX_PATH:${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_FRAMEWORK_PATH:${CMAKE_FRAMEWORK_PATH}")
 message(STATUS "CMAKE_APPBUNDLE_PATH:${CMAKE_APBUNDLE_PATH}")
-find_package(${module} ${${module}_version} CONFIG NO_SYSTEM_ENVIRONMENT_PATH)# PATHS /home/sins/Download/glog/build/install)
+find_package(${module} ${${module}_version} CONFIG 
+    NO_CMAKE_PACKAGE_REGISTRY
+    )
 
 if(${${module}_FOUND})
-    message(STATUS ${${module}_FOUND})
+    get_target_property(i glog::glog IMPORTED)
+    message(STATUS "IMPORTED(glog::glog):${i}")
+    get_target_property(ic glog::glog IMPORTED_CONFIGURATIONS)
+    message(STATUS "IMPORTED_CONFIGURATIONS:${ic}")
+    get_target_property(ilr glog::glog IMPORTED_LOCATION_${ic})
+    message(STATUS "IMPORTED_LOCATION_${ic}:${ilr}")
+    get_target_property(isr glog::glog IMPORTED_SONAME_${ic})
+    message(STATUS "IMPORTED_SONAME_${ic}:${isr}")
+    get_target_property(icd glog::glog INTERFACE_COMPILE_DEFINITIONS)
+    message(STATUS "INTERFACE_COMPILE_DEFINITIONS:${icd}")
+    get_target_property(iid glog::glog INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "INTERFACE_INCLUDE_CIRECTORIES:${iid}")
+    get_target_property(ill glog::glog INTERFACE_LINK_LIBRARIES)
+    message(STATUS "INTERFACE_LINK_LIBRARIES:${ill}")
+    #set_target_properties(third_party
+    #    PROPERTIES
+    #    INTERFACE_INCLUDE_DIRECTORIES ${ill}
+    #)
 else()
     include(ExternalProject)
 
@@ -38,7 +57,7 @@ else()
         CMAKE_CACHE_ARGS
             -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
             -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
-            -DCMAKE_INSTALL_PREFIX:STRING=${externale_install_path}
+            -DCMAKE_INSTALL_PREFIX:STRING=${external_install_path}
             -DBUILD_TESTING:BOOL=OFF
             -DWITH_GFLAGS:BOOL=OFF
             -DWITH_THREADS:BOOL=ON
