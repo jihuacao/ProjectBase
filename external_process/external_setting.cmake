@@ -1,4 +1,4 @@
-set(external_install_path ${CMAKE_CURRENT_BINARY_DIR}/install CACHE STRING "the path for installing the external")
+set(external_install_path ${CMAKE_SOURCE_DIR}/install CACHE STRING "the path for installing the external")
 message(STATUS "external_install_path: ${external_install_path}")
 option(external_build_shared "the lib link type for building the external" ON)
 message(STATUS "external_build_shared: ${external_build_shared}")
