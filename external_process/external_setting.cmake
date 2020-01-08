@@ -137,3 +137,31 @@ endmacro(version_url_hash_match)
 # macro(check_env_package target_name supported_version)
 #     find_package(${${target_name}})
 # endmacro(check_env_package)
+
+##################################################################
+# this function extract the configure which contain the include_dirs 
+# link_dirs link_name etc.
+# this function is dependen on the external_process module, in which
+# create the a cache-property for getting the configure
+# param:
+#   targets: list contains any existed external target
+#   to_target: should be an existed target
+# result:
+#   link_dirs:
+#   sonames:
+#   include_dirs:
+#   predefines:
+##################################################################
+function(default_external_config_getter target to_target)
+    get_target_property(${target}_include_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES) 
+    set_property(TARGET ${${to_target}} APPEND PROPERTY INCLUDE_DIRECTORIES ${${target}_include_dirs})
+    get_target_property(${target}_link_library ${target} IMPORTED_SN)
+endfunction(default_external_config_getter)
+
+
+macro(external_configs_getter targets to_target)
+    foreach(target IN LISTS ${targets})
+        message(STATUS ${target})
+        eval("${target}_get_config" to_target)
+    endforeach()
+endmacro(external_configs_getter)
