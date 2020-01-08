@@ -38,3 +38,4 @@ CMakeCache*
 .vscode*
 
 *external
+*CMakeFiles
