@@ -8,14 +8,10 @@ set(module glog)
 set(${module}_supported_version 0.4.0)
 version_selector(${module} ${module}_supported_version 0.4.0)
 
-message(STATUS "CMAKE_PREFIX_PATH:${CMAKE_PREFIX_PATH}")
-message(STATUS "CMAKE_FRAMEWORK_PATH:${CMAKE_FRAMEWORK_PATH}")
-message(STATUS "CMAKE_APPBUNDLE_PATH:${CMAKE_APBUNDLE_PATH}")
-find_package(${module} ${${module}_version} CONFIG 
-    NO_CMAKE_PACKAGE_REGISTRY
-    )
+find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
 
-if(${${module}_FOUND})
+
+function(fix_glog_target_name)
     get_target_property(i glog::glog IMPORTED)
     message(STATUS "IMPORTED(glog::glog):${i}")
     get_target_property(ic glog::glog IMPORTED_CONFIGURATIONS)
@@ -30,10 +26,10 @@ if(${${module}_FOUND})
     message(STATUS "INTERFACE_INCLUDE_CIRECTORIES:${iid}")
     get_target_property(ill glog::glog INTERFACE_LINK_LIBRARIES)
     message(STATUS "INTERFACE_LINK_LIBRARIES:${ill}")
-    #set_target_properties(third_party
-    #    PROPERTIES
-    #    INTERFACE_INCLUDE_DIRECTORIES ${ill}
-    #)
+endfunction(fix_glog_target_name)
+
+if(${${module}_FOUND})
+    fix_glog_target_name()
 else()
     include(ExternalProject)
 
@@ -63,4 +59,8 @@ else()
             -DWITH_THREADS:BOOL=ON
             -DWITH_TLS:BOOL=ON
     )
+    #find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
+    #fix_glog_target_name()
 endif()
+set(${module}_target_name glog)
+message(STATUS "this external target's name is ${${module}_target_name}")
