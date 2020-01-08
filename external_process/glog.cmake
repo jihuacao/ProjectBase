@@ -30,6 +30,7 @@ endfunction(fix_glog_target_name)
 
 if(${${module}_FOUND})
     fix_glog_target_name()
+    add_custom_target(${module})
 else()
     include(ExternalProject)
 
