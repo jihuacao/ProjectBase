@@ -5,11 +5,11 @@ cmakelists_base_header()
 project_base_system_message()
 
 set(module glog)
+set(${module}_target_name glog::glog)
 set(${module}_supported_version 0.4.0)
 version_selector(${module} ${module}_supported_version 0.4.0)
 
 find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
-
 
 function(fix_glog_target_name)
     get_target_property(i glog::glog IMPORTED)
@@ -30,7 +30,6 @@ endfunction(fix_glog_target_name)
 
 if(${${module}_FOUND})
     fix_glog_target_name()
-    add_custom_target(${module})
 else()
     include(ExternalProject)
 
@@ -41,6 +40,25 @@ else()
 
     default_external_project_build_type(${module})
     project_build_shared(${module})
+
+    string(TOUPPER ${_${module}_build_type} _${module}_build_type)
+    if(_${module}_build_type STREQUAL "RELEASE")
+        if(_${module}_build_shared)
+            set(soname liblog.so)
+            set(location ${external_install_path}/lib/libglog.so)
+        else()
+            set(soname liblog.a)
+            set(location ${external_install_path}/lib/libglog.a)
+        endif()
+    else()
+        if(_${module}_build_shared)    
+            set(soname liblogd.so)
+            set(location ${external_install_path}/lib/libglogd.so)
+        else()
+            set(soname liblogd.a)
+            set(location ${external_install_path}/lib/libglogd.a)
+        endif()
+    endif()
 
     ExternalProject_Add(
         ${module}
@@ -60,8 +78,21 @@ else()
             -DWITH_THREADS:BOOL=ON
             -DWITH_TLS:BOOL=ON
     )
-    #find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
-    #fix_glog_target_name()
+
+    add_library(${${module}_target_name} UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(
+        ${${module}_target_name}
+        PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${external_install_path}/include"
+        INTERFACE_LINK_LIBRARIES "-lpthread"
+        INTERFACE_LINK_DIRECTORIES "${external_install_path}/lib"
+        INTERFACE_COMPILE_DEFINITIONS "GOOGLE_GLOG_DLL_DECL=;GOOGLE_GLOG_DLL_DECL_FOR_UNITTESTS="
+        IMPORTED_LOCATION_${_${module}_build_type} "${location}"
+        IMPORTED_SONAME_${_${module}_build_type} "${soname}"
+    )
+    add_dependencies(${${module}_target_name} ${module})
+    unset(location)
+    unset(soname)
+
 endif()
-set(${module}_target_name glog)
 message(STATUS "this external target's name is ${${module}_target_name}")
