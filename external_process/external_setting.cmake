@@ -6,6 +6,12 @@ set(external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for
 message(STATUS "external_download_dir: ${external_download_dir}")
 
 ##################################################################
+# create a external_dependencies property in CACHED_VARIABLE
+# this property 
+##################################################################
+define_property(CACHED_VARIABLE PROPERTY external_dependencies BRIEF_DOCS asdasd FULL_DOCS asd)
+
+##################################################################
 # macro
 ##################################################################
 macro(project_build_shared project)
