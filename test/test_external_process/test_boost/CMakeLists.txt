@@ -7,6 +7,7 @@ get_filename_component(src_dir ${test_dir} PATH)
 
 set(CMAKE_MODULE_PATH ${src_dir}/external_process/ ${CMAKE_MODULE_PATH})
 include(cmake_module_set)
+include(ProjectBaseSet)
 message("module_path: ${CMAKE_MODULE_PATH}")
 include(external_setting)
 include(boost)

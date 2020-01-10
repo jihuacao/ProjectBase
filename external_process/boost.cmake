@@ -1,13 +1,39 @@
-message(STATUS ${CMAKE_CURRENT_LIST_FILE})
-
-set(with_Boost ON)
 include(popular_message)
+include(external_setting)
+cmakelists_base_header()
 project_base_system_message()
 include(ExternalProject)
-
-include(external_setting)
-
+include(file_read_method)
 set(module Boost)
+
+# generate a boost componment config file to the CMAKE_SOURCE_DIR
+## find the config file
+find_file(componment_config_file boost_componment_config NO_DEFAULT_PATH PATHS ${CMAKE_SOURCE_DIR})
+if(${componment_config_file} STREQUAL "componment_config_file-NOTFOUND")
+    message(STATUS copy boost_componment_config to ${CMAKE_SOURCE_DIR})
+    file(COPY ${ProjectBase_boost_componment_config_file_rpath} DESTINATION ${CMAKE_SOURCE_DIR})
+else()
+    message(STATUS found:${componment_config_file})
+endif()
+set(componment_file_rpath ${CMAKE_SOURCE_DIR}/${ProjectBase_boost_componment_config_file_name})
+execute_process(
+    COMMAND 
+    python
+    ${ProjectBase_script_componment_config_file_fix} 
+    --using_componment_file=${componment_file_rpath}
+    --standard_componment_file=${ProjectBase_boost_componment_config_file_rpath}
+    )
+componment_config_read(componment_file_rpath module)
+message(STATUS "with boost componment:")
+foreach(with ${${module}_with})
+   message(STATUS :${with}) 
+endforeach()
+
+message(STATUS "without boost componment:")
+foreach(without ${${module}_without})
+   message(STATUS :${without}) 
+endforeach()
+
 list(
     APPEND 
     ${module}_all_version 
@@ -25,12 +51,6 @@ set(
     )
 
 version_selector(${module} ${module}_all_version "1.71.0")
-
-# to get the Boost_build_type
-default_external_project_build_type(${module})
-
-# to get the Boost_build_shared
-project_build_shared(${module})
 
 # the BoostConfig.cmake config the Boost_INCLUDE_DIRS for include, 
 #
@@ -50,6 +70,12 @@ else()
 endif()
 if(${module}_FOUND)
 else()
+    # to get the Boost_build_type
+    default_external_project_build_type(${module})
+
+    # to get the Boost_build_shared
+    project_build_shared(${module})
+
     version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
 
     # mkdir the 
