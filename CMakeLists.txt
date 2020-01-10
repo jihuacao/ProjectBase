@@ -51,6 +51,10 @@ include(boost)
 add_subdirectory(cmake_module)
 # build_external_process
 add_subdirectory(external_process)
+# build script
+add_subdirectory(script)
+# build config
+add_subdirectory(config)
 # build cross_platform
 add_subdirectory(cross_platform)
 # build util
