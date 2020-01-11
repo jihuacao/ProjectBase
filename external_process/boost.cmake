@@ -5,6 +5,7 @@ project_base_system_message()
 include(ExternalProject)
 include(file_read_method)
 set(module Boost)
+set(external_project_add_target _boost)
 
 # generate a boost component config file to the CMAKE_SOURCE_DIR
 ## find the config file
@@ -42,7 +43,7 @@ list(
 
 set(
     ${module}_supported_url 
-    https://dl.bintray.com/Boostorg/release/1.71.0/source/Boost_1_71_0.tar.gz
+    https://dl.bintray.com/${module}org/release/1.71.0/source/${module}_1_71_0.tar.gz
     )
 
 set(
@@ -51,40 +52,99 @@ set(
     )
 
 version_selector(${module} ${module}_all_version "1.71.0")
-# to get the Boost_build_type
+
 default_external_project_build_type(${module})
 
-# to get the Boost_build_shared
 project_build_shared(${module})
 
-find_package(${module} "1.71" COMPONENTS ${${module}_with} CONFIG HINTS /home/sins/Download/boost_1_71_0/install/)
-include_directories(${${module}_INCLUDE_DIRS})
-link_directories(${${module}_DIR}/lib)
-
-get_cmake_property(_variableNames VARIABLES)
-# message("sd:${_variableNames}")
-
-if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+set(${module}_USE_DEBUG_LIBS OFF)
+set(${module}_USE_RELEASE_LIBS OFF)
+set(${module}_USE_STATIC_LIBS OFF)
+set(${module}_USE_STATIC_RUNTIME OFF)
+set(${module}_USE_DEBUG_RUNTIME OFF)
+set(${module}_COMPILER OFF)
+set(${module}_PYTHON_VERSION OFF)
+set(${module}_VERBOSE OFF)
+set(${module}_DEBUG OFF)
+if(${_${module}_build_type} STREQUAL "RELEASE")
+    set(${module}_USE_RELEASE_LIBS ON)
 else()
+    set(${module}_USE_DEBUG_LIBS ON)
 endif()
-if(${module}_FOUND)
-    message(STATUS ${Boost_DEBUG})
-    message(STATUS ${Boost_FIND_COMPONENTS})
-    message(STATUS ${Boost_VERSION_MACRO})
+if(${_${module}_build_shared})
+    set(${module}_USE_STATIC_LIBS OFF)
 else()
-    
+    set(${module}_USE_STATIC_LIBS ON)
+endif()
+message(STATUS "Prefix Configuration:
+````````${module}_USE_DEBUG_LIBS: ${${module}_USE_DEBUG_LIBS}
+````````${module}_USE_RELEASE_LIBS: ${${module}_USE_RELEASE_LIBS}
+````````${module}_USE_STATIC_LIBS: ${${module}_USE_STATIC_LIBS}
+````````${module}_USE_STATIC_RUNTIME: ${${module}_USE_STATIC_RUNTIME}
+````````${module}_USE_DEBUG_RUNTIME: ${${module}_USE_DEBUG_RUNTIME}
+````````${module}_COMPILER: ${${module}_COMPILER}
+````````${module}_PYTHONT_VERSION: ${${module}_PYTHON_VERSION}
+````````${module}_VERBOSE: ${${module}_VERBOSE}
+````````${module}_DEBUG: ${${module}_DEBUG}")
+
+find_package(${module} "1.71" COMPONENTS ${${module}_with} CONFIG HINTS /home/sins/Download/boost_1_71_0/install/)
+
+function(download_and_build_boost)
     version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
 
     # mkdir the 
     add_custom_command()
     ExternalProject_Add(
-        Boost
-        PREFIX Boost-${${module}_version}
+        _boost
+        PREFIX ${module}-${${module}_version}
         URL ${${module}_url}
         URL_HASH:SHA256="${${module}_hash}"
         DOWNLOAD_COMMAND axel -k -n 10 -av ${${module}_url}
         DOWNLOAD_DIR "${external_download_dir}"
-
         UPDATE_COMMAND ""
     )
+endfunction(download_and_build_boost)
+
+macro(add_total_boost_component_link)
+    add_library(${module}_total UNKNOWN IMPORTED)
+    foreach(component ${${module}_with})
+        set_property(TARGET ${module}_total APPEND PROPERTY INTERFACE_LINK_INTERFACE_LIBRARIES_RELEASE "${module}::${component}")
+    endforeach()
+    get_target_property(t ${module}_total INTERFACE_LINK_INTERFACE_LIBRARIES_RELEASE)
+    message(STATUS "${t}")
+    set(${module}_target_name ${module}_total)
+    message(STATUS ${${module}_target_name})
+endmacro(add_total_boost_component_link)
+
+if(${module}_FOUND)
+    set(component_found)
+    set(component_not_found)
+    foreach(component ${${module}_with})
+        if(${module}_${component}_FOUND)
+            list(APPEND component_found ${component})
+        else()
+            list(APPEND component_not_found ${component})
+        endif()
+    endforeach()
+    list(LENGTH component_not_found not_found_amount)
+    if(${not_found_amount} EQUAL 0)
+        set(${module}_total_found ON)
+    else()
+        set(${module}_total_found OFF)
+    endif()
+    message(STATUS "${module} found component: ${component_found}; not found component: ${component_not_found}")
+    if(${module}_total_found)
+        add_total_boost_component_link()
+    else()
+        download_and_build_boost()
+        # todo: make the component libraries
+        add_total_boost_component_link()
+    endif()
+else()
+    download_and_build_boost()
+    # todo: make the component libraries
+    add_total_boost_component_link()
 endif()
+unset(component_found)
+unset(component_not_found)
+unset(${module}_total_found)
