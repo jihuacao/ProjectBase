@@ -22,7 +22,7 @@ macro(component_config_read file_path name_prefix)
         string(REPLACE "${Name}=" "" Value ${NameAndValue})
         # Set the variable
         if(${Value})
-            list(APPEND ${name_prefix}_with ${Name})
+            list(APPEND ${${name_prefix}}_with ${Name})
         else()
             list(APPEND ${${name_prefix}}_without ${Name})
         endif()
