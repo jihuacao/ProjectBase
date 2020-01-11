@@ -41,7 +41,7 @@ option(project_base_build_shared_lib "build the shared library or not" ON)
 option(build_test "build the test project or not" ON)
 
 # gtest depend
-include(googletest)
+include(GTest)
 # boost depend
 include(boost)
 

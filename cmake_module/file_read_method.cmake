@@ -1,15 +1,15 @@
 ####################################################################
-# this macro provide read componment config from file, and save the 
-# needed componment to ${${name_prefix}}_with:list
-# unneeded componment to ${${name_prefix}}_without:list
+# this macro provide read component config from file, and save the 
+# needed component to ${${name_prefix}}_with:list
+# unneeded component to ${${name_prefix}}_without:list
 # file_path:
-#       the componment config file rpath, for example, config/boost_componment_config
-#       the format should be: one componment in one line and ON represent needing componment
-#       OFF represent do not need componment
+#       the component config file rpath, for example, config/boost_component_config
+#       the format should be: one component in one line and ON represent needing component
+#       OFF represent do not need component
 # name_prefix:
 #       the package prefix, for example: set name_prefix Boost for boost library
 ####################################################################
-macro(componment_config_read file_path name_prefix)
+macro(component_config_read file_path name_prefix)
     file(STRINGS ${${file_path}} ConfigContents)
     set(${name_prefix}_with)
     set(${name_prefix}_without)
@@ -27,4 +27,4 @@ macro(componment_config_read file_path name_prefix)
             list(APPEND ${${name_prefix}}_without ${Name})
         endif()
     endforeach()
-endmacro(componment_config_read)
+endmacro(component_config_read)
