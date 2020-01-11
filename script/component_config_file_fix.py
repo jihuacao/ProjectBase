@@ -36,10 +36,10 @@ if __name__ == '__main__':
             else:
                 using_component, using_status = (split_result[0], split_result[1])
                 pass
+            using_component = using_component.replace(' ', '')
+            using_status = using_status.replace(' ' , '').replace('\n', '')
             if using_status not in ('ON', 'OFF'):
                 continue
-            using_component = using_component.replace(' ', '').replace('\n', '')
-            using_status = using_status.replace(' ' , '').replace('\n', '')
             using_component_dict[using_component] = using_status
             pass
         pass
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         lines = fp.readlines()
         for line in lines:
             standard_component, standard_status = line.split('=')
-            standard_component = standard_component.replace(' ', '').replace('\n', '')
+            standard_component = standard_component.replace(' ', '')
             standard_status = standard_status.replace(' ', '').replace('\n', '')
             standard_component_dict[standard_component] = standard_status
             pass
