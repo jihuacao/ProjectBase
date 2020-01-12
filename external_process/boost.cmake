@@ -92,6 +92,23 @@ find_package(${module} "1.71" COMPONENTS ${${module}_with} CONFIG HINTS /home/si
 function(download_and_build_boost)
     version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
 
+    string(REPLACE "." "_" boost_download_file_name boost.${${module}_version})
+    find_file(found_download_file ${boost_download_file_name} ${external_download_path})
+    set(actual_download_command axel -k -n 10 -av ${${module}_url} -o ${external_download_dir}/${boost_download_file_name})
+    if(${found_download_file} STREQUAL "found_download_file-NOTFOUND")
+        set(download_command ${actual_download_command})
+    else()
+        file(SHA256 ${external_download_dir}/${boost_download_file_name} exist_sha)
+        if(${exist_sha} STREQUAL ${${module}_hash})
+            set(download_command )
+        else()
+            set(download_command ${actual_download_command})
+        endif()
+    endif()
+    unset(actual_download_command)
+    add_custom_command(OUTPUT a COMMAND echo asd COMMAND echo aswf)
+    message(FATAL_ERROR "ad")
+
     # mkdir the 
     add_custom_command()
     ExternalProject_Add(
@@ -99,10 +116,13 @@ function(download_and_build_boost)
         PREFIX ${module}-${${module}_version}
         URL ${${module}_url}
         URL_HASH:SHA256="${${module}_hash}"
-        DOWNLOAD_COMMAND axel -k -n 10 -av ${${module}_url}
+        DOWNLOAD_COMMAND ${download_command}
         DOWNLOAD_DIR "${external_download_dir}"
         UPDATE_COMMAND ""
     )
+    unset(boost_download_file_name)
+    unset(found_download_file)
+    unset(download_command)
 endfunction(download_and_build_boost)
 
 macro(add_total_boost_component_link)
