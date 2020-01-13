@@ -5,11 +5,15 @@ project_base_system_message()
 include(ExternalProject)
 include(file_read_method)
 include(file_operation)
+# these could be remove
 set(module Boost)
 set(external_project_add_target _boost)
 set(url_label_name boost)
 set(extension tar.gz)
 set(component_lib_prefix Boost)
+set(generate_boost_op_name _${module})
+# this should be retain
+set(generate_boost_imported_name boost_generate_target)
 
 # generate a boost component config file to the CMAKE_SOURCE_DIR
 ## find the config file
@@ -118,42 +122,58 @@ function(download_and_build_boost)
         set(_link static)
     endif()
     
-    add_custom_target(_${module}
+    add_custom_target(${generate_boost_op_name}
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir} tar -xvf ${download_file_name} >./decompression_info.txt
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} variant=_variant link=_link runtime-link=shared threading=multi
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install --prefix=${external_install_path}
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} variant=_variant link=_link runtime-link=shared threading=multi > bootstrap_info.txt
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 > b2_info.txt
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install --prefix=${external_install_path} > b2_install_info.txt
     )
-    add_dependencies(_${module} ${target})
+    add_dependencies(${generate_boost_op_name} ${target})
     unset(with_component_option)
     unset(_variant)
     unset(_link)
 endfunction(download_and_build_boost)
 
-function(build_boost_target version components install_path)
-    foreach(component ${components})
-        add_library(${component_lib_prefix}::${component} UNKNOW IMPORTED)
-        set_target_properties(
-            ${component_lib_prefix}::${component}
+function(build_boost_target version components shared _build_type install_path)
+    if(${${shared}})
+        set(posefix so)
+    else()
+        set(posefix a)
+    endif()
+    if(${${_build_type}} STREQUAL "RELEASE")
+        set(type )
+    else()
+        set(type d)
+    endif()
+    foreach(component ${${components}})
+        add_library(${module}_${component} UNKNOWN IMPORTED)
+        set_target_properties(${module}_${component}
             PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${${install_path}}/include"
-            INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_NO_LIB"
+            INTERFACE_LINK_DIRECTORIES "${${install_path}}/lib"
+            IMPORTED_LOCATION_${_${module}_build_type} "${${install_path}}/lib/libboost_${component}${type}.${posefix}"
         )
+        list(APPEND libraries ${module}_${component};)
     endforeach()
+    # importent: waiting to write the note
+    add_library(${generate_boost_imported_name} INTERFACE IMPORTED)
+    set_target_properties(${generate_boost_imported_name}
+        PROPERTIES
+        #INTERFACE_INCLUDE_DIRECTORIES "${external_install_path}/include"
+        #INTERFACE_LINK_DIRECTORIES "${external_install_path}/lib"
+        #IMPORTED_LOCATION_${_${module}_build_type} "${external_install_path}/lib/libboost_filesystem.so"
+        ##IMPORTED_SONAME_${_${module}_build_type} ${libraries}
+        INTERFACE_LINK_LIBRARIES "${libraries}"
+    )
+    add_dependencies(${generate_boost_imported_name} ${generate_boost_op_name})
 endfunction(build_boost_target)
 
 macro(add_total_boost_component_link)
-    add_library(${module}_total UNKNOWN IMPORTED)
-    foreach(component ${${module}_with})
-        #set_property(TARGET ${module}_total APPEND PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_RELEASE "${module}::${component}")
-        add_dependencies(${module}_total ${module}::${component})
-    endforeach()
-    show_target_properties(Boost::filesystem)
-    set_target_properties(${module}_total
-        PROPERTIES 
-        INTERFACE_LINK_LIBRARIES "Boost::filesystem"
-    )
-    set(${module}_target_name ${module}_total)
+    if(${module}_total_found)
+        set(${module}_target_name Boost::boost)
+    else()
+        set(${module}_target_name ${generate_boost_imported_name})
+    endif()
     message(STATUS ${${module}_target_name})
 endmacro(add_total_boost_component_link)
 
@@ -178,14 +198,22 @@ if(${module}_FOUND)
         add_total_boost_component_link()
     else()
         download_and_build_boost()
-        # todo: make the component libraries
+        build_boost_target(${module}_version ${module}_with _${module}_build_shared _${module}_build_type external_install_path)
         add_total_boost_component_link()
     endif()
 else()
     download_and_build_boost()
-    # todo: make the component libraries
+    message(STATUS "ttttt${${module}_with}")
+    build_boost_target(${module}_version ${module}_with _${module}_build_shared _${module}_build_type external_install_path)
     add_total_boost_component_link()
 endif()
+
 unset(component_found)
 unset(component_not_found)
 unset(${module}_total_found)
+unset(module)
+unset(external_project_add_target)
+unset(url_label_name)
+unset(extension)
+unset(component_lib_prefix)
+unset(generate_boost_op_name)
