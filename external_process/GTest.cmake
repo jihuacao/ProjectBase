@@ -113,10 +113,11 @@ else()
         INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=${link_as_shared}"
         INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
         INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${${module}_include}"
-        IMPORTED_LINK_INTERFACE_LIBRARIES_RELEASE "${dep}"
-        IMPORTED_LOCATION_RELEASE "${external_install_path}/lib/${gtest_lib_name}"
-        IMPORTED_SONAME_RELEASE "${gtest_lib_name}"
-    
+        IMPORTED_LINK_INTERFACE_LIBRARIES_${_${module}_build_type} "${dep}"
+        IMPORTED_LOCATION_${_${module}_build_type} "${external_install_path}/lib/${gtest_lib_name}"
+        IMPORTED_SONAME_${_${module}_build_type} "${gtest_lib_name}"
+        #INTERFACE_LINK_LIBRARIES "${dep}"
+        #LOCATION "${external_install_path}/lib/${gtest_lib_name}"
     )
     add_library(GTest::gmock UNKNOWN IMPORTED)
     set_property(TARGET GTest::gmock APPEND PROPERTY IMPORTED_CONFIGURATIONS ${_${module}_build_type})
@@ -126,9 +127,9 @@ else()
         INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=${link_as_shared}"
         INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
         INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${${module}_include}"
-        IMPORTED_LINK_INTERFACE_LIBRARIES_RELEASE "${dep};GTest::gtest"
-        IMPORTED_LOCATION_RELEASE "${external_install_path}/lib/${gmock_lib_name}"
-        IMPORTED_SONAME_RELEASE "${gmock_lib_name}"
+        IMPORTED_LINK_INTERFACE_LIBRARIES_${_${module}_build_type} "${dep};GTest::gtest"
+        IMPORTED_LOCATION_${_${module}_build_type} "${external_install_path}/lib/${gmock_lib_name}"
+        IMPORTED_SONAME_${_${module}_build_type} "${gmock_lib_name}"
     )
     add_dependencies(GTest::gmock _${module})
     unset(link_as_shared)
