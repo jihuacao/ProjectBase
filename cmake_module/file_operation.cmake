@@ -19,3 +19,26 @@ function(touch_file touch_target generated_target_posefix url hash dir file_name
     add_custom_target(touch_${${generated_target_posefix}} ALL COMMAND ${download_command})
     set(${touch_target} touch_${${generated_target_posefix}} PARENT_SCOPE)
 endfunction(touch_file)
+
+#function(touch_fold target_fold)
+#    set(old_parent ${${target_fold}})
+#    set(parent "")
+#    while(NOT (${old_parent} STREQUAL ${parent}))
+#        get_filename_component(parent ${${target_fold}} PATH)
+#        find_path(temp )
+#    endwhile()
+#endfunction(touch_fold)
+
+
+################################################################
+# this function get the name of the file from the download url
+################################################################
+function(get_file_name_from_url file_name url)
+    string(REPLACE "/" ";" split ${${url}})
+    list(LENGTH split length)
+    math(EXPR list_last "${length} - 1")
+    list(GET split ${list_last} last_item)
+    set(${file_name} ${last_item} PARENT_SCOPE)
+    unset(split)
+    unset(length)
+endfunction(get_file_name_from_url)
