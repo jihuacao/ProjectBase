@@ -14,6 +14,7 @@ include(popular_message)
 cmakelists_base_header()
 project_base_system_message()
 
+set(qt_custom_options -opensource -confirm-license -no-opengl)
 include(qt)
 
 set(sources "${${PROJECT_NAME}_SOURCE_DIR}/test_qt.cpp")
