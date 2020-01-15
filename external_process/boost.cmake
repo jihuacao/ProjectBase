@@ -95,7 +95,7 @@ message(STATUS "Prefix Configuration:
 ````````${module}_VERBOSE: ${${module}_VERBOSE}
 ````````${module}_DEBUG: ${${module}_DEBUG}")
 
-find_package(${module} "1.71" COMPONENTS ${${module}_with} CONFIG HINTS ${external_install_path})
+find_package(${module} "1.71" COMPONENTS ${${module}_with} CONFIG NO_CMAKE_PACKAGE_REGISTRY HINTS ${external_install_path})
 
 function(download_and_build_boost)
     version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
