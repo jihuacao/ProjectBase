@@ -40,6 +40,10 @@ include_directories(${project_include_dir})
 option(project_base_build_shared_lib "build the shared library or not" ON)
 option(build_test "build the test project or not" ON)
 
+# gflags depend
+include(gflags)
+# glog depend
+include(glog)
 # gtest depend
 include(GTest)
 # boost depend
