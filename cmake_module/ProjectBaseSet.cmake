@@ -14,6 +14,9 @@ set(ProjectBase_config_dir ${ProjectBase_config_dir}/config)
 set(ProjectBase_boost_component_config_file_name boost_component_config)
 set(ProjectBase_boost_component_config_file_rpath ${ProjectBase_config_dir}/${ProjectBase_boost_component_config_file_name})
 
+set(ProjectBase_qt5_component_config_file_name qt5_component_config)
+set(ProjectBase_qt5_component_config_file_rpath ${ProjectBase_config_dir}/${ProjectBase_qt5_component_config_file_name})
+
 
 ###################################################################
 # set the ProjectBase_script
