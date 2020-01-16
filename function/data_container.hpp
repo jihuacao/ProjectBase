@@ -3,6 +3,7 @@
 #include <string>
 #include <ProjectBase/function/Define.hpp>
 #include <ProjectBase/function/data.hpp>
+#include <ProjectBase/function/name_container.hpp>
 
 namespace ProjectBase{
     namespace function{

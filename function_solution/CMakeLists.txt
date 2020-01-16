@@ -7,6 +7,7 @@ obj_name_provide(CMAKE_BUILD_TYPE project_base_build_shared_lib module)
 
  #生成链接库
 add_library(${${module}_target_name} ${${module}_build_link_type} ${DIR_LIB_SRCS})
+target_compile_definitions(${${module}_target_name} PRIVATE PROJECT_BASE_FUNCTION_SOLUTION)
 
 # install multilanguage
 ## header

@@ -69,6 +69,8 @@ add_subdirectory(multi_language)
 add_subdirectory(unified_type)
 # build function
 add_subdirectory(function)
+# build function_solution
+add_subdirectory(function_solution)
 # build function_ui
 add_subdirectory(function_ui)
 # build ui_style_config

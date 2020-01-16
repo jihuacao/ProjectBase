@@ -12,7 +12,7 @@ namespace ProjectBase{
                 Data(const Data& other);
                 Data(Data&& ref);
             public:
-
+                
         };
     }
 }

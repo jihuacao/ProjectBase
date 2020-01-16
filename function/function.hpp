@@ -11,7 +11,8 @@ namespace ProjectBase{
                 Function(/* args */);
                 ~Function();
             public:
-                ProjectBase::function::DataContainer& dat_container() const;
+                ProjectBase::function::DataContainer& data_container() const;
+                void run() const; 
             protected:
                 /* data */
         };
