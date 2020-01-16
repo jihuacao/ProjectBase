@@ -7,7 +7,7 @@ include(file_read_method)
 include(file_operation)
 include(ProjectBaseSet)
 # these could be remove
-set(module Boost)
+set(module boost)
 set(external_project_add_target _boost)
 set(url_label_name boost)
 set(extension tar.gz)
@@ -66,37 +66,37 @@ default_external_project_build_type(${module})
 
 project_build_shared(${module})
 
-set(${module}_USE_DEBUG_LIBS OFF)
-set(${module}_USE_RELEASE_LIBS OFF)
-set(${module}_USE_STATIC_LIBS OFF)
-set(${module}_USE_STATIC_RUNTIME OFF)
-set(${module}_USE_DEBUG_RUNTIME OFF)
-set(${module}_COMPILER OFF)
-set(${module}_PYTHON_VERSION OFF)
-set(${module}_VERBOSE OFF)
-set(${module}_DEBUG OFF)
+set(Boost_USE_DEBUG_LIBS OFF)
+set(Boost_USE_RELEASE_LIBS OFF)
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_STATIC_RUNTIME OFF)
+set(Boost_USE_DEBUG_RUNTIME OFF)
+set(Boost_COMPILER OFF)
+set(Boost_PYTHON_VERSION OFF)
+set(Boost_VERBOSE OFF)
+set(Boost_DEBUG OFF)
 if(${_${module}_build_type} STREQUAL "RELEASE")
-    set(${module}_USE_RELEASE_LIBS ON)
+    set(Boost_USE_RELEASE_LIBS ON)
 else()
-    set(${module}_USE_DEBUG_LIBS ON)
+    set(Boost_USE_DEBUG_LIBS ON)
 endif()
 if(${_${module}_build_shared})
-    set(${module}_USE_STATIC_LIBS OFF)
+    set(Boost_USE_STATIC_LIBS OFF)
 else()
-    set(${module}_USE_STATIC_LIBS ON)
+    set(Boost_USE_STATIC_LIBS ON)
 endif()
 message(STATUS "Prefix Configuration:
-````````${module}_USE_DEBUG_LIBS: ${${module}_USE_DEBUG_LIBS}
-````````${module}_USE_RELEASE_LIBS: ${${module}_USE_RELEASE_LIBS}
-````````${module}_USE_STATIC_LIBS: ${${module}_USE_STATIC_LIBS}
-````````${module}_USE_STATIC_RUNTIME: ${${module}_USE_STATIC_RUNTIME}
-````````${module}_USE_DEBUG_RUNTIME: ${${module}_USE_DEBUG_RUNTIME}
-````````${module}_COMPILER: ${${module}_COMPILER}
-````````${module}_PYTHONT_VERSION: ${${module}_PYTHON_VERSION}
-````````${module}_VERBOSE: ${${module}_VERBOSE}
-````````${module}_DEBUG: ${${module}_DEBUG}")
+````````Boost_USE_DEBUG_LIBS: ${Boost_USE_DEBUG_LIBS}
+````````Boost_USE_RELEASE_LIBS: ${Boost_USE_RELEASE_LIBS}
+````````Boost_USE_STATIC_LIBS: ${Boost_USE_STATIC_LIBS}
+````````Boost_USE_STATIC_RUNTIME: ${Boost_USE_STATIC_RUNTIME}
+````````Boost_USE_DEBUG_RUNTIME: ${Boost_USE_DEBUG_RUNTIME}
+````````Boost_COMPILER: ${Boost_COMPILER}
+````````Boost_PYTHONT_VERSION: ${Boost_PYTHON_VERSION}
+````````Boost_VERBOSE: ${Boost_VERBOSE}
+````````Boost_DEBUG: ${Boost_DEBUG}")
 
-find_package(${module} "1.71" COMPONENTS ${${module}_with} CONFIG NO_CMAKE_PACKAGE_REGISTRY HINTS ${external_install_path})
+find_package(Boost "1.71" COMPONENTS ${${module}_with} CONFIG NO_CMAKE_PACKAGE_REGISTRY HINTS ${external_install_path})
 
 function(download_and_build_boost)
     version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
@@ -204,7 +204,6 @@ if(${module}_FOUND)
     endif()
 else()
     download_and_build_boost()
-    message(STATUS "ttttt${${module}_with}")
     build_boost_target(${module}_version ${module}_with _${module}_build_shared _${module}_build_type external_install_path)
     add_total_boost_component_link()
 endif()

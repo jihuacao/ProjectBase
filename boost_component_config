@@ -1,0 +1,4 @@
+system=ON
+filesystem=ON
+python=OFF
+graph=ON
