@@ -1,4 +1,4 @@
-system=ON
-filesystem=ON
 python=OFF
 graph=ON
+system=ON
+filesystem=ON

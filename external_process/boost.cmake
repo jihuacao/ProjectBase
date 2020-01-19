@@ -5,6 +5,7 @@ project_base_system_message()
 include(ExternalProject)
 include(file_read_method)
 include(file_operation)
+include(fold_operation)
 include(ProjectBaseSet)
 # these could be remove
 set(module boost)
@@ -107,6 +108,11 @@ function(download_and_build_boost)
     touch_file(target module ${module}_url ${module}_hash external_download_dir download_file_name)
 
     # get the component option
+    list(LENGTH ${module}_with component_amount)
+    if(component_amount EQUAL 0)
+        message(WARNING "with ${component_amount} component for ${module}")
+    else()
+    endif()
     set(with_component_option)
     foreach(component ${${module}_with})
        set(with_component_option ${component},${with_component_option})
@@ -146,6 +152,13 @@ function(build_boost_target version components shared _build_type install_path)
     else()
         set(type d)
     endif()
+
+    set(include_dir ${${install_path}}/include)
+    set(lib_dir ${${install_path}}/lib)
+    # make sure the directory exists
+    touch_fold(include_dir)
+    touch_fold(lib_dir)
+
     foreach(component ${${components}})
         add_library(${module}_${component} UNKNOWN IMPORTED)
         set_target_properties(${module}_${component}
@@ -160,13 +173,11 @@ function(build_boost_target version components shared _build_type install_path)
     add_library(${generate_boost_imported_name} INTERFACE IMPORTED)
     set_target_properties(${generate_boost_imported_name}
         PROPERTIES
-        #INTERFACE_INCLUDE_DIRECTORIES "${external_install_path}/include"
-        #INTERFACE_LINK_DIRECTORIES "${external_install_path}/lib"
-        #IMPORTED_LOCATION_${_${module}_build_type} "${external_install_path}/lib/libboost_filesystem.so"
-        ##IMPORTED_SONAME_${_${module}_build_type} ${libraries}
         INTERFACE_LINK_LIBRARIES "${libraries}"
     )
     add_dependencies(${generate_boost_imported_name} ${generate_boost_op_name})
+    unset(include_dir)
+    unset(lib_dir)
 endfunction(build_boost_target)
 
 macro(add_total_boost_component_link)
