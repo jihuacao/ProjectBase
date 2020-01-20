@@ -118,8 +118,8 @@ else()
         _${module}_nothreads
         PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
-        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir"
-        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir/libgflags_nothreads${type}.${posefix}"
+        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
+        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir}/libgflags_nothreads${type}.${posefix}"
     )
     add_dependencies(_${module}_nothreads _${module})
     include(CMakeFindDependencyMacro)
@@ -129,8 +129,8 @@ else()
         _${module}_thread
         PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
-        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir"
-        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir/libgflags${type}.${posefix}"
+        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
+        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir}/libgflags${type}.${posefix}"
         INTERFACE_LINK_LIBRARIES "Threads::Threads"
     )
     add_dependencies(_${module}_thread _${module})
