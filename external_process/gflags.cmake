@@ -3,6 +3,7 @@ include(popular_message)
 include(ExternalProject)
 include(external_setting)
 cmakelists_base_header()
+include(fold_operation)
 set(module gflags)
 project_base_system_message()
 
@@ -71,9 +72,9 @@ else()
     else()
     endif()
 
-    set(gflags_include ${external_install_path}/include)
-    set(gflags_lib_dir ${external_install_path}/lib)
-    set(gflags_lib ${gflags_lib_dir}/${gflags_lib_name})
+    set(${module}_include ${external_install_path}/include)
+    set(${module}_lib_dir ${external_install_path}/lib)
+    set(${module}_lib ${gflags_lib_dir}/${gflags_lib_name})
 
     ExternalProject_Add(
         _${module}
@@ -107,13 +108,18 @@ else()
     else()
         set(posefix a)
     endif()
+
+    # make sure dir existed
+    touch_fold(${module}_include)
+    touch_fold(${module}_lib_dir)
+
     add_library(_${module}_nothreads UNKNOWN IMPORTED)
     set_target_properties(
         _${module}_nothreads
         PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${external_install_path}/include"
-        INTERFACE_LINK_DIRECTORIES "${external_install_path}/lib"
-        IMPORTED_LOCATION_${_${module}_build_type} "${external_install_path}/lib/libgflags_nothreads${type}.${posefix}"
+        INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
+        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
+        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir}/libgflags_nothreads${type}.${posefix}"
     )
     add_dependencies(_${module}_nothreads _${module})
     include(CMakeFindDependencyMacro)
@@ -122,9 +128,9 @@ else()
     set_target_properties(
         _${module}_thread
         PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${external_install_path}/include"
-        INTERFACE_LINK_DIRECTORIES "${external_install_path}/lib"
-        IMPORTED_LOCATION_${_${module}_build_type} "${external_install_path}/lib/libgflags${type}.${posefix}"
+        INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
+        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
+        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir}/libgflags${type}.${posefix}"
         INTERFACE_LINK_LIBRARIES "Threads::Threads"
     )
     add_dependencies(_${module}_thread _${module})

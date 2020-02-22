@@ -5,6 +5,7 @@ cmakelists_base_header()
 project_base_system_message()
 
 include(ExternalProject)
+include(fold_operation)
 set(module GTest)
 
 # this is a list contain versions which have the same behavior
@@ -99,6 +100,10 @@ else()
             -Dgtest_force_shared_crt:BOOL=ON
             -Dgtest_hide_internal_symbols:BOOL=OFF
     )
+
+    # make sure the dir existed
+    touch_fold(${module}_include)
+    touch_fold(${module}_lib_dir)
 
     if(${${module}_disable_pthreads})
     else()

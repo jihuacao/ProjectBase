@@ -3,6 +3,7 @@ include(popular_message)
 include(external_setting)
 cmakelists_base_header()
 project_base_system_message()
+include(fold_operation)
 
 set(module glog)
 set(${module}_target_name glog::glog)
@@ -79,13 +80,19 @@ else()
             -DWITH_TLS:BOOL=ON
     )
 
+    # make sure the dir exist
+    set(include_dir ${external_install_path}/include)
+    set(lib_dir ${external_install_path}/lib)
+    touch_fold(include_dir)
+    touch_fold(lib_dir)
+
     add_library(${${module}_target_name} UNKNOWN IMPORTED GLOBAL)
     set_target_properties(
         ${${module}_target_name}
         PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${external_install_path}/include"
+        INTERFACE_INCLUDE_DIRECTORIES "${include_dir}"
         INTERFACE_LINK_LIBRARIES "-lpthread"
-        INTERFACE_LINK_DIRECTORIES "${external_install_path}/lib"
+        INTERFACE_LINK_DIRECTORIES "${lib_dir}"
         INTERFACE_COMPILE_DEFINITIONS "GOOGLE_GLOG_DLL_DECL=;GOOGLE_GLOG_DLL_DECL_FOR_UNITTESTS="
         IMPORTED_LOCATION_${_${module}_build_type} "${location}"
         IMPORTED_SONAME_${_${module}_build_type} "${soname}"
@@ -93,6 +100,8 @@ else()
     add_dependencies(${${module}_target_name} ${module})
     unset(location)
     unset(soname)
+    unset(include_dir)
+    unset(lib_dir)
 
 endif()
 message(STATUS "this external target's name is ${${module}_target_name}")

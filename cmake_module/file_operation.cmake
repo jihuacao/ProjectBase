@@ -1,9 +1,11 @@
+include(fold_operation)
 ################################################################
 # this fucntion make sure the file exist, and generate a target name
 ################################################################
 function(touch_file touch_target generated_target_posefix url hash dir file_name)
+    touch_fold(${dir})
     find_file(found_download_file ${${file_name}} ${${dir}})
-    set(actual_download_command axel -k -n 10 -av ${${url}} -o ${${dir}}/${${file_name}})
+    set(actual_download_command axel -n 10 -av ${${url}} -o ${${dir}}/${${file_name}})
     if(${found_download_file} STREQUAL "found_download_file-NOTFOUND")
         set(download_command ${actual_download_command})
     else()
