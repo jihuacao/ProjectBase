@@ -67,6 +67,8 @@ add_subdirectory(util)
 add_subdirectory(multi_language)
 # build unified_type
 add_subdirectory(unified_type)
+# build data
+add_subdirectory(data)
 # build function
 add_subdirectory(function)
 # build function_solution
