@@ -94,14 +94,14 @@ macro(build_and_install_qt)
         ${module}_install
         #COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir} tar -xvf ${external_download_dir}/${download_file_name} > decompression_info.txt
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${fold_name} ./configure
-            -make gui
-            -sclient
+            #-make libs tools examples
+            -silent
             -prefix ${external_install_path}
             ${build_type_options}
             ${link_type_options}
             ${qt_custom_options} > configure_info.txt
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${fold_name} make -j$(nproc)
-        #COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${fold_name} make install
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${fold_name} make install
         )
     add_dependencies(${module}_install ${touch_${module}})
     add_library(_${module} INTERFACE IMPORTED)
