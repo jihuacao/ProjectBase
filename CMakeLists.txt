@@ -67,6 +67,8 @@ add_subdirectory(util)
 add_subdirectory(multi_language)
 # build unified_type
 add_subdirectory(unified_type)
+# build tensor
+add_subdirectory(tensor)
 # build data
 add_subdirectory(data)
 # build function

@@ -13,22 +13,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 *****************************************************************************/
-#ifndef PROJECT_BASE_DATA_DATA_H
-#define PROJECT_BASE_DATA_DATA_H
-#include <ProjectBase/data/Define.hpp>
+#ifndef PROJECT_BASE_TENSOR_TENSOR_H
+#define PROJECT_BASE_TENSOR_TENSOR_H
+#include <ProjectBase/tensor/Define.hpp>
+#include <boost/container/list.hpp>
 
 namespace ProjectBase{
-    namespace Data{
-
-        class PROJECT_BASE_DATA_SYMBOL Data{
+    namespace Tensor{
+        class PROJECT_BASE_TENSOR_SYMBOL Tensor{
             public:
-                typedef const ProjectBase::Data::Data& (*_get_data_func)();
-                typedef bool (*_set_data_func)(const ProjectBase::Data::Data& data);
-            public:
-                Data();
-                Data(const Data& other);
-                Data(Data&& ref);
+                Tensor();
+                Tensor(boost::container::ini);
         };
     }
 }
-#endif // ! PROJECT_BASE_FUNCTION_DATA_H
+#endif

@@ -13,22 +13,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 *****************************************************************************/
-#ifndef PROJECT_BASE_DATA_DATA_H
-#define PROJECT_BASE_DATA_DATA_H
-#include <ProjectBase/data/Define.hpp>
+#ifndef PROJECT_BASE_TENSOR_DEFINE_H
+#define PROJECT_BASE_TENSOR_DEFINE_H
+#include <ProjectBase/cross_platform/util_method.hpp>
+#include <ProjectBase/cross_platform/symbol.hpp>
+#if defined(PROJECT_BASE_TENSOR)
+#define PROJECT_BASE_TENSOR_SYMBOL SYMBOL_EXPORT
+#else
+#define PROJECT_BASE_TENSOR_SYMBOL SYMBOL_IMPORT
+#endif // !1PROJECT_BASE_TENSOR
 
-namespace ProjectBase{
-    namespace Data{
+#pragma message(MACRO_TO_STRING(PROJECT_BASE_TENSOR_SYMBOL))
 
-        class PROJECT_BASE_DATA_SYMBOL Data{
-            public:
-                typedef const ProjectBase::Data::Data& (*_get_data_func)();
-                typedef bool (*_set_data_func)(const ProjectBase::Data::Data& data);
-            public:
-                Data();
-                Data(const Data& other);
-                Data(Data&& ref);
-        };
-    }
-}
-#endif // ! PROJECT_BASE_FUNCTION_DATA_H
+#else
+#endif // !1PROJET_BASE_TENSOR_DEFINE_H
