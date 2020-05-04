@@ -2,10 +2,13 @@ include(fold_operation)
 ################################################################
 # this fucntion make sure the file exist, and generate a target name
 ################################################################
+set(method_for_download_from_url axel -n 10 -av CACHE STRING "the method used in the touch_file, you can only use axel")
 function(touch_file touch_target generated_target_posefix url hash dir file_name)
     touch_fold(${dir})
     find_file(found_download_file ${${file_name}} ${${dir}})
-    set(actual_download_command axel -n 10 -av ${${url}} -o ${${dir}}/${${file_name}})
+    set(actual_download_command ${method_for_download_from_url} ${${url}} -o ${${dir}}/${${file_name}})
+    message(STATUS "command: ${method_for_download_from_url} ${${url}} -o ${${dir}}/${${file_name}}")
+    #set(actual_download_command axel -n 10 -av ${${url}} -o ${${dir}}/${${file_name}})
     if(${found_download_file} STREQUAL "found_download_file-NOTFOUND")
         set(download_command ${actual_download_command})
     else()
@@ -21,6 +24,10 @@ function(touch_file touch_target generated_target_posefix url hash dir file_name
     add_custom_target(touch_${${generated_target_posefix}} ALL COMMAND ${download_command})
     set(${touch_target} touch_${${generated_target_posefix}} PARENT_SCOPE)
 endfunction(touch_file)
+
+function(download_file_from_url touch_target generated_target_posefix url hash dir file_name)
+    touch_file(${touch_target} ${generated_target_posefix} ${url} ${hash} ${dir} ${file})
+endfunction(download_file_from_url)
 
 #function(touch_fold target_fold)
 #    set(old_parent ${${target_fold}})
