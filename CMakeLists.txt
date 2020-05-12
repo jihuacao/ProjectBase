@@ -79,6 +79,8 @@ add_subdirectory(function_solution)
 add_subdirectory(function_ui)
 # build ui_style_config
 add_subdirectory(ui_style_config)
+# build codec
+add_subdirectory(codec)
 
 if(${build_test})
     add_subdirectory(test)
