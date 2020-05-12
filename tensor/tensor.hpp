@@ -23,7 +23,8 @@ namespace ProjectBase{
         class PROJECT_BASE_TENSOR_SYMBOL Tensor{
             public:
                 Tensor();
-                Tensor(boost::container::ini);
+            public:
+                void T();
         };
     }
 }
