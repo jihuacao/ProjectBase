@@ -17,14 +17,6 @@ set(codec_module_name ${module} PARENT_SCOPE)
 set(${codec_module_name}_target_name ${${module}_target_name} PARENT_SCOPE)
 target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
 add_dependencies(${${module}_target_name} ${boost_target_name})
-add_dependencies(${${module}_target_name} ${${tensor_module_name}_target_name})
-
-set(Generate${module} CACHE BOOL)
-file(GLOB test_${module}_src codec_test*)
-message(DEBUG "the src for the test_${module}: ${test_${module}_src}")
-add_executable(test_${module} ${test_${module}_src})
-target_link_libraries(test_${module} ${${tensor_module_name}_target_name})
->>>>>>> Stashed changes
 
 include(test_engineer_config)
 build_test_option(${module})
