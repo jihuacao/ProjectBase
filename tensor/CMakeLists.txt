@@ -13,6 +13,7 @@ add_library(${${module}_target_name} ${${module}_build_link_type} ${DIR_LIB_SRCS
 target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
 add_dependencies(${${module}_target_name} ${boost_target_name})
 set(${module}_target_name ${${module}_target_name} PARENT_SCOPE)
+set(tensor_module_name ${module} PARENT_SCOPE)
 
 
 ## install data
