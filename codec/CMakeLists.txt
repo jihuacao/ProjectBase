@@ -1,20 +1,30 @@
 include(popular_message)
 cmakelists_base_header()
-aux_source_directory(. DIR_LIB_SRCS)
-set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
 
 include(obj_name_provide)
 set(module Codec)
 obj_name_provide(CMAKE_BUILD_TYPE project_base_build_shared_lib module)
 
  #生成链接库
-add_library(${${module}_target_name} ${${module}_build_link_type} ${DIR_LIB_SRCS})
-#target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
-add_dependencies(${${module}_target_name} ${boost_target_name})
-add_dependencies(${${module}_target_name} ${${tensor_module_name}_target_name})
-target_link_libraries(${${module}_target_name} ${${tensor_module_name}_target_name})
+aux_source_directory(. ${module}_files)
+set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
+set(${module}_lib_src_reg *.h *.hpp *.cpp *.cc)
+file(GLOB ${module}_lib_src ${${module}_lib_src_reg})
+file(GLOB ${module}_lib_src_for_debug RELATIVE ${CMAKE_CURRENT_LIST_DIR} ${${module}_lib_src_reg})
+message(DEBUG "the src for the ${${module}_target_name} lib: ${${module}_lib_src_for_debug} in path: ${CMAKE_CURRENT_LIST_DIR}")
+add_library(${${module}_target_name} ${${module}_build_link_type} ${${module}_lib_src})
 set(codec_module_name ${module} PARENT_SCOPE)
 set(${codec_module_name}_target_name ${${module}_target_name} PARENT_SCOPE)
+target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
+add_dependencies(${${module}_target_name} ${boost_target_name})
+add_dependencies(${${module}_target_name} ${${tensor_module_name}_target_name})
+
+set(Generate${module} CACHE BOOL)
+file(GLOB test_${module}_src codec_test*)
+message(DEBUG "the src for the test_${module}: ${test_${module}_src}")
+add_executable(test_${module} ${test_${module}_src})
+target_link_libraries(test_${module} ${${tensor_module_name}_target_name})
+>>>>>>> Stashed changes
 
 include(test_engineer_config)
 build_test_option(${module})
@@ -26,8 +36,9 @@ endif()
 
 # install codec
 ## header
-file(GLOB ${module}_files *.hpp)
-install(FILES ${${module}_files} DESTINATION  ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${module})
+file(GLOB ${module}_install_heads *.hpp)
+message(DEBUG "the install header of the lib: ${${module}_install_heads}")
+install(FILES ${${module}_install_heads} DESTINATION  ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${module})
 
 ## obj
 install(
