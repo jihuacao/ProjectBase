@@ -1,0 +1,12 @@
+set(build_test ON CACHE BOOL "build the test engineer or not")
+
+function(build_test_option target_project)
+    set(build_${target_project}_test ${build_test} CACHE STRING "build the test engineer of ${target_project}")
+    set_property(CACHE build_${target_project}_test PROPERTY STRINGS "ON" "OFF" "FOLLOW_BUILD_TEST")
+    if("${build_${target_project}_test}" STREQUAL "FOLLOW_BUILD_TEST")
+        set(_build_${target_project}_test ${build_test})
+    else()
+        set(_build_${target_project}_test ${build_${target_project}_test})
+    endif()
+    message(DEBUG "tatat: ${_build_${target_project}_test}")
+endfunction(build_test_option)

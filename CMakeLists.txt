@@ -38,7 +38,6 @@ get_filename_component(project_include_dir ${ProjectBase_SOURCE_DIR} PATH)
 include_directories(${project_include_dir})
 
 option(project_base_build_shared_lib "build the shared library or not" ON)
-option(build_test "build the test project or not" ON)
 
 # gflags depend
 include(gflags)
@@ -82,6 +81,7 @@ add_subdirectory(ui_style_config)
 # build codec
 add_subdirectory(codec)
 
+include(test_engineer_config)
 if(${build_test})
     add_subdirectory(test)
 endif()
