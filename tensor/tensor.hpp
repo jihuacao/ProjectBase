@@ -16,13 +16,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef PROJECT_BASE_TENSOR_TENSOR_H
 #define PROJECT_BASE_TENSOR_TENSOR_H
 #include <ProjectBase/tensor/Define.hpp>
-#include <boost/test/data/monomoriphic/initializer_list.hpp>
+#include <boost/test/data/monomorphic/initializer_list.hpp>
 
 namespace ProjectBase{
     namespace Tensor{
         class PROJECT_BASE_TENSOR_SYMBOL Shape{
             public:
-                Shape(const boost::monomorphic::init_list<long>& sl);
+                Shape();
             public:
                 long get(int index);
         };

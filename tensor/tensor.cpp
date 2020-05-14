@@ -14,12 +14,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 *****************************************************************************/
 #include <ProjectBase/tensor/tensor.hpp>
+#include <iostream>
+#include <glog/logging.h>
 
 
 ProjectBase::Tensor::Tensor::Tensor(){
-
+    DLOG(INFO) << "Tensor";
 }
 
 void ProjectBase::Tensor::Tensor::T(){
-
 }
