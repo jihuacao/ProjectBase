@@ -50,6 +50,8 @@ include(boost)
 
 # glog depend
 
+# build plugin_manager
+add_subdirectory(plugin_manager)
 # build cmake_module
 add_subdirectory(cmake_module)
 # build_external_process
