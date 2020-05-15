@@ -10,21 +10,12 @@ aux_source_directory(. ${module}_files)
 set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
 set(${module}_lib_src_reg *.h *.hpp *.cpp *.cc)
 file(GLOB ${module}_lib_src ${${module}_lib_src_reg})
-file(GLOB ${module}_lib_src_for_debug RELATIVE ${CMAKE_CURRENT_LIST_DIR} ${${module}_lib_src_reg})
-message(DEBUG "the src for the ${${module}_target_name} lib: ${${module}_lib_src_for_debug} in path: ${CMAKE_CURRENT_LIST_DIR}")
+debug_the_src_with_abspath(${module}_lib_src)
 add_library(${${module}_target_name} ${${module}_build_link_type} ${${module}_lib_src})
 set(codec_module_name ${module} PARENT_SCOPE)
 set(${codec_module_name}_target_name ${${module}_target_name} PARENT_SCOPE)
 target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
 add_dependencies(${${module}_target_name} ${boost_target_name})
-
-include(test_engineer_config)
-build_test_option(${module})
-message(DEBUG "build_test: ${_build_${module}_test}")
-if(_build_${module}_test)
-    add_subdirectory(codec_test)
-else()
-endif()
 
 # install codec
 ## header
@@ -40,3 +31,12 @@ install(
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
+
+# the test
+include(test_engineer_config)
+build_test_option(${module})
+message(DEBUG "build_test: ${_build_${module}_test}")
+if(_build_${module}_test)
+    add_subdirectory(codec_test)
+else()
+endif()
