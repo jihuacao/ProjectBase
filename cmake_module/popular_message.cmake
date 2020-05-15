@@ -54,3 +54,32 @@ macro(show_target_properties target)
 
     print_target_properties(${target})
 endmacro(show_target_properties)
+
+
+#####################################################################
+# debug_the_src_with_abspath :
+#   在构建target时，我们会使用file(GLOB ***)（虽然不能支持新obj更新响应），
+#   我们会获得一个list，我们希望能够输出该list的信息，但是一般该list是abspath，
+#   我们可以使用该function，实现list的debug信息
+#####################################################################
+function(debug_the_src_with_abspath abspaths)
+    list(APPEND group)
+    #message(STATUS "debug: asdasd: ${group}")
+    foreach(item ${${abspaths}})
+        get_filename_component(parent ${item} DIRECTORY)
+        get_filename_component(file ${item} NAME)
+        if(parent IN_LIST group)
+        else()
+            #message(STATUS "debug: asdasdsad:add")
+            #message(STATUS "debug: T:${parent} TT:${group}")
+            list(APPEND group ${parent})
+        endif()
+        list(APPEND ${parent} ${file})
+    endforeach(item)
+    set(msg "")
+    #message(STATUS "debug: ASDASD: ${group}")
+    foreach(g ${group})
+        set(msg "${msg}:|parent_dir(${g}):${${g}}")
+    endforeach(g)
+    message(DEBUG "${msg}")
+endfunction(debug_the_src_with_abspath)
