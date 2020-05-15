@@ -1,1 +1,2 @@
 add_subdirectory(test_ui_style_config)
+add_subdirectory(test_cmake_module)
