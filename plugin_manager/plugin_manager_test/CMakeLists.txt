@@ -12,7 +12,7 @@ file(GLOB test_${module}_src *.h *.cc)
 file(GLOB test_${module}_src_debug RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h *.cc)
 message(DEBUG "the src for the test_${module}: ${test_${module}_src_debug}")
 add_executable(${${module}_target_name} ${test_${module}_src})
-target_link_libraries(${${module}_target_name} ${${plugin_manager_module_name}_target_name})
+target_link_libraries(${${module}_target_name} ${${plugin_manager_module_name}_target_name} ${glog_target_name} ${gflags_target_name})
 
 # install multilanguage
 ## obj

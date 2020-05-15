@@ -26,7 +26,18 @@ namespace ProjectBase{
             public:
                 PluginRegistry();
             public:
-                void insert(const boost::container::string& name, const boost::filesystem::path& path);
+                /*
+                this function
+                */
+                void append(const boost::container::string& name, const boost::filesystem::path& path);
+                /*
+                */
+                void remove(const boost::container::string& name);
+                /**/
+                void check();
+                /**/
+                boost::container::string get();
+                /**/
             private:
                 ProjectBase::PluginManager::plugin_registry* _impl;
         };
