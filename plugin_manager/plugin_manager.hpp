@@ -26,18 +26,6 @@ namespace ProjectBase{
             public:
                 PluginRegistry();
             public:
-                /*
-                this function
-                */
-                void append(const boost::container::string& name, const boost::filesystem::path& path);
-                /*
-                */
-                void remove(const boost::container::string& name);
-                /**/
-                void check();
-                /**/
-                boost::container::string get();
-                /**/
             private:
                 ProjectBase::PluginManager::plugin_registry* _impl;
         };
@@ -48,6 +36,29 @@ namespace ProjectBase{
                 PluginManager();
             public:
                 const PluginRegistry& registry() const;               
+            public:
+                typedef boost::container::string plugin_class;
+                typedef boost::container::string plugin_name;
+            public:
+                /**/
+                void config_from_file(const boost::filesystem::path& file_path);
+                /*
+                make a shortcut of the file while the file_path already exists, and then writ to the file_path
+                */
+                void write_to_file(const boost::filesystem::path& file_path);
+                /**/
+                void add_plugin_path(const boost::filesystem::path& dir);
+                /*
+                this function
+                */
+                void append(const ProjectBase::PluginManager::PluginManager::plugin_class& plugin_class, const ProjectBase::PluginManager::PluginManager::plugin_name& plugin_name);
+                /**/
+                void remove(const ProjectBase::PluginManager::PluginManager::plugin_class& plugin_class, const ProjectBase::PluginManager::PluginManager::plugin_name& plugin_name);
+                /**/
+                boost::container::string get(const ProjectBase::PluginManager::PluginManager::plugin_class& plugin_class, const ProjectBase::PluginManager::PluginManager::plugin_name& plugin_name);
+                /**/
+                void check();
+                /**/
             private:
                 ProjectBase::PluginManager::plugin_manager* _impl;
         };   
