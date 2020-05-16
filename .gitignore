@@ -40,3 +40,4 @@ CMakeCache*
 *external
 *CMakeFiles
 *.swp
+latex/*
