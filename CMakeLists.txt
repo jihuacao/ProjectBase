@@ -47,6 +47,8 @@ include(glog)
 include(GTest)
 # boost depend
 include(boost)
+# eigen3 depend
+include(eigen3)
 
 # glog depend
 
