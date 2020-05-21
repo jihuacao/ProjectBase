@@ -29,12 +29,12 @@
 #pragma message(MACRO_TO_STRING(SYMBOL_IMPORT))
 #pragma message(MACRO_TO_STRING(SYMBOL_LOCAL))
 
-//#define SYMBOL(LIB_NAME) \
-//#if defined(LIB_NAME) \
-//#define SYMBOL_##LIB_NAME SYMBOL_EXPORT \
-//#else \
-//#define SYMBOL_##LIB_NAME SYMBOL_EXPORT \
-//#endif
+// #define SYMBOL(LIB_NAME) \
+// #if defined(LIB_NAME) \
+// #define SYMBOL_##LIB_NAME SYMBOL_EXPORT \
+// #else \
+// #define SYMBOL_##LIB_NAME SYMBOL_EXPORT \
+// #endif
 
 #else
 #endif
