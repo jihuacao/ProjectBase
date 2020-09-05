@@ -40,3 +40,5 @@ CMakeCache*
 *external
 *CMakeFiles
 *.swp
+latex/*
+DOXYGEN_OUTPUT

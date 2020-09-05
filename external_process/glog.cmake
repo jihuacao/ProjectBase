@@ -30,8 +30,10 @@ function(fix_glog_target_name)
 endfunction(fix_glog_target_name)
 
 if(${${module}_FOUND})
+    message(DEBUG "GLOG FOUND(TEMP)")
     fix_glog_target_name()
 else()
+    message(DEBUG "GLOG NOT FOUND(TEMP)")
     include(ExternalProject)
 
     set(${module}_url https://github.com/google/glog.git)
