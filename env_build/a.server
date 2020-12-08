@@ -1,0 +1,8 @@
+[Unit]
+Description=ngrok
+After=network.target
+[Service]
+Type=simple
+ExecStart=/usr/loadl/bin/ngrok -config=/usr/loadl/etc/ngrok.conf start ssh #pan-ssh pi-ssh mac-ssh pi-vnc pan-http pi-http bt-http test-http
+[Install]
+WantedBy=multi-user.target
