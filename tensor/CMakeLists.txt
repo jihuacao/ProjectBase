@@ -12,9 +12,10 @@ obj_name_provide(CMAKE_BUILD_TYPE project_base_build_shared_lib module)
 add_library(${${module}_target_name} ${${module}_build_link_type} ${DIR_LIB_SRCS})
 target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
 add_dependencies(${${module}_target_name} ${boost_target_name})
+target_link_libraries(${${module}_target_name} PUBLIC ${eigen3_target_name})
+add_dependencies(${${module}_target_name} ${eigen3_target_name})
 set(${module}_target_name ${${module}_target_name} PARENT_SCOPE)
 set(tensor_module_name ${module} PARENT_SCOPE)
-
 
 ## install data
 message(STATUS ${CMAKE_CURRENT_LIST_FILE})
@@ -26,4 +27,10 @@ file(
 )
 install(FILES ${${module}_head} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${module})
 
+include(test_engineer_config)
+build_test_option(${module})
+if(${_build_${module}_test})
+    add_subdirectory(tensor_test)
+else()
+endif()
 
