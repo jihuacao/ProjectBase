@@ -88,7 +88,7 @@ else()
         BUILD_COMMAND make -j 8
         CMAKE_CACHE_ARGS
             -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
-            -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_SOURCE_DIR}/install
+            -DCMAKE_INSTALL_PREFIX:STRING=${external_install_path}
             -DBUILD_PACKAGING:BOOL=OFF
             -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
             -DBUILD_TESTING:BOOL=OFF

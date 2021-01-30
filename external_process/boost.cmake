@@ -129,10 +129,9 @@ function(download_and_build_boost)
     else()
         set(_link static)
     endif()
-    
     add_custom_target(${generate_boost_op_name}
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir} tar -xvf ${download_file_name} >./decompression_info.txt
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} variant=_variant link=_link runtime-link=shared threading=multi > bootstrap_info.txt
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} variant=${_variant} link=${_link} runtime-link=shared threading=multi > bootstrap_info.txt
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 > b2_info.txt
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install --prefix=${external_install_path} > b2_install_info.txt
     )

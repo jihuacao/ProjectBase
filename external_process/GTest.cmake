@@ -92,7 +92,7 @@ else()
             -DBUILD_GMOCK:BOOL=ON
             -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
             -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
-            -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_SOURCE_DIR}/install
+            -DCMAKE_INSTALL_PREFIX:STRING=${external_install_path}
             -DINSTALL_GTEST:BOOL=ON
             -Dgmock_build_tests:BOOL=OFF
             -Dgtest_build_samples:BOOL=OFF
