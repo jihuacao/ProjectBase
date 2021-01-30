@@ -3,6 +3,7 @@ cmakelists_base_header()
 
 include(obj_name_provide)
 set(module TensorTest)
+set(tensor_test_module_name ${module} CACHE INTERNAL "module name")
 obj_name_provide(CMAKE_BUILD_TYPE project_base_build_shared_lib module)
 
  # generate executable
@@ -12,7 +13,6 @@ file(GLOB test_${module}_src *.h *.cc)
 debug_the_src_with_abspath(test_${module}_src)
 add_executable(${module} ${test_${module}_src})
 target_link_libraries(${module} ${${tensor_module_name}_target_name})
-add_dependencies(${module} ${${tensor_module_name}_target_name})
 
 
 ## obj

@@ -30,7 +30,7 @@
 
 #include <cstdint>
 
-#include <codec/Define.hpp>
+#include <ProjectBase/codec/Define.hpp>
 
 namespace rle
 {

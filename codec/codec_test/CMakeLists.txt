@@ -11,7 +11,9 @@ set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
 file(GLOB test_${module}_src *.h *.cc)
 debug_the_src_with_abspath(test_${module}_src)
 add_executable(${module} ${test_${module}_src})
+target_link_libraries(${module} ${${codec_module_name}_target_name})
 target_link_libraries(${module} ${${tensor_module_name}_target_name})
+target_link_libraries(${module} ${${boost_module_name}_target_name})
 
 # install multilanguage
 ## header

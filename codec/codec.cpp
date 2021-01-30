@@ -18,10 +18,3 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ProjectBase::Codec::Codec::Codec(){
 
 }
-
-ProjectBase::Tensor::Tensor ProjectBase::Codec::Codec::encode(const ProjectBase::Tensor::Tensor& data) const{
-}
-
-void ProjectBase::Codec::Codec::t(ProjectBase::Tensor::Tensor& data){
-    data.T();
-}

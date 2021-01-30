@@ -17,17 +17,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define PROJECT_BASE_CODEC_CODEC_H
 #include <ProjectBase/codec/Define.hpp>
 #include <ProjectBase/tensor/tensor.hpp>
+#include <boost/container/string.hpp>
+
 namespace ProjectBase{
     namespace Codec{
         class PROJECT_CODEC_SYMBOL Codec{
             public:
                 Codec();
-
             public:
-                ProjectBase::Tensor::Tensor encode(const ProjectBase::Tensor::Tensor& data) const;
-                ProjectBase::Tensor::Tensor decode(const ProjectBase::Tensor::Tensor& bytes) const;
+                virtual ProjectBase::Tensor::Tensor encode(const ProjectBase::Tensor::Tensor& data) const = 0;
+                virtual ProjectBase::Tensor::Tensor decode(const ProjectBase::Tensor::Tensor& bytes) const = 0;
             public:
-                void t(ProjectBase::Tensor::Tensor& data);
+                const boost::container::string& CCDName() const;
+                const boost::container::string& CCDDoc() const;
         };
     };
 }

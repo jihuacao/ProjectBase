@@ -5,6 +5,7 @@ set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
 
 include(obj_name_provide)
 set(module Function)
+set(function_module_name ${module} CACHE INTERNAL "module name")
 obj_name_provide(CMAKE_BUILD_TYPE project_base_build_shared_lib module)
 
  #生成链接库
