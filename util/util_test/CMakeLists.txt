@@ -11,14 +11,15 @@ set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
 
 file(GLOB test_${module}_src *.h *.cc)
 debug_the_src_with_abspath(test_${module}_src)
-add_executable(${module} ${test_${module}_src})
-target_link_libraries(${module} ${${util_module_name}_target_name})
+add_executable(${${util_test_module_name}_target_name} ${test_${module}_src})
+target_link_libraries(${${util_test_module_name}_target_name} ${${util_module_name}_target_name})
+target_link_libraries(${${util_test_module_name}_target_name} ${${gtest_module_name}_target_name})
 
 
 ## obj
 install(
     TARGETS
-    ${${module}_target_name}
+    ${${util_test_module_name}_target_name}
     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin 
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
