@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.idl": "cpp",
+        "*.inc": "cpp",
+        "*.gen": "cpp",
+        "*.ipp": "cpp",
+        "*.def": "cpp",
+        "ostream": "cpp"
+    }
+}

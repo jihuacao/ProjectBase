@@ -34,9 +34,6 @@
 # CMake
 CMakeCache*
 
-# vscode
-.vscode*
-
 *external
 *CMakeFiles
 *.swp
