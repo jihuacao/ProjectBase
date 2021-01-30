@@ -15,14 +15,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 #include "ProjectBase/tensor/inner_tensor.h"
 
-ProjectBase::Tensor::tensor::tensor(){
+ProjectBase::Tensor::inner_tensor::inner_tensor(){
 
 }
 
-ProjectBase::Tensor::tensor::tensor(const ProjectBase::Tensor::tensor& other){
+ProjectBase::Tensor::inner_tensor::inner_tensor(const ProjectBase::Tensor::inner_tensor& other){
 
 }
 
-ProjectBase::Tensor::tensor::tensor(ProjectBase::Tensor::tensor&& ref){
+ProjectBase::Tensor::inner_tensor::inner_tensor(ProjectBase::Tensor::inner_tensor&& ref){
 
 }

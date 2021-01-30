@@ -19,17 +19,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 ProjectBase::Tensor::Tensor::Tensor()
-    :_impl(new ProjectBase::Tensor::tensor())
+    :_impl(new ProjectBase::Tensor::inner_tensor())
 {
 }
 
 ProjectBase::Tensor::Tensor::Tensor(const ProjectBase::Tensor::Tensor& other)
-    :_impl(new ProjectBase::Tensor::tensor(*other._impl))
+    :_impl(new ProjectBase::Tensor::inner_tensor(*other._impl))
 {
 }
 
 ProjectBase::Tensor::Tensor::Tensor(ProjectBase::Tensor::Tensor&& ref)
-    :_impl(new ProjectBase::Tensor::tensor(std::move(*ref._impl)))
+    :_impl(new ProjectBase::Tensor::inner_tensor(std::move(*ref._impl)))
 {
 
 }

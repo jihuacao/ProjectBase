@@ -61,7 +61,7 @@ namespace ProjectBase{
                  * \retval retval
                  * \since version
                  * */
-                Tensor(void* )
+                Tensor(void* ptr);
                 ~Tensor();
             public:
                 /**
@@ -90,9 +90,9 @@ namespace ProjectBase{
                 const ProjectBase::Tensor::Tensor& slice() const;
                 const ProjectBase::Tensor::Tensor& at() const;
             public:
-                const ProjectBase::Tensor::Tensor& operator[]() const;
+                //const ProjectBase::Tensor::Tensor& operator[]() const;
             private:
-                ProjectBase::Tensor::tensor* _impl;
+                ProjectBase::Tensor::inner_tensor* _impl;
         };
     }
 }
