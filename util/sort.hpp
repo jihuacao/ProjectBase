@@ -12,7 +12,7 @@ template<typename type> void quick_sort(type arr[], unsigned long long from, uns
     {
         while(l < end && arr[l] <= povit) l++;
         while(r > from && arr[r] >= povit) r--;
-        if(r < len && l > 0 && r > l)
+        if(r < len && l > from && r > l)
         {
             int temp = arr[l];
             arr[l] = arr[r];
