@@ -84,6 +84,8 @@ add_subdirectory(function_ui)
 add_subdirectory(ui_style_config)
 # build codec
 add_subdirectory(codec)
+# build play_with_now_code
+add_subdirectory(play_with_now_code)
 
 include(test_engineer_config)
 if(${build_test})
