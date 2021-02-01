@@ -39,3 +39,4 @@ CMakeCache*
 *.swp
 latex/*
 DOXYGEN_OUTPUT
+doc/*
