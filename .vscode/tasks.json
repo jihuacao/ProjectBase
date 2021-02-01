@@ -12,6 +12,16 @@
                 //　捕获编译错误
                 "$gcc"
             ]
-        }
+        },
+        {
+            // 该task被launch调用，实现启动前调用，此处编译UtilTestd
+            "label": "BuildPlayWithNowCoded",
+            "type": "shell",
+            "command": "make PlayWithNowCoded -C ./build-debug",
+            "problemMatcher":[
+                //　捕获编译错误
+                "$gcc"
+            ]
+        },
     ]
 }
