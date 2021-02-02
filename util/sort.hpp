@@ -8,11 +8,11 @@ template<typename type> void quick_sort(type arr[], unsigned long long from, uns
     int l = from;
     int r = end;
     int len = end + 1;
-    while(l <= r)
+    while(l < r)
     {
         while(l < end && arr[l] <= povit) l++;
         while(r > from && arr[r] >= povit) r--;
-        if(r < len && l > from && r > l)
+        if(r > l)
         {
             int temp = arr[l];
             arr[l] = arr[r];
