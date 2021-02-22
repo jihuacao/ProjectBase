@@ -38,6 +38,7 @@ get_filename_component(project_include_dir ${ProjectBase_SOURCE_DIR} PATH)
 include_directories(${project_include_dir})
 
 option(project_base_build_shared_lib "build the shared library or not" ON)
+option(project_base_build_python_interface "build the interface for python or not" OFF)
 
 # gflags depend
 include(gflags)
