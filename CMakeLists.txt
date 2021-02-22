@@ -87,6 +87,8 @@ add_subdirectory(ui_style_config)
 add_subdirectory(codec)
 # build play_with_now_code
 add_subdirectory(play_with_now_code)
+# build indicator
+add_subdirectory(indicator)
 
 include(test_engineer_config)
 if(${build_test})
