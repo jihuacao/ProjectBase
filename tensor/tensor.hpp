@@ -62,6 +62,10 @@ namespace ProjectBase{
                  * \since version
                  * */
                 Tensor(void* ptr);
+                template<typename T> Tensor(const std::vector<T>& vector);
+                template<typename T> Tensor(std::vector<T>&& vector);
+                template<typename T> Tensor(const std::list<T>& vector);
+                template<typename T> Tensor(std::list<T>&& vector);
                 ~Tensor();
             public:
                 /**
@@ -88,7 +92,13 @@ namespace ProjectBase{
                 const ProjectBase::Tensor::TensorType& type() const;
             public:
                 const ProjectBase::Tensor::Tensor& slice() const;
-                const ProjectBase::Tensor::Tensor& at() const;
+                const ProjectBase::Tensor::Tensor& at(const unsigned long long& index, ...) const;
+                const unsigned long long dim() const;
+                const unsigned long long get_dim(const unsigned long long& dim) const;
+            public:
+                Tensor&& to_cuda(int cuda_id);
+                Tensor&& to_cpu();
+                void series(void** ptr, unsigned long long* size) const;
             public:
                 //const ProjectBase::Tensor::Tensor& operator[]() const;
             private:
