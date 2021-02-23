@@ -76,11 +76,13 @@ set(Boost_USE_DEBUG_RUNTIME OFF)
 set(Boost_COMPILER OFF)
 set(Boost_PYTHON_VERSION OFF)
 set(Boost_VERBOSE OFF)
-set(Boost_DEBUG OFF)
+set(Boost_DIR ${external_install_path})
 if(${_${module}_build_type} STREQUAL "RELEASE")
     set(Boost_USE_RELEASE_LIBS ON)
+    set(Boost_DEBUG OFF)
 else()
     set(Boost_USE_DEBUG_LIBS ON)
+    set(Boost_DEBUG ON)
 endif()
 if(${_${module}_build_shared})
     set(Boost_USE_STATIC_LIBS OFF)
@@ -98,6 +100,7 @@ message(STATUS "Prefix Configuration:
 ````````Boost_VERBOSE: ${Boost_VERBOSE}
 ````````Boost_DEBUG: ${Boost_DEBUG}")
 
+message(${external_install_path})
 find_package(Boost ${${module}_version} COMPONENTS ${${module}_with} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
 
 function(download_and_build_boost)
