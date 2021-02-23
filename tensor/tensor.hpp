@@ -20,6 +20,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <ProjectBase/tensor/Define.hpp>
 #include <ProjectBase/tensor/tensor_shape.hpp>
 #include <ProjectBase/tensor/tensor_type.hpp>
+#include <boost/container/list.hpp>
+#include <boost/container/vector.hpp>
 
 namespace ProjectBase{
     namespace Tensor{
@@ -62,10 +64,9 @@ namespace ProjectBase{
                  * \since version
                  * */
                 Tensor(void* ptr);
-                template<typename T> Tensor(const std::vector<T>& vector);
-                template<typename T> Tensor(std::vector<T>&& vector);
-                template<typename T> Tensor(const std::list<T>& vector);
-                template<typename T> Tensor(std::list<T>&& vector);
+                template<typename T> Tensor(const boost::container::vector<T>& vector){
+                }
+                template<typename T> Tensor(boost::container::vector<T>&& vector);
                 ~Tensor();
             public:
                 /**

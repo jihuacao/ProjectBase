@@ -15,6 +15,8 @@ target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
 add_dependencies(${${module}_target_name} ${boost_target_name})
 target_link_libraries(${${module}_target_name} PUBLIC ${eigen3_target_name})
 add_dependencies(${${module}_target_name} ${eigen3_target_name})
+target_link_libraries(${${module}_target_name} PUBLIC ${glog_target_name})
+add_dependencies(${${module}_target_name} ${glog_target_name})
 
 ## install data
 message(STATUS ${CMAKE_CURRENT_LIST_FILE})
