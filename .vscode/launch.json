@@ -53,5 +53,25 @@
                 }
             ]
         },
+        {
+            "name": "IndicatorTestd",
+            "preLaunchTask": "BuildIndicatorTestd", //此处调用tasks.json里面的事项，实现运行前的处理，比如编译之类的
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build-debug/indicator/indicator_test/IndicatorTestd",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
     ]
 }
