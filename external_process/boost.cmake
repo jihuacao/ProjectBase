@@ -77,12 +77,12 @@ set(Boost_COMPILER OFF)
 set(Boost_PYTHON_VERSION OFF)
 set(Boost_VERBOSE OFF)
 set(Boost_DIR ${external_install_path})
+set(Boost_DEBUG ON) # 查看boost 的BoostConfig.cmake文件可以知道Boost_DEBUG置ON表示find_package中输出Debug信息
 if(${_${module}_build_type} STREQUAL "RELEASE")
     set(Boost_USE_RELEASE_LIBS ON)
-    set(Boost_DEBUG OFF)
 else()
     set(Boost_USE_DEBUG_LIBS ON)
-    set(Boost_DEBUG ON)
+    set(Boost_USE_DEBUG_RUNTIME ON)
 endif()
 if(${_${module}_build_shared})
     set(Boost_USE_STATIC_LIBS OFF)
@@ -132,11 +132,24 @@ function(download_and_build_boost)
     else()
         set(_link static)
     endif()
+    # 构建方法：https://www.boost.org/doc/libs/1_66_0/more/getting_started/unix-variants.html
+    # 该链接包含了boost库组件的命名规则：要应用该规则，需要在编译时增加**--layout=tagged参数 这里不是用这些命名规则，避免麻烦**
+    # threading |   variant
+    # multi     |   debug-->-mt-d
+    # single    |   debug-->-d
+    # single    |   release-->-mt
+    # multi     |   release-->
+    # 包含构建类型（静态还是动态的规则）
+    # link与runtime-link
+    # 目前暂时这样区分：
+    # link控制的是是否生成静态库，当link为shared时不起作用，当link为static时生成.a
+    # runtime-link控制的是是否生成动态库，当runtime-link为shared时生成.so，当runtime-link为static时不起作用
     add_custom_target(${generate_boost_op_name}
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir} tar -xvf ${download_file_name} >./decompression_info.txt
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} variant=${_variant} link=${_link} runtime-link=shared threading=multi > bootstrap_info.txt
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 > b2_info.txt
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install --prefix=${external_install_path} > b2_install_info.txt
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} > bootstrap_info.txt
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 clean
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install variant=${_variant} link=${_link} runtime-link=${_link} threading=multi --prefix=${external_install_path}> b2_info.txt
+        #COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install --prefix=${external_install_path} > b2_install_info.txt
     )
     add_dependencies(${generate_boost_op_name} ${target})
     unset(with_component_option)
@@ -151,9 +164,9 @@ function(build_boost_target version components shared _build_type install_path)
         set(posefix a)
     endif()
     if(${${_build_type}} STREQUAL "RELEASE")
-        set(type )
+        set(type -mt)
     else()
-        set(type d)
+        set(type -mt-d)
     endif()
 
     set(include_dir ${${install_path}}/include)
@@ -163,12 +176,14 @@ function(build_boost_target version components shared _build_type install_path)
     touch_fold(lib_dir)
 
     foreach(component ${${components}})
-        add_library(${module}_${component} UNKNOWN IMPORTED)
+        add_library(${module}_${component} INTERFACE IMPORTED)
         set_target_properties(${module}_${component}
             PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${${install_path}}/include"
             INTERFACE_LINK_DIRECTORIES "${${install_path}}/lib"
-            IMPORTED_LOCATION_${_${module}_build_type} "${${install_path}}/lib/libboost_${component}${type}.${posefix}"
+            # 如果使用--layout=tagged应用命名规则的话，这里会很麻烦，必须编写判断名称
+            #IMPORTED_LOCATION_${_${module}_build_type} "${${install_path}}/lib/libboost_${component}${type}.${posefix}"
+            IMPORTED_LOCATION_${_${module}_build_type} "${${install_path}}/lib/libboost_${component}.${posefix}"
         )
         list(APPEND libraries ${module}_${component};)
     endforeach()
