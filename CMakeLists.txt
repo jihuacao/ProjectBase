@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19.0 FATAL_ERROR)
 
 if(POLICY CMP0042)
 cmake_policy(SET CMP0042 NEW)
@@ -7,6 +7,11 @@ endif()
 if(POLICY CMP0048)
 cmake_policy(SET CMP0048 NEW)
 endif()
+
+execute_process(COMMAND uname -a
+		COMMAND awk "{if ($0 ~ \"x86_64\") {print \"x64\"} else {print \"x86\"}}"
+		OUTPUT_VARIABLE UNAME_LOG)
+MESSAGE(STATUS "Your system architecture is: ${UNAME_LOG}" )
 
 #----------------------------------------
 # package information

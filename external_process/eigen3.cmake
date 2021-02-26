@@ -34,6 +34,9 @@ else()
     set(${module}_supported_tag 3.3.7)
 
     version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
+    default_external_project_build_type(${module})
+
+    message(STATUS ${_${module}_build_type})
 
     ExternalProject_Add(
         ${module}
@@ -45,6 +48,8 @@ else()
         BUILD_COMMAND make -j 8
         INSTALL_COMMAND make install
         CMAKE_CACHE_ARGS
+            -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
+            -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
             -DCMAKE_INSTALL_PREFIX:STRING=${external_install_path}
     )
 
@@ -52,11 +57,14 @@ else()
     set(include_dir ${external_install_path}/include/eigen3)
     touch_fold(include_dir)
 
-    add_library(${${module}_target_name} UNKNOWN IMPORTED GLOBAL)
+    #add_library(${${module}_target_name} UNKNOWN IMPORTED GLOBAL)
+    add_library(${${module}_target_name} INTERFACE IMPORTED GLOBAL)
     set_target_properties(
         ${${module}_target_name}
         PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${include_dir}"
+        #INTERFACE_LINK_DIRECTORIES "${lib_dir}"
+        #IMPORTED_LOCATION "${location}"
     )
     add_dependencies(${${module}_target_name} ${module})
     unset(include_dir)
