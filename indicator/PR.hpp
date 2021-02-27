@@ -1,6 +1,10 @@
 #include <boost/container/vector.hpp>
 #include <boost/timer.hpp>
 #include <boost/assert.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/sort/sample_sort/sample_sort.hpp>
+//#include <boost/range/algorithm/transform.hpp>
+//#include <boost/algorithm/cxx11/iota.hpp>
 
 struct pr{
     float percision;
@@ -35,9 +39,53 @@ unsigned long long get_label_p_n(boost::container::vector<In>& label, Out* const
     return NULL;
 }
 
-template<typename T> T p(const T& TP){
-
-}
+//template <typename T, typename Compare>
+//boost::container::vector<std::size_t> sort_permutation(
+//    const boost::container::vector<T>& vec,
+//    Compare& compare)
+//{
+//    boost::container::vector<size_t> p(vec.size());
+//    boost::algorithm::iota(p.begin(), p.end(), 0);
+//    boost::sort::sample_sort(p.begin(), p.end(), [&](size_t i, size_t j){
+//        return vec[i] < vec[j];});
+//    return p;
+//}
+//
+//template <typename T>
+//std::vector<T> apply_permutation(
+//    const std::vector<T>& vec,
+//    const std::vector<std::size_t>& p)
+//{
+//    std::vector<T> sorted_vec(vec.size());
+//    std::transform(p.begin(), p.end(), sorted_vec.begin(),
+//        [&](std::size_t i){ return vec[i]; });
+//    return sorted_vec;
+//}
+//
+//template <typename T>
+//void apply_permutation_in_place(
+//    std::vector<T>& vec,
+//    const std::vector<std::size_t>& p)
+//{
+//    std::vector<bool> done(vec.size());
+//    for (std::size_t i = 0; i < vec.size(); ++i)
+//    {
+//        if (done[i])
+//        {
+//            continue;
+//        }
+//        done[i] = true;
+//        std::size_t prev_j = i;
+//        std::size_t j = p[i];
+//        while (i != j)
+//        {
+//            std::swap(vec[prev_j], vec[j]);
+//            done[j] = true;
+//            prev_j = j;
+//            j = p[j];
+//        }
+//    }
+//}
 
 boost::container::vector<pr> PR(boost::container::vector<double>& score, boost::container::vector<double>& label){
     int TP = 0;
@@ -47,8 +95,7 @@ boost::container::vector<pr> PR(boost::container::vector<double>& score, boost::
     unsigned long long p = 0;
     unsigned long long n = 0;
     BOOST_ASSERT(get_label_p_n(score, &p, &n) == NULL);
-    for(auto index = 0; index < score.size(); ++index){
-        if(label[index] == 0){
-        }
-    }
+    //auto index = sort_permutation(score, [](
+    //    boost::container::vector<double>::const_iterator i, 
+    //    boost::container::vector<double>::const_iterator j) -> bool { return *i < *j; });
 }
