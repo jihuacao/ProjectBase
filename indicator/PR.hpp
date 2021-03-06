@@ -1,3 +1,4 @@
+#include <glog/logging.h>
 #include <boost/container/vector.hpp>
 #include <boost/timer.hpp>
 #include <boost/assert.hpp>
@@ -26,8 +27,8 @@ unsigned long long get_tp(boost::container::vector<double>& score, boost::contai
  * \param[out] p
  * \param[out] n
  * */
-template<typename In, typename Out>
-unsigned long long get_label_p_n(boost::container::vector<In>& label, Out* const & p, Out* const & n){
+template <typename _LABEL_TYPE, typename _OUT>
+unsigned long long get_label_p_n(const _LABEL_TYPE& label, _OUT* const & p, _OUT* const & n){
     for(auto iter = label.begin(); iter != label.end(); ++iter){
         if(*iter == 1){
             (*p)++;
@@ -87,7 +88,8 @@ unsigned long long get_label_p_n(boost::container::vector<In>& label, Out* const
 //    }
 //}
 
-boost::container::vector<pr> PR(boost::container::vector<double>& score, boost::container::vector<double>& label){
+template <typename _SCORE_TYPE, typename _LABEL_TYPE>
+_SCORE_TYPE PR(const _SCORE_TYPE& score, const _LABEL_TYPE& label){
     int TP = 0;
     int TN = 0;
     int FP = 0;
@@ -95,7 +97,7 @@ boost::container::vector<pr> PR(boost::container::vector<double>& score, boost::
     unsigned long long p = 0;
     unsigned long long n = 0;
     BOOST_ASSERT(get_label_p_n(score, &p, &n) == NULL);
-    //auto index = sort_permutation(score, [](
-    //    boost::container::vector<double>::const_iterator i, 
-    //    boost::container::vector<double>::const_iterator j) -> bool { return *i < *j; });
+    //auto index = boost::sort(boost::const_begin(score), boost::const_end(score));//, [&](_SCORE_TYPE::const_iterator i, _SCORE_TYPE::const_iterator j) -> bool { return *i < *j; });
+    //DLOG(INFO) << "Done";
+    return _SCORE_TYPE();
 }
