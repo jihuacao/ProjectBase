@@ -1,8 +1,10 @@
 set(external_install_path ${CMAKE_SOURCE_DIR}/install CACHE STRING "the path for installing the external")
+get_filename_component(external_install_path ${external_install_path} ABSOLUTE) #转化为绝对路径
 message(STATUS "external_install_path: ${external_install_path}")
 option(external_build_shared "the lib link type for building the external" ON)
 message(STATUS "external_build_shared: ${external_build_shared}")
 set(external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for download the source of the third party repo")
+get_filename_component(external_download_dir ${external_download_dir} ABSOLUTE)
 message(STATUS "external_download_dir: ${external_download_dir}")
 
 ##################################################################
