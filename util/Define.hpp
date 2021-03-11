@@ -15,8 +15,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 #ifndef PROJECT_BASE_UTIL_DEFINE_H
 #define PROJECT_BASE_UTIL_DEFINE_H
-#include <ProjectBase/cross_platform/util_method.hpp>
-#include <ProjectBase/cross_platform/symbol.hpp>
+#include <ProjectBase/cross_platform/cross_platform.hpp>
 #if defined(PROJECT_BASE_UTIL)
 #define PROJECT_BASE_UTIL_SYMBOL SYMBOL_EXPORT
 #else
