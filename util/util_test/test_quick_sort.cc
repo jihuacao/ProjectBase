@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-TEST(Sort, QuickSort){
+TEST(TestSort, QuickSort){
     int len = 10;
     int a[len] = {0, 10, 2, 2, 3, 4, 5, 6, 7, 8};
     quick_sort(a, 0, len);

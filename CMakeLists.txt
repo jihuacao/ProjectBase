@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19.0 FATAL_ERROR)
 
 if(POLICY CMP0042)
 cmake_policy(SET CMP0042 NEW)
@@ -7,6 +7,11 @@ endif()
 if(POLICY CMP0048)
 cmake_policy(SET CMP0048 NEW)
 endif()
+
+execute_process(COMMAND uname -a
+		COMMAND awk "{if ($0 ~ \"x86_64\") {print \"x64\"} else {print \"x86\"}}"
+		OUTPUT_VARIABLE UNAME_LOG)
+MESSAGE(STATUS "Your system architecture is: ${UNAME_LOG}" )
 
 #----------------------------------------
 # package information
@@ -38,6 +43,7 @@ get_filename_component(project_include_dir ${ProjectBase_SOURCE_DIR} PATH)
 include_directories(${project_include_dir})
 
 option(project_base_build_shared_lib "build the shared library or not" ON)
+option(project_base_build_python_interface "build the interface for python or not" OFF)
 
 # gflags depend
 include(gflags)
@@ -72,6 +78,8 @@ add_subdirectory(multi_language)
 add_subdirectory(unified_type)
 # build tensor
 add_subdirectory(tensor)
+# build matrix
+add_subdirectory(matrix)
 # build data
 add_subdirectory(data)
 # build function
@@ -86,6 +94,8 @@ add_subdirectory(ui_style_config)
 add_subdirectory(codec)
 # build play_with_now_code
 add_subdirectory(play_with_now_code)
+# build indicator
+add_subdirectory(indicator)
 
 include(test_engineer_config)
 if(${build_test})
