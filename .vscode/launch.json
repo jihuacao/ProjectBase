@@ -39,7 +39,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build-debug/util/util_test/UtilTestd",
-            "args": ["--gtest_filter=*.TestSort"],
+            "args": ["--gtest_filter=TestSort.*"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
