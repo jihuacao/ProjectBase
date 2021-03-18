@@ -1,8 +1,13 @@
-set(external_install_path ${CMAKE_SOURCE_DIR}/install CACHE STRING "the path for installing the external")
+# 消息等级:FATAL_ERROR WARNING STATUS DEBUG...
+set(var_external_install_path ${CMAKE_SOURCE_DIR}/install CACHE STRING "the path for installing the external")
+# 获取运行cmake命令的目录路径：PROJECT_BINARY_DIR 
+# 获取路径：可用与转化相对路径为绝对路径，获取路径的相关集合操作，注意这里是通过相对路径获取绝对路径，注意指定父路径需要使用BASE_DIR <dir>
+get_filename_component(external_install_path ${var_external_install_path} ABSOLUTE BASE_DIR ${PROJECT_BINARY_DIR} CACHE)
 message(STATUS "external_install_path: ${external_install_path}")
 option(external_build_shared "the lib link type for building the external" ON)
 message(STATUS "external_build_shared: ${external_build_shared}")
-set(external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for download the source of the third party repo")
+set(var_external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for download the source of the third party repo")
+get_filename_component(external_download_dir ${var_external_download_dir} ABSOLUTE BASE_DIR ${PROJECT_BINARY_DIR} CACHE)
 message(STATUS "external_download_dir: ${external_download_dir}")
 
 ##################################################################

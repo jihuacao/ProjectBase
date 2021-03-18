@@ -5,6 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // linux 使用dump文件进行debug，完善coreDumpPath与program两个选项
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "<PATH-TO-BINARY>",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "coreDumpPath": "<PATH-TO-CORE-DUMP>"
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
@@ -20,6 +41,26 @@
             "request": "launch",
             "program": "${workspaceFolder}/build-debug/util/util_test/UtilTestd",
             "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "UtilTestd.TestSort",
+            "preLaunchTask": "BuildUtilTestd", //此处调用tasks.json里面的事项，实现运行前的处理，比如编译之类的
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build-debug/util/util_test/UtilTestd",
+            "args": ["--gtest_filter=TestSort.*"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

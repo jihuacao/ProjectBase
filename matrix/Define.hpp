@@ -13,17 +13,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 *****************************************************************************/
-#ifndef PROJECT_BASE_UTIL_DEFINE_H
-#define PROJECT_BASE_UTIL_DEFINE_H
-#include <ProjectBase/cross_platform/cross_platform.hpp>
-#if defined(PROJECT_BASE_UTIL)
-#define PROJECT_BASE_UTIL_SYMBOL SYMBOL_EXPORT
+#ifndef PROJECT_BASE_MATRIX_DEFINE_H
+#define PROJECT_BASE_MATRIX_DEFINE_H
+#include <ProjectBase/cross_platform/util_method.hpp>
+#include <ProjectBase/cross_platform/symbol.hpp>
+#if defined(PROJECT_BASE_MATRIX)
+#define PROJECT_BASE_MATRIX_SYMBOL SYMBOL_EXPORT
 #else
-#define PROJECT_BASE_UTIL_SYMBOL SYMBOL_IMPORT
-#endif // !1PROJECT_BASE_UTIL
+#define PROJECT_BASE_MATRIX_SYMBOL SYMBOL_IMPORT
+#endif // !1PROJECT_BASE_MATRIX
 
-#pragma message(MACRO_TO_STRING(PROJECT_BASE_UTIL_SYMBOL))
+#pragma message(MACRO_TO_STRING(PROJECT_BASE_MATRIX_SYMBOL))
 
 #else
-#endif // !1PROJET_BASE_UTIL_DEFINE_H
+#endif // !1PROJET_BASE_MATRIX_DEFINE_H
 

@@ -78,6 +78,8 @@ add_subdirectory(multi_language)
 add_subdirectory(unified_type)
 # build tensor
 add_subdirectory(tensor)
+# build matrix
+add_subdirectory(matrix)
 # build data
 add_subdirectory(data)
 # build function
