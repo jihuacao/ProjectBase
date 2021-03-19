@@ -24,14 +24,22 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ]
+            ],
+            "linux": {
+                "MIMode": "gdb",
+            },
+            "osx": {
+                "MIMode": "lldb",
+            },
+            "windows": {
+                "MIMode": ""
+            },
         },
         {
             "name": "UtilTestd.TestSort",
@@ -44,14 +52,22 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ]
+            ],
+            "linux": {
+                "MIMode": "gdb",
+            },
+            "osx": {
+                "MIMode": "lldb",
+            },
+            "windows": {
+                "MIMode": ""
+            },
         },
         {
             "name": "PlayWithNowCoded",
@@ -64,14 +80,22 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ]
+            ],
+            "linux": {
+                "MIMode": "gdb",
+            },
+            "osx": {
+                "MIMode": "lldb",
+            },
+            "windows": {
+                "MIMode": ""
+            },
         },
         {
             "name": "IndicatorTestd",
@@ -83,7 +107,15 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
+            "linux": {
+                "MIMode": "gdb",
+            },
+            "osx": {
+                "MIMode": "lldb",
+            },
+            "windows": {
+                "MIMode": ""
+            },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -92,7 +124,33 @@
                 }
             ],
             "preLaunchTask": "BuildIndicatorTestd", //此处调用tasks.json里面的事项，实现运行前的处理，比如编译之类的
-            //"coreDumpPath": "/var/crash/IndicatorTestd.1616050170.404152.404152.404152.404152.1007.1007.1.6",
+            "coreDumpPath": "/var/crash/IndicatorTestd.1616050170.404152.404152.404152.404152.1007.1007.1.6",
+        },
+        {
+            "name": "CppAttach12345",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerServerAddress": "localhost:12345",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/build-debug/indicator/indicator_test/IndicatorTestd",
+            "args": [],
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "/home/caojihua/.local/bin/gdb"
+            },
+            "osx": {
+                "MIMode": "lldb",
+            },
+            "windows": {
+                "MIMode": "gdb",
+            },
         },
     ]
 }
