@@ -5,27 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            // linux 使用dump文件进行debug，完善coreDumpPath与program两个选项
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "<PATH-TO-BINARY>",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "coreDumpPath": "<PATH-TO-CORE-DUMP>"
-        },
-        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
@@ -93,6 +72,27 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "IndicatorTestd",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build-debug/indicator/indicator_test/IndicatorTestd",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "BuildIndicatorTestd", //此处调用tasks.json里面的事项，实现运行前的处理，比如编译之类的
+            //"coreDumpPath": "/var/crash/IndicatorTestd.1616050170.404152.404152.404152.404152.1007.1007.1.6",
         },
     ]
 }
