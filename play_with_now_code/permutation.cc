@@ -3,30 +3,19 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <unordered_map>
+#include <queue>
 
-struct total_input{
-    void* ptr;
-    size_t size;
-    public:
-    total_input(void* ptr, size_t size){ptr = ptr; size = size;};
+typedef int TotalPermutationUnrepeatedInputType;
+typedef std::vector<TotalPermutationUnrepeatedInputType> TotalPermutationUnrepeatedInput;
+typedef std::unordered_map<TotalPermutationUnrepeatedInputType, int> TotalPermutationStatus;
+typedef std::vector<TotalPermutationUnrepeatedInput> TotalPermutationResult;
+bool search(TotalPermutationStatus& status, std::queue<TotalPermutationUnrepeatedInputType>& remain_queue, TotalPermutationResult& result){
+    return false;
 };
-
-std::vector<total_input> generate_data(){
-    return std::vector<total_input> ();
-}
-
-class Total:
-public testing::TestWithParam<total_input>{
-
+class TotalPermutation:
+public testing::TestWithParam<TotalPermutationUnrepeatedInput>{
 };
-
-TEST_P(Total, Permutation){
-
+TEST_P(TotalPermutation, Unrepeated){
 };
-
-TEST_P(Total, K){
-
-};
-
-//INSTANTIATE_TEST_SUITE_P(Permutaion, Total, testing::Values(total_input(nullptr, 1), total_input(nullptr, 1)));
-INSTANTIATE_TEST_SUITE_P(Permutaion, Total, testing::Values(generate_data()));
+INSTANTIATE_TEST_SUITE_P(Permutaion, TotalPermutation, testing::Values(TotalPermutationUnrepeatedInput({1, 2, 3, 4})));
