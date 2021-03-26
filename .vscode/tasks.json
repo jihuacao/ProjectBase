@@ -25,6 +25,16 @@
         },
         {
             // 该task被launch调用，实现启动前调用，此处编译IndicatorTest
+            "label": "BuildMethodTestd",
+            "type": "shell",
+            "command": "make MethodTestd -C ./build-debug",
+            "problemMatcher":[
+                //　捕获编译错误
+                "$gcc"
+            ]
+        },
+        {
+            // 该task被launch调用，实现启动前调用，此处编译IndicatorTest
             "label": "BuildIndicatorTestd",
             "type": "shell",
             "command": "make IndicatorTestd -C ./build-debug",
