@@ -72,6 +72,8 @@ add_subdirectory(config)
 add_subdirectory(cross_platform)
 # build util
 add_subdirectory(util)
+# build method
+add_subdirectory(method)
 # build multi_language
 add_subdirectory(multi_language)
 # build unified_type
