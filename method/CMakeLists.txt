@@ -2,7 +2,7 @@
 include(popular_message)
 cmakelists_base_header()
 aux_source_directory(. DIR_LIB_SRCS)
-set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_TENSOR=1 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_TENSOR=1 ${CMAKE_CXX_FLAGS} -fpermissive")
 
 include(obj_name_provide)
 set(module Method)
