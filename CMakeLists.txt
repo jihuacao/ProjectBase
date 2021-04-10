@@ -101,5 +101,6 @@ add_subdirectory(indicator)
 
 include(test_engineer_config)
 if(${build_test})
+	message(STATUS "build test")
     add_subdirectory(test)
 endif()
