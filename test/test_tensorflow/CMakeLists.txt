@@ -12,8 +12,11 @@ set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS}")
 
 file(GLOB test_${module}_src *.h *.cc)
 debug_the_src_with_abspath(test_${module}_src)
+include_directories(/data2/process_data/caojihua/Download/tensorflow/tensorflow)
+link_directories(/data2/process_data/caojihua/Download/tensorflow/bazel-bin/tensorflow)
 add_executable(${${test_tensorflow_module_name}_target_name} ${test_${module}_src})
 target_link_libraries(${${test_tensorflow_module_name}_target_name} ${${gtest_module_name}_target_name})
+target_link_libraries(${${test_tensorflow_module_name}_target_name} libtensorflow_cc.so)
 
 
 ## obj
