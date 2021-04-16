@@ -10,8 +10,8 @@ set(${module}_target_name protobuf)
 set(generate_${module}_op_name _${module})
 set(generate_${module}_imported_name ${module}_generate_target)
 set(${module}_url https://github.com/protocolbuffers/protobuf.git)
-set(${module}_supported_version 3.5.2)
-set(${module}_supported_tag 3.5.x)
+set(${module}_supported_version 3.5.2 3.8.0)
+set(${module}_supported_tag 3.5.x 3.8.x)
 
 version_selector(${module} ${module}_supported_version 3.5.2)
 
