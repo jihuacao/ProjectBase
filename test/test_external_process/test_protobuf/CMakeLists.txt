@@ -22,3 +22,18 @@ target_link_libraries(${PROJECT_NAME} ${protobuf_target_name})
 target_compile_options(${PROJECT_NAME} PRIVATE -std=c++11)
 add_dependencies(${PROJECT_NAME} ${protobuf_target_name})
 
+# install multilanguage
+## header
+file(
+    GLOB
+    ${Obj}_files
+    *.hpp
+    )
+install(FILES ${${Obj}_files} DESTINATION  ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${Obj})
+## obj
+install(
+    TARGETS
+    ${PROJECT_NAME}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin 
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

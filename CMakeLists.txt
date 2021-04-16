@@ -55,6 +55,8 @@ include(GTest)
 include(boost)
 # eigen3 depend
 include(eigen3)
+# protobuf
+include(protobuf)
 
 # glog depend
 
