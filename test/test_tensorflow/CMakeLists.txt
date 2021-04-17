@@ -17,6 +17,7 @@ link_directories(/data2/process_data/caojihua/Download/tensorflow/bazel-bin/tens
 add_executable(${${test_tensorflow_module_name}_target_name} ${test_${module}_src})
 target_link_libraries(${${test_tensorflow_module_name}_target_name} ${${gtest_module_name}_target_name})
 target_link_libraries(${${test_tensorflow_module_name}_target_name} libtensorflow_cc.so)
+target_include_directories(${${test_tensorflow_module_name}_target_name} PRIVATE ${external_install_path}/include/third_party/eigen3/)
 
 
 ## obj
