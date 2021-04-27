@@ -100,6 +100,8 @@ add_subdirectory(codec)
 add_subdirectory(play_with_now_code)
 # build indicator
 add_subdirectory(indicator)
+# build number_theory
+add_subdirectory(number_theory)
 
 include(test_engineer_config)
 if(${build_test})
