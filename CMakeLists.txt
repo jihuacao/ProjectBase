@@ -104,6 +104,8 @@ add_subdirectory(indicator)
 add_subdirectory(number_theory)
 # build basic_calculation
 add_subdirectory(basic_calculation)
+# build basic_algorithm
+add_subdirectory(basic_algorithm)
 
 include(test_engineer_config)
 if(${build_test})
