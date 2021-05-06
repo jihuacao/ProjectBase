@@ -5,6 +5,8 @@
         "*.gen": "cpp",
         "*.ipp": "cpp",
         "*.def": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "*.cmc": "cpp",
+        "*.cl": "cpp"
     }
 }
