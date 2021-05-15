@@ -7,6 +7,5 @@
         "*.def": "cpp",
         "ostream": "cpp",
         "*.cmc": "cpp",
-        "*.cl": "cpp"
     }
 }
