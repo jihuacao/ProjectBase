@@ -31,7 +31,7 @@ set(SRC
 add_library(${${module}_target_name} ${${module}_build_link_type} ${SRC})
 target_link_libraries(${${module}_target_name} ${${cm_module_name}_target_name})
 
-## install basic_calculation 
+## install basic_calculation
 message(STATUS ${CMAKE_CURRENT_LIST_FILE})
 set(module basic_calculation)
 file(
