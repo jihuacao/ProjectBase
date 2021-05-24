@@ -25,8 +25,8 @@ set(SRC
     "./col2im.hpp"
     "./col2im.cpp"
     "./Define.hpp"
-    #"./col2im_kernel.cl"
-    #"./col2im.cmc"
+    "./col2im_kernel.cl"
+    "./col2im.cmc"
 )
 add_library(${${module}_target_name} ${${module}_build_link_type} ${SRC})
 target_link_libraries(${${module}_target_name} ${${cm_module_name}_target_name})
