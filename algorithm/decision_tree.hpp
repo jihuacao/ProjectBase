@@ -37,7 +37,7 @@ namespace ProjectBase{
         };
         class IncrementalDecisionTree: DecisionTree{
             public:
-                virtual void continue_train(const Data& data);
+                virtual void continue_train(const Data& data)=0;
         };
     };
 }
