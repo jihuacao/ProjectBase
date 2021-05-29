@@ -28,8 +28,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace ProjectBase{
     namespace algorithm{
         class Data{
-
+            public:
+                
         };
+
+        class Indicator{
+            public:
+        };
+
         class DecisionTree{
             public:
                 virtual void train(const Data& data)=0;
