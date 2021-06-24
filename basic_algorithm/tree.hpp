@@ -252,34 +252,34 @@ namespace ProjectBase{
 						void set_parent_();
 				};
 
-		      /// Iterator which traverses only the leaves.
-		      class leaf_iterator : public iterator_base {
-		         public:
-		            leaf_iterator();
-		            leaf_iterator(tree_node *, tree_node *top=0);
-		            leaf_iterator(const sibling_iterator&);
-		            leaf_iterator(const iterator_base&);
+		      	/// Iterator which traverses only the leaves.
+		      	class leaf_iterator : public iterator_base {
+		      	   public:
+		      	      leaf_iterator();
+		      	      leaf_iterator(tree_node *, tree_node *top=0);
+		      	      leaf_iterator(const sibling_iterator&);
+		      	      leaf_iterator(const iterator_base&);
 
-		            bool    operator==(const leaf_iterator&) const;
-		            bool    operator!=(const leaf_iterator&) const;
-		            leaf_iterator&  operator++();
-		            leaf_iterator&  operator--();
-		            leaf_iterator   operator++(int);
-		            leaf_iterator   operator--(int);
-		            leaf_iterator&  operator+=(unsigned int);
-		            leaf_iterator&  operator-=(unsigned int);
+		      	      bool    operator==(const leaf_iterator&) const;
+		      	      bool    operator!=(const leaf_iterator&) const;
+		      	      leaf_iterator&  operator++();
+		      	      leaf_iterator&  operator--();
+		      	      leaf_iterator   operator++(int);
+		      	      leaf_iterator   operator--(int);
+		      	      leaf_iterator&  operator+=(unsigned int);
+		      	      leaf_iterator&  operator-=(unsigned int);
 					private:
 						tree_node *top_node;
-		      };
+		      	};
 
 				/// Return iterator to the beginning of the tree.
-				inline pre_order_iterator   begin() const;
+				inline pre_order_iterator begin() const;
 				/// Return iterator to the end of the tree.
-				inline pre_order_iterator   end() const;
+				inline pre_order_iterator end() const;
 				/// Return post-order iterator to the beginning of the tree.
-				post_order_iterator  begin_post() const;
+				post_order_iterator begin_post() const;
 				/// Return post-order end iterator of the tree.
-				post_order_iterator  end_post() const;
+				post_order_iterator end_post() const;
 				/// Return fixed-depth iterator to the first node at a given depth from the given iterator.
 				/// If 'walk_back=true', a depth=0 iterator will be taken from the beginning of the sibling
 				/// range, not the current node.
@@ -291,25 +291,25 @@ namespace ProjectBase{
 				/// Return breadth-first end iterator.
 				breadth_first_queued_iterator end_breadth_first() const;
 				/// Return sibling iterator to the first child of given node.
-				static sibling_iterator     begin(const iterator_base&);
+				static sibling_iterator begin(const iterator_base&);
 				/// Return sibling end iterator for children of given node.
-				static sibling_iterator     end(const iterator_base&);
-		      /// Return leaf iterator to the first leaf of the tree.
-		      leaf_iterator   begin_leaf() const;
-		      /// Return leaf end iterator for entire tree.
-		      leaf_iterator   end_leaf() const;
-		      /// Return leaf iterator to the first leaf of the subtree at the given node.
-		      leaf_iterator   begin_leaf(const iterator_base& top) const;
-		      /// Return leaf end iterator for the subtree at the given node.
-		      leaf_iterator   end_leaf(const iterator_base& top) const;
+				static sibling_iterator end(const iterator_base&);
+		      	/// Return leaf iterator to the first leaf of the tree.
+		      	leaf_iterator begin_leaf() const;
+		      	/// Return leaf end iterator for entire tree.
+		      	leaf_iterator end_leaf() const;
+		      	/// Return leaf iterator to the first leaf of the subtree at the given node.
+		      	leaf_iterator begin_leaf(const iterator_base& top) const;
+		      	/// Return leaf end iterator for the subtree at the given node.
+		      	leaf_iterator end_leaf(const iterator_base& top) const;
 
 				typedef std::vector<int> path_t;
 				/// Return a path (to be taken from the 'top' node) corresponding to a node in the tree.
 				/// The first integer in path_t is the number of steps you need to go 'right' in the sibling
 				/// chain (so 0 if we go straight to the children).
-				path_t          path_from_iterator(const iterator_base& iter, const iterator_base& top) const;
+				path_t path_from_iterator(const iterator_base& iter, const iterator_base& top) const;
 				/// Return an iterator given a path from the 'top' node.
-				iterator        iterator_from_path(const path_t&, const iterator_base& top) const;
+				iterator iterator_from_path(const path_t&, const iterator_base& top) const;
 
 				/// Return iterator to the parent of a node. Throws a `navigation_error` if the node
 				/// does not have a parent.
@@ -322,15 +322,15 @@ namespace ProjectBase{
 				template<typename iter> iter next_at_same_depth(iter) const;
 
 				/// Erase all nodes of the tree.
-				void     clear();
+				void clear();
 				/// Erase element at position pointed to by iterator, return incremented iterator.
 				template<typename iter> iter erase(iter);
 				/// Erase all children of the node pointed to by iterator.
-				void     erase_children(const iterator_base&);
+				void erase_children(const iterator_base&);
 				/// Erase all siblings to the right of the iterator.
-				void     erase_right_siblings(const iterator_base&);
+				void erase_right_siblings(const iterator_base&);
 				/// Erase all siblings to the left of the iterator.
-				void     erase_left_siblings(const iterator_base&);
+				void erase_left_siblings(const iterator_base&);
 
 				/// Insert empty node as last/first child of node pointed to by position.
 				template<typename iter> iter append_child(iter position); 
@@ -387,8 +387,8 @@ namespace ProjectBase{
 				/// Move 'source' node (plus its children) to become the next sibling of 'target'.
 				template<typename iter> iter move_after(iter target, iter source);
 				/// Move 'source' node (plus its children) to become the previous sibling of 'target'.
-		      template<typename iter> iter move_before(iter target, iter source);
-		      sibling_iterator move_before(sibling_iterator target, sibling_iterator source);
+		      	template<typename iter> iter move_before(iter target, iter source);
+		      	sibling_iterator move_before(sibling_iterator target, sibling_iterator source);
 				/// Move 'source' node (plus its children) to become the node at 'target' (erasing the node at 'target').
 				template<typename iter> iter move_ontop(iter target, iter source);
 
@@ -403,38 +403,38 @@ namespace ProjectBase{
 				template<typename iter> iter move_in_as_nth_child(iter, size_t, tree&);
 
 				/// Merge with other tree, creating new branches and leaves only if they are not already present.
-				void     merge(sibling_iterator, sibling_iterator, sibling_iterator, sibling_iterator, 
+				void merge(sibling_iterator, sibling_iterator, sibling_iterator, sibling_iterator, 
 									bool duplicate_leaves=false);
 				/// As above, but using two trees with a single top node at the 'to' and 'from' positions.
-				void     merge(iterator to, iterator from, bool duplicate_leaves);
+				void merge(iterator to, iterator from, bool duplicate_leaves);
 				/// Sort (std::sort only moves values of nodes, this one moves children as well).
-				void     sort(sibling_iterator from, sibling_iterator to, bool deep=false);
+				void sort(sibling_iterator from, sibling_iterator to, bool deep=false);
 				template<class StrictWeakOrdering>
-				void     sort(sibling_iterator from, sibling_iterator to, StrictWeakOrdering comp, bool deep=false);
+				void sort(sibling_iterator from, sibling_iterator to, StrictWeakOrdering comp, bool deep=false);
 				/// Compare two ranges of nodes (compares nodes as well as tree structure).
 				template<typename iter>
-				bool     equal(const iter& one, const iter& two, const iter& three) const;
+				bool equal(const iter& one, const iter& two, const iter& three) const;
 				template<typename iter, class BinaryPredicate>
-				bool     equal(const iter& one, const iter& two, const iter& three, BinaryPredicate) const;
+				bool equal(const iter& one, const iter& two, const iter& three, BinaryPredicate) const;
 				template<typename iter>
-				bool     equal_subtree(const iter& one, const iter& two) const;
+				bool equal_subtree(const iter& one, const iter& two) const;
 				template<typename iter, class BinaryPredicate>
-				bool     equal_subtree(const iter& one, const iter& two, BinaryPredicate) const;
+				bool equal_subtree(const iter& one, const iter& two, BinaryPredicate) const;
 				/// Extract a new tree formed by the range of siblings plus all their children.
-				tree     subtree(sibling_iterator from, sibling_iterator to) const;
-				void     subtree(tree&, sibling_iterator from, sibling_iterator to) const;
+				tree subtree(sibling_iterator from, sibling_iterator to) const;
+				void subtree(tree&, sibling_iterator from, sibling_iterator to) const;
 				/// Exchange the node (plus subtree) with its sibling node (do nothing if no sibling present).
-				void     swap(sibling_iterator it);
+				void swap(sibling_iterator it);
 				/// Exchange two nodes (plus subtrees). The iterators will remain valid and keep 
 				/// pointing to the same nodes, which now sit at different locations in the tree.
-			   void     swap(iterator, iterator);
+			   	void swap(iterator, iterator);
 
 				/// Count the total number of nodes.
-				size_t   size() const;
+				size_t size() const;
 				/// Count the total number of nodes below the indicated node (plus one).
-				size_t   size(const iterator_base&) const;
+				size_t size(const iterator_base&) const;
 				/// Check if tree is empty.
-				bool     empty() const;
+				bool empty() const;
 				/// Compute the depth to the root or to a fixed other iterator.
 				static int depth(const iterator_base&);
 				static int depth(const iterator_base&, const iterator_base&);
@@ -491,7 +491,7 @@ namespace ProjectBase{
 				void head_initialise_();
 				void copy_(const tree<T, tree_nodeallocator>& other);
 
-		      /// Comparator class for two nodes of a tree (used for sorting and searching).
+		      	/// Comparator class for two nodes of a tree (used for sorting and searching).
 				template<class StrictWeakOrdering>
 				class compare_nodes {
 					public:
