@@ -90,7 +90,7 @@ COMPACT_LATEX          = NO
 MAKEINDEX_CMD_NAME     = makeindex
 LATEX_CMD_NAME         = latex
 LATEX_OUTPUT           = latex
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 EXTRA_SEARCH_MAPPINGS  =
 EXTERNAL_SEARCH_ID     =
 SEARCHDATA_FILE        = searchdata.xml
@@ -108,7 +108,7 @@ FORMULA_FONTSIZE       = 10
 EXT_LINKS_IN_WINDOW    = NO
 TREEVIEW_WIDTH         = 250
 ENUM_VALUES_PER_LINE   = 4
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 DISABLE_INDEX          = NO
 ECLIPSE_DOC_ID         = org.doxygen.Project
 GENERATE_ECLIPSEHELP   = NO
@@ -174,7 +174,8 @@ EXCLUDE_PATTERNS       = install* external build*
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE                =
 RECURSIVE              = YES
-                         *.qsf
+FILE_PATTERNS          = *.c \
+                         *.qsf \
                          *.ucf \
                          *.vhdl \
                          *.vhd \
@@ -216,8 +217,7 @@ RECURSIVE              = YES
                          *.c++ \
                          *.cpp \
                          *.cxx \
-                         *.cc \
-FILE_PATTERNS          = *.c \
+                         *.cc
 INPUT_ENCODING         = UTF-8
 INPUT                  = ./
 WARN_LOGFILE           =
@@ -318,7 +318,7 @@ OUTPUT_DIRECTORY       = ./doc/private
 PROJECT_LOGO           =
 PROJECT_BRIEF          =
 PROJECT_NUMBER         =
-PROJECT_NAME           = "Putil"
+PROJECT_NAME           = "ProjectBase"
 DOXYFILE_ENCODING      = UTF-8
 
 # This file describes the settings to be used by the documentation system

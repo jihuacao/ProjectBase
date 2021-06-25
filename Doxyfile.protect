@@ -174,7 +174,8 @@ EXCLUDE_PATTERNS       = install* external build*
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE                =
 RECURSIVE              = YES
-                         *.qsf
+FILE_PATTERNS          = *.c \
+                         *.qsf \
                          *.ucf \
                          *.vhdl \
                          *.vhd \
@@ -217,7 +218,6 @@ RECURSIVE              = YES
                          *.cpp \
                          *.cxx \
                          *.cc \
-FILE_PATTERNS          = *.c \
 INPUT_ENCODING         = UTF-8
 INPUT                  = ./
 WARN_LOGFILE           =
