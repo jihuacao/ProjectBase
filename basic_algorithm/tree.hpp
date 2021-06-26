@@ -1030,6 +1030,14 @@ namespace ProjectBase{
 			//	return ret;
 			}
 
+		/**
+		 * \brief append_child 在子节点集合末端增加一个子节点并将该子节点的引用iter返回
+		 * \note 
+		 * \author none
+		 * \param[in] position 目标父节点
+		 * \return iter 返回增加的子节点额引用
+		 * \since v0.0.1
+		 * */
 		template <class T, class tree_nodeallocator>
 		template <typename iter>
 		iter tree<T, tree_nodeallocator>::append_child(iter position)
@@ -1056,6 +1064,15 @@ namespace ProjectBase{
 			return tmp;
 		 	}
 
+		/**
+		 * \brief prepend_child 与append_child功能类似，增加子节点的位置变成了子节点集合的前端
+		 * \note note
+		 * \author none
+		 * \param[in] position 目标父节点
+		 * \return iter 返回增加的子节点的迭代器引用
+		 * \retval retval
+		 * \since v0.0.1
+		 * */
 		template <class T, class tree_nodeallocator>
 		template <typename iter>
 		iter tree<T, tree_nodeallocator>::prepend_child(iter position)
@@ -1082,6 +1099,16 @@ namespace ProjectBase{
 			return tmp;
 		 	}
 
+		/**
+		 * \brief append_child 参考append_child，本函数直接传入节点的值，不需要外部使用引用迭代器去赋值
+		 * \note note
+		 * \author none
+		 * \param[in] position 目标父节点
+		 * \param[in] x 增加的子节点的值
+		 * \return iter 增加子节点的迭代器引用
+		 * \retval retval
+		 * \since v0.0.1
+		 * */
 		template <class T, class tree_nodeallocator>
 		template <class iter>
 		iter tree<T, tree_nodeallocator>::append_child(iter position, const T& x)
@@ -1112,6 +1139,16 @@ namespace ProjectBase{
 			return tmp;
 			}
 
+		/**
+		 * \brief append_child 参考
+		 * \note note
+		 * \author none
+		 * \param[in] in
+		 * \param[out] out
+		 * \return return
+		 * \retval retval
+		 * \since version
+		 * */
 		template <class T, class tree_nodeallocator>
 		template <class iter>
 		iter tree<T, tree_nodeallocator>::append_child(iter position, T&& x)
