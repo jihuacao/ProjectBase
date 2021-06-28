@@ -36,9 +36,9 @@ namespace ProjectBase{
 				tree_node(const T&);
 				tree_node(T&&);
 
-				tree_node<T> *parent;
-			   	tree_node<T> *first_child, *last_child;
-				tree_node<T> *prev_sibling, *next_sibling;
+				tree_node<T> *parent; // 指针记录父节点
+			   	tree_node<T> *first_child, *last_child; // 链表方式记录子节点指针
+				tree_node<T> *prev_sibling, *next_sibling; // 链表的方式记录兄弟节点指针
 				T data;
 		}; 
 
@@ -156,7 +156,7 @@ namespace ProjectBase{
 						bool    operator==(const pre_order_iterator&) const;
 						bool    operator!=(const pre_order_iterator&) const;
 						pre_order_iterator&  operator++();
-					   pre_order_iterator&  operator--();
+					   	pre_order_iterator&  operator--();
 						pre_order_iterator   operator++(int);
 						pre_order_iterator   operator--(int);
 						pre_order_iterator&  operator+=(unsigned int);
@@ -176,7 +176,7 @@ namespace ProjectBase{
 						bool    operator==(const post_order_iterator&) const;
 						bool    operator!=(const post_order_iterator&) const;
 						post_order_iterator&  operator++();
-					   post_order_iterator&  operator--();
+					   	post_order_iterator&  operator--();
 						post_order_iterator   operator++(int);
 						post_order_iterator   operator--(int);
 						post_order_iterator&  operator+=(unsigned int);
@@ -2684,17 +2684,18 @@ namespace ProjectBase{
 		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator++()
 			{
 			assert(this->node!=0);
-			if(!this->skip_current_children_ && this->node->first_child != 0) {
-				this->node=this->node->first_child;
+			if(!this->skip_current_children_ && this->node->first_child != 0) { // 如果当前节点有子节点，同时状态为<不跳过下一个子节点>
+				this->node=this->node->first_child; // 将当前节点设置为当前节点的子节点
 				}
-			else {
-				this->skip_current_children_=false;
-				while(this->node->next_sibling==0) {
+			else { // 状态为<跳过子节点以及子节点子树> 或者为没有子节点，反正就是不会查询到子节点
+				this->skip_current_children_=false;	// 直接重置状态，等待下一次设置
+				while(this->node->next_sibling==0) { // 如果当前节点没有下一个兄弟节点，将当前节点设置为当前节点的父节点，向上查询，
+				//指导查到有下一个兄弟节点的节点，或者直到根节点，停止
 					this->node=this->node->parent;
 					if(this->node==0)
 						return *this;
 					}
-				this->node=this->node->next_sibling;
+				this->node=this->node->next_sibling; // 如果当前节点有下一个兄弟节点，当前节点设置为当前节点的下一个兄弟节点
 				}
 			return *this;
 			}
@@ -2800,17 +2801,17 @@ namespace ProjectBase{
 		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator++()
 			{
 			assert(this->node!=0);
-			if(this->node->next_sibling==0) {
+			if(this->node->next_sibling==0) { // 如果当前节点没有兄弟节点了，那么将当前节点置为当前节点的父节点，往上回溯
 				this->node=this->node->parent;
 				this->skip_current_children_=false;
 				}
-			else {
+			else { // 如果当前节点存在兄弟节点，那么
 				this->node=this->node->next_sibling;
-				if(this->skip_current_children_) {
+				if(this->skip_current_children_) { // 如果状态<跳过子节点子树>成立，则
 					this->skip_current_children_=false;
 					}
 				else {
-					while(this->node->first_child)
+					while(this->node->first_child) // 如果当前节点存在子节点，那么往下查询指导获得叶子结点
 						this->node=this->node->first_child;
 					}
 				}
