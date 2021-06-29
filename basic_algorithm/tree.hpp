@@ -56,18 +56,8 @@ namespace ProjectBase{
 
 		template<class T>
 		tree_node<T>::tree_node(T&& val)
-			: parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), data(val)
-			{
-			}
-
-		// Throw an exception with a stacktrace.
-
-		//template <class E>
-		//void throw_with_trace(const E& e)
-		//	{
-		//	throw boost::enable_error_info(e)
-		//		<< traced(boost::stacktrace::stacktrace());
-		//	}
+			: parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), data(val){
+		}
 
 		class navigation_error : public std::logic_error {
 			public:
@@ -89,7 +79,7 @@ namespace ProjectBase{
 		};
 
 		template <class T, class tree_nodeallocator = std::allocator<tree_node<T> > >
-		class tree {
+		class chain_tree {
 			protected:
 				typedef tree_node<T> tree_node;
 			public:
@@ -3280,8 +3270,7 @@ namespace ProjectBase{
 		   }
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator++()
-		   {
+		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator++(){
 			assert(this->node!=0);
 			if(this->node->first_child!=0) { // current node is no longer leaf (children got added)
 				 while(this->node->first_child) 
@@ -3298,11 +3287,10 @@ namespace ProjectBase{
 					  this->node=this->node->first_child;
 				 }
 			return *this;
-		   }
+		}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator--()
-		   {
+		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator--(){
 			assert(this->node!=0);
 			while (this->node->prev_sibling==0) {
 				if (this->node->parent==0) return *this;
@@ -3313,70 +3301,39 @@ namespace ProjectBase{
 			while(this->node->last_child)
 				this->node=this->node->last_child;
 			return *this;
-			}
+		}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::leaf_iterator::operator++(int)
-		   {
+		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::leaf_iterator::operator++(int){
 		   leaf_iterator copy = *this;
 		   ++(*this);
 		   return copy;
-		   }
+		}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::leaf_iterator::operator--(int)
-		   {
+		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::leaf_iterator::operator--(int){
 		   leaf_iterator copy = *this;
 		   --(*this);
 		   return copy;
-		   }
-
+		}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator+=(unsigned int num)
-		   {
+		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator+=(unsigned int num){
 		   while(num>0) {
 		      ++(*this);
 		      --num;
 		      }
 		   return (*this);
-		   }
+		}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator-=(unsigned int num)
-		   {
+		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator-=(unsigned int num){
 		   while(num>0) {
 		      --(*this);
 		      --num;
 		      }
 		   return (*this);
-		   }
-
-		#endif
-
-		// Local variables:
-		// tab-width: 3
-		// End:
-        template<typename NodeType, typename TreeSizeType, typename DepthSizeType> 
-        class Tree{
-            public:
-            virtual bool empty() const=0;
-            virtual const NodeType& root() const=0;
-            virtual DepthSizeType depth() const=0;
-            virtual NodeType& value(TreeSizeType index) const=0;
-            virtual NodeType& assign(const NodeType& source, TreeSizeType index)=0;
-            virtual NodeType& parent(TreeSizeType index) const=0;
-            virtual NodeType& child(TreeSizeType parent_index, TreeSizeType child_index) const=0;
-            virtual TreeSizeType child_size(TreeSizeType parent_index) const=0;
-            virtual NodeType&& delete_child(TreeSizeType parent_index, )
-        };
-
-        //class chain_tree;
-        //class ChainTree: Tree<NodeType>{
-        //    public:
-        //    ChainTree();
-        //    chain_tree* _impl;
-        //};
+		}
     };
 };
 #endif
