@@ -79,7 +79,7 @@ namespace ProjectBase{
 		};
 
 		template <class T, class tree_nodeallocator = std::allocator<tree_node<T> > >
-		class chain_tree {
+		class tree {
 			protected:
 				typedef tree_node<T> tree_node;
 			public:
@@ -154,6 +154,8 @@ namespace ProjectBase{
 
 						pre_order_iterator&  next_skip_children();
 				};
+
+				/*由于是普通树结构，不存在中序，子节点数目可大于2*/
 
 				/// Depth-first iterator, first accessing the children, then the node itself.
 				class post_order_iterator : public iterator_base {
@@ -306,7 +308,16 @@ namespace ProjectBase{
 				template<typename	iter> static iter parent(iter);
 				/// Return iterator to the previous sibling of a node.
 				template<typename iter> static iter previous_sibling(iter);
-				/// Return iterator to the next sibling of a node.
+				/**
+				 * \brief 获取兄弟节点，静态方法，因为关系结构已经固化在tree_node中，而iter就包含tree_node
+				 * \note 
+				 * 	Return iterator to the next sibling of a node.
+				 * \author none
+				 * \param[in] iter 目标
+				 * \return 返回兄弟节点
+				 * \retval retval
+				 * \since version
+				 * */
 				template<typename iter> static iter next_sibling(iter);
 				/// Return iterator to the next node at a given depth.
 				template<typename iter> iter next_at_same_depth(iter) const;
@@ -425,25 +436,34 @@ namespace ProjectBase{
 				size_t size(const iterator_base&) const;
 				/// Check if tree is empty.
 				bool empty() const;
-				/// Compute the depth to the root or to a fixed other iterator.
+				/// Compute the depth to the root or to a fixed other iterator.(查询目标节点到指定某一节点的距离，根节点也可以是指定的节点)
 				static int depth(const iterator_base&);
 				static int depth(const iterator_base&, const iterator_base&);
-				/// Compute the depth to the root, counting all levels for which predicate returns true.
+				/**
+				 * \brief depth 计算指定节点到root的步数
+				 * \note Compute the depth to the root, counting all levels for which predicate returns true.
+				 * \author none
+				 * \param[in] p 是某一些断言，可以接收iterator_base对象，并作出false与true的断言，如果是true，则返回值要自增一
+				 * \param[in] iterator_base 是一个迭代器，对应节点位置
+				 * \return return
+				 * \retval retval
+				 * \since v0.0.1
+				 * */
 				template<class Predicate>
 				static int depth(const iterator_base&, Predicate p);
 				/// Compute the depth distance between two nodes, counting all levels for which predicate returns true.
 				template<class Predicate>
 				static int distance(const iterator_base& top, const iterator_base& bottom, Predicate p);
 				/// Determine the maximal depth of the tree. An empty tree has max_depth=-1.
-				int      max_depth() const;
+				int max_depth() const;
 				/// Determine the maximal depth of the tree with top node at the given position.
-				int      max_depth(const iterator_base&) const;
+				int max_depth(const iterator_base&) const;
 				/// Count the number of children of node at position.
 				static unsigned int number_of_children(const iterator_base&);
 				/// Count the number of siblings (left and right) of node at iterator. Total nodes at this level is +1.
 				unsigned int number_of_siblings(const iterator_base&) const;
 				/// Determine whether node at position is in the subtrees with indicated top node.
-		   	bool     is_in_subtree(const iterator_base& position, const iterator_base& top) const;
+		   		bool     is_in_subtree(const iterator_base& position, const iterator_base& top) const;
 				/// Determine whether node at position is in the subtrees with root in the range.
 				bool     is_in_subtree(const iterator_base& position, const iterator_base& begin, 
 											  const iterator_base& end) const;
@@ -552,26 +572,24 @@ namespace ProjectBase{
 			}
 
 		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::tree(tree<T, tree_nodeallocator>&& x) 
-			{
+		tree<T, tree_nodeallocator>::tree(tree<T, tree_nodeallocator>&& x) {
 			head_initialise_();
-			if(x.head->next_sibling!=x.feet) { // move tree if non-empty only
-				head->next_sibling=x.head->next_sibling;
-				feet->prev_sibling=x.feet->prev_sibling;
-				x.head->next_sibling->prev_sibling=head;
-				x.feet->prev_sibling->next_sibling=feet;
-				x.head->next_sibling=x.feet;
-				x.feet->prev_sibling=x.head;
-				}
+			if(x.head->next_sibling != x.feet) { // move tree if non-empty only
+				head->next_sibling =x.head->next_sibling;
+				feet->prev_sibling = x.feet->prev_sibling;
+				x.head->next_sibling->prev_sibling = head;
+				x.feet->prev_sibling->next_sibling = feet;
+				x.head->next_sibling = x.feet;
+				x.feet->prev_sibling = x.head;
 			}
+		}
 
 		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::tree(const iterator_base& other)
-			{
+		tree<T, tree_nodeallocator>::tree(const iterator_base& other) {
 			head_initialise_();
 			set_head((*other));
 			replace(begin(), other);
-			}
+		}
 
 		template <class T, class tree_nodeallocator>
 		tree<T, tree_nodeallocator>::~tree()
@@ -584,25 +602,24 @@ namespace ProjectBase{
 			}
 
 		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::head_initialise_() 
-		   { 
-		   head = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
-		   feet = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, head, tree_node<T>());
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, feet, tree_node<T>());	
+		void tree<T, tree_nodeallocator>::head_initialise_() {
+			head = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
+		   	feet = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, head, ProjectBase::Tree::tree_node<T>());
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, feet, ProjectBase::Tree::tree_node<T>());	
 
-		   head->parent=0;
-		   head->first_child=0;
-		   head->last_child=0;
-		   head->prev_sibling=0; //head;
-		   head->next_sibling=feet; //head;
+		   	head->parent=0;
+		   	head->first_child=0;
+		   	head->last_child=0;
+		   	head->prev_sibling=0; //head;
+		   	head->next_sibling=feet; //head;
 
 			feet->parent=0;
 			feet->first_child=0;
 			feet->last_child=0;
 			feet->prev_sibling=head;
 			feet->next_sibling=0;
-		   }
+		}
 
 		template <class T, class tree_nodeallocator>
 		tree<T,tree_nodeallocator>& tree<T, tree_nodeallocator>::operator=(const tree<T, tree_nodeallocator>& other)
@@ -1037,7 +1054,7 @@ namespace ProjectBase{
 			assert(position.node);
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, tree_node<T>());
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, ProjectBase::Tree::tree_node<T>());
 			tmp->first_child=0;
 			tmp->last_child=0;
 
@@ -1072,7 +1089,7 @@ namespace ProjectBase{
 			assert(position.node);
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, tree_node<T>());
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, ProjectBase::Tree::tree_node<T>());
 			tmp->first_child=0;
 			tmp->last_child=0;
 
@@ -2135,20 +2152,18 @@ namespace ProjectBase{
 			}
 
 		template <class T, class tree_nodeallocator>
-		size_t tree<T, tree_nodeallocator>::size() const
-			{
+		size_t tree<T, tree_nodeallocator>::size() const {
 			size_t i=0;
 			pre_order_iterator it=begin(), eit=end();
 			while(it!=eit) {
 				++i;
 				++it;
-				}
-			return i;
 			}
+			return i;
+		}
 
 		template <class T, class tree_nodeallocator>
-		size_t tree<T, tree_nodeallocator>::size(const iterator_base& top) const
-			{
+		size_t tree<T, tree_nodeallocator>::size(const iterator_base& top) const {
 			size_t i=0;
 			pre_order_iterator it=top, eit=top;
 			eit.skip_children();
@@ -2156,9 +2171,9 @@ namespace ProjectBase{
 			while(it!=eit) {
 				++i;
 				++it;
-				}
-			return i;
 			}
+			return i;
+		}
 
 		template <class T, class tree_nodeallocator>
 		bool tree<T, tree_nodeallocator>::empty() const
@@ -2168,17 +2183,16 @@ namespace ProjectBase{
 			}
 
 		template <class T, class tree_nodeallocator>
-		int tree<T, tree_nodeallocator>::depth(const iterator_base& it) 
-			{
+		int tree<T, tree_nodeallocator>::depth(const iterator_base& it) {
 			tree_node* pos=it.node;
 			assert(pos!=0);
 			int ret=0;
 			while(pos->parent!=0) {
 				pos=pos->parent;
 				++ret;
-				}
-			return ret;
 			}
+			return ret;
+		}
 
 		template <class T, class tree_nodeallocator>
 		int tree<T, tree_nodeallocator>::depth(const iterator_base& it, const iterator_base& root) 
@@ -2235,37 +2249,36 @@ namespace ProjectBase{
 
 
 		template <class T, class tree_nodeallocator>
-		int tree<T, tree_nodeallocator>::max_depth(const iterator_base& pos) const
-			{
-			tree_node *tmp=pos.node;
+		int tree<T, tree_nodeallocator>::max_depth(const iterator_base& pos) const{
+			tree_node *tmp = pos.node;
 
-			if(tmp==0 || tmp==head || tmp==feet) return -1;
+			if(tmp == 0 || tmp == head || tmp == feet) return -1;
 
-			int curdepth=0, maxdepth=0;
+			int curdepth = 0, maxdepth = 0;
 			while(true) { // try to walk the bottom of the tree
-				while(tmp->first_child==0) {
-					if(tmp==pos.node) return maxdepth;
-					if(tmp->next_sibling==0) {
+				while(tmp->first_child == 0) {
+					if(tmp == pos.node) return maxdepth;
+					if(tmp->next_sibling == 0) {
 						// try to walk up and then right again
 						do {
-							tmp=tmp->parent;
-		               if(tmp==0) return maxdepth;
-		               --curdepth;
-							}
-						while(tmp->next_sibling==0);
+							tmp = tmp->parent;
+		               		if(tmp == 0) return maxdepth;
+		               		--curdepth;
 						}
-		         if(tmp==pos.node) return maxdepth;
-					tmp=tmp->next_sibling;
+						while(tmp->next_sibling == 0);
 					}
-				tmp=tmp->first_child;
+		         if(tmp == pos.node) return maxdepth;
+					tmp = tmp->next_sibling;
+				}
+				tmp = tmp->first_child;
 				++curdepth;
-				maxdepth=std::max(curdepth, maxdepth);
-				} 
-			}
+				maxdepth = std::max(curdepth, maxdepth);
+			} 
+		}
 
 		template <class T, class tree_nodeallocator>
 		unsigned int tree<T, tree_nodeallocator>::number_of_children(const iterator_base& it) 
-			{
+		{
 			tree_node *pos=it.node->first_child;
 			if(pos==0) return 0;
 
@@ -2277,7 +2290,7 @@ namespace ProjectBase{
 			while((pos=pos->next_sibling))
 				++ret;
 			return ret;
-			}
+		}
 
 		template <class T, class tree_nodeallocator>
 		unsigned int tree<T, tree_nodeallocator>::number_of_siblings(const iterator_base& it) const
@@ -2634,10 +2647,6 @@ namespace ProjectBase{
 			return ret;
 			}
 
-
-
-		// Pre-order iterator
-
 		template <class T, class tree_nodeallocator>
 		tree<T, tree_nodeallocator>::pre_order_iterator::pre_order_iterator() 
 			: iterator_base(0)
@@ -2671,8 +2680,7 @@ namespace ProjectBase{
 			}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator++()
-			{
+		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator++() {
 			assert(this->node!=0);
 			if(!this->skip_current_children_ && this->node->first_child != 0) { // 如果当前节点有子节点，同时状态为<不跳过下一个子节点>
 				this->node=this->node->first_child; // 将当前节点设置为当前节点的子节点
@@ -2688,7 +2696,7 @@ namespace ProjectBase{
 				this->node=this->node->next_sibling; // 如果当前节点有下一个兄弟节点，当前节点设置为当前节点的下一个兄弟节点
 				}
 			return *this;
-			}
+		}
 
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator--()
@@ -2716,12 +2724,11 @@ namespace ProjectBase{
 			}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::next_skip_children() 
-		   {
+		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::next_skip_children() {
 			(*this).skip_children();
 			(*this)++;
 			return *this;
-			}
+		}
 
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::pre_order_iterator::operator--(int)
@@ -2751,10 +2758,7 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-
-
 		// Post-order iterator
-
 		template <class T, class tree_nodeallocator>
 		tree<T, tree_nodeallocator>::post_order_iterator::post_order_iterator() 
 			: iterator_base(0)
@@ -2788,41 +2792,39 @@ namespace ProjectBase{
 			}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator++()
-			{
-			assert(this->node!=0);
-			if(this->node->next_sibling==0) { // 如果当前节点没有兄弟节点了，那么将当前节点置为当前节点的父节点，往上回溯
-				this->node=this->node->parent;
-				this->skip_current_children_=false;
-				}
+		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator++(){
+			assert(this->node != 0);
+			if(this->node->next_sibling == 0) { // 如果当前节点没有兄弟节点了，那么将当前节点置为当前节点的父节点，往上回溯
+				this->node = this->node->parent;
+				this->skip_current_children_ = false;
+			}
 			else { // 如果当前节点存在兄弟节点，那么
-				this->node=this->node->next_sibling;
+				this->node = this->node->next_sibling;
 				if(this->skip_current_children_) { // 如果状态<跳过子节点子树>成立，则
-					this->skip_current_children_=false;
-					}
+					this->skip_current_children_ = false;
+				}
 				else {
 					while(this->node->first_child) // 如果当前节点存在子节点，那么往下查询指导获得叶子结点
-						this->node=this->node->first_child;
-					}
+						this->node = this->node->first_child;
 				}
-			return *this;
 			}
+			return *this;
+		}
 
 		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator--()
-			{
-			assert(this->node!=0);
-			if(this->skip_current_children_ || this->node->last_child==0) {
-				this->skip_current_children_=false;
-				while(this->node->prev_sibling==0)
-					this->node=this->node->parent;
-				this->node=this->node->prev_sibling;
-				}
-			else {
-				this->node=this->node->last_child;
-				}
-			return *this;
+		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator--() {
+			assert(this->node != 0);
+			if(this->skip_current_children_ || this->node->last_child == 0) { // 当状态<跳过下一个节点>成立，或者当前节点没有兄弟节点
+				this->skip_current_children_ = false;
+				while(this->node->prev_sibling == 0)
+					this->node = this->node->parent;
+				this->node = this->node->prev_sibling;
 			}
+			else {
+				this->node = this->node->last_child;
+			}
+			return *this;
+		}
 
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::post_order_iterator tree<T, tree_nodeallocator>::post_order_iterator::operator++(int)

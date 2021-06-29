@@ -7,5 +7,9 @@
         "*.def": "cpp",
         "ostream": "cpp",
         "*.cmc": "cpp",
+        "algorithm": "cpp",
+        "condition_variable": "cpp",
+        "forward_list": "cpp",
+        "functional": "cpp"
     }
 }
