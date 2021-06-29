@@ -28,35 +28,65 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace ProjectBase{
     namespace Tree{
-		/// A node in the tree, combining links to other nodes as well as the actual data.
 		template<class T>
-		class tree_node { // size: 5*4=20 bytes (on 32 bit arch), can be reduced by 8.
+		class tree_node {
 			public:
 				tree_node();
 				tree_node(const T&);
 				tree_node(T&&);
-
-				tree_node<T> *parent; // 指针记录父节点
-			   	tree_node<T> *first_child, *last_child; // 链表方式记录子节点指针
-				tree_node<T> *prev_sibling, *next_sibling; // 链表的方式记录兄弟节点指针
 				T data;
-		}; 
+		};
 
 		template<class T>
-		tree_node<T>::tree_node()
-			: parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0)
-			{
-			}
+		tree_node<T>::tree_node(){
+
+		};
 
 		template<class T>
 		tree_node<T>::tree_node(const T& val)
-			: parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), data(val)
+		: data(val){
+
+		};
+
+		template<class T>
+		tree_node<T>::tree_node(T&& val)
+		: data(val){
+
+		};
+
+		/// A node in the tree, combining links to other nodes as well as the actual data.
+		/**
+		 * \brief duplex_tree_node，双工链表构成的树节点，有父子节点链表、兄弟节点链表
+		 * \note 空间复杂度比较高，但是时间复杂度比较低
+		 * \author none
+		 * \since v0.0.1
+		 * */
+		template<class T>
+		class duplex_tree_node : public tree_node<T> { // size: 5*4=20 bytes (on 32 bit arch), can be reduced by 8.
+			public:
+				duplex_tree_node();
+				duplex_tree_node(const T&);
+				duplex_tree_node(T&&);
+
+				duplex_tree_node<T> *parent; // 指针记录父节点
+				duplex_tree_node<T> *first_child, *last_child; // 链表方式记录子节点指针
+				duplex_tree_node<T> *prev_sibling, *next_sibling; // 链表的方式记录兄弟节点指针
+		}; 
+
+		template<class T>
+		duplex_tree_node<T>::duplex_tree_node()
+			: tree_node<T>(), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0)
 			{
 			}
 
 		template<class T>
-		tree_node<T>::tree_node(T&& val)
-			: parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), data(val){
+		duplex_tree_node<T>::duplex_tree_node(const T& val)
+			: tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
+		}
+
+		template<class T>
+		duplex_tree_node<T>::duplex_tree_node(T&& val)
+			: tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
 		}
 
 		class navigation_error : public std::logic_error {
@@ -78,10 +108,10 @@ namespace ProjectBase{
 		//		std::string stacktrace;
 		};
 
-		template <class T, class tree_nodeallocator = std::allocator<tree_node<T> > >
+		template <class T, class tree_nodeallocator = std::allocator<duplex_tree_node<T> > >
 		class tree {
 			protected:
-				typedef tree_node<T> tree_node;
+				typedef duplex_tree_node<T> tree_node;
 			public:
 				/// Value of the data stored at a node.
 				typedef T value_type;
@@ -605,8 +635,8 @@ namespace ProjectBase{
 		void tree<T, tree_nodeallocator>::head_initialise_() {
 			head = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 		   	feet = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, head, ProjectBase::Tree::tree_node<T>());
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, feet, ProjectBase::Tree::tree_node<T>());	
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, head, tree_node());
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, feet, tree_node());	
 
 		   	head->parent=0;
 		   	head->first_child=0;
