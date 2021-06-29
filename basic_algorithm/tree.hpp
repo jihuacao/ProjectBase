@@ -28,29 +28,46 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace ProjectBase{
     namespace Tree{
+		/**
+		 * \brief brief
+		 * \note note
+		 * \author none
+		 * \since version
+		 * */
 		template<class T>
-		class tree_node {
+		class _tree_node {
 			public:
-				tree_node();
-				tree_node(const T&);
-				tree_node(T&&);
+				_tree_node();
+				_tree_node(const T&);
+				_tree_node(T&&);
 				T data;
 		};
 
 		template<class T>
-		tree_node<T>::tree_node(){
+		_tree_node<T>::_tree_node(){
 
 		};
 
 		template<class T>
-		tree_node<T>::tree_node(const T& val)
+		_tree_node<T>::_tree_node(const T& val)
 		: data(val){
 
 		};
 
 		template<class T>
-		tree_node<T>::tree_node(T&& val)
+		_tree_node<T>::_tree_node(T&& val)
 		: data(val){
+
+		};
+
+		/**
+		 * \brief brief
+		 * \note note
+		 * \author none
+		 * \since version
+		 * */
+		template<class T>
+		class _tree{
 
 		};
 
@@ -62,7 +79,7 @@ namespace ProjectBase{
 		 * \since v0.0.1
 		 * */
 		template<class T>
-		class duplex_tree_node : public tree_node<T> { // size: 5*4=20 bytes (on 32 bit arch), can be reduced by 8.
+		class duplex_tree_node : public _tree_node<T> { // size: 5*4=20 bytes (on 32 bit arch), can be reduced by 8.
 			public:
 				duplex_tree_node();
 				duplex_tree_node(const T&);
@@ -75,18 +92,18 @@ namespace ProjectBase{
 
 		template<class T>
 		duplex_tree_node<T>::duplex_tree_node()
-			: tree_node<T>(), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0)
+			: _tree_node<T>(), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0)
 			{
 			}
 
 		template<class T>
 		duplex_tree_node<T>::duplex_tree_node(const T& val)
-			: tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
+			: _tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
 		}
 
 		template<class T>
 		duplex_tree_node<T>::duplex_tree_node(T&& val)
-			: tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
+			: _tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
 		}
 
 		class navigation_error : public std::logic_error {
@@ -1084,7 +1101,7 @@ namespace ProjectBase{
 			assert(position.node);
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, ProjectBase::Tree::tree_node<T>());
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, tree_node());
 			tmp->first_child=0;
 			tmp->last_child=0;
 
@@ -1119,7 +1136,7 @@ namespace ProjectBase{
 			assert(position.node);
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
-			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, ProjectBase::Tree::tree_node<T>());
+			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, tree_node());
 			tmp->first_child=0;
 			tmp->last_child=0;
 
