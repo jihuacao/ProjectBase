@@ -37,6 +37,8 @@ namespace ProjectBase{
 		template<class T>
 		class _tree_node {
 			public:
+				typedef T value_type;
+			public:
 				_tree_node();
 				_tree_node(const T&);
 				_tree_node(T&&);
@@ -72,9 +74,9 @@ namespace ProjectBase{
 		 * \author none
 		 * \since version
 		 * */
-		template<class T>
+		template<typename Node>
 		class _tree{
-
+			
 		};
 
 		/// A node in the tree, combining links to other nodes as well as the actual data.
@@ -162,13 +164,14 @@ namespace ProjectBase{
 		//		std::string stacktrace;
 		};
 
-		template <class T, class tree_nodeallocator = std::allocator<duplex_tree_node<T> > >
+		template <typename Node, typename tree_nodeallocator = std::allocator<duplex_tree_node<typename Node::value_type> > >
 		class tree {
 			protected:
-				typedef duplex_tree_node<T> tree_node;
+				typedef Node tree_node;
 			public:
 				/// Value of the data stored at a node.
-				typedef T value_type;
+				typedef typename Node::value_type value_type;
+				typedef typename Node::value_type T;
 
 				class iterator_base;
 				class pre_order_iterator;
@@ -179,11 +182,11 @@ namespace ProjectBase{
 				tree();                                         // empty constructor
 				tree(const T&);                                 // constructor setting given element as head
 				tree(const iterator_base&);
-				tree(const tree<T, tree_nodeallocator>&);      // copy constructor
-				tree(tree<T, tree_nodeallocator>&&);           // move constructor
+				tree(const tree<Node, tree_nodeallocator>&);      // copy constructor
+				tree(tree<Node, tree_nodeallocator>&&);           // move constructor
 				~tree();
-				tree<T,tree_nodeallocator>& operator=(const tree<T, tree_nodeallocator>&);   // copy assignment
-				tree<T,tree_nodeallocator>& operator=(tree<T, tree_nodeallocator>&&);        // move assignment
+				tree<Node,tree_nodeallocator>& operator=(const tree<Node, tree_nodeallocator>&);   // copy assignment
+				tree<Node,tree_nodeallocator>& operator=(tree<Node, tree_nodeallocator>&&);        // move assignment
 
 		      /// Base class for iterators, only pointers stored, no traversal logic.
 		#ifdef __SGI_STL_PORT
@@ -573,8 +576,8 @@ namespace ProjectBase{
 				/// Comparator class for iterators (compares pointer values; why doesn't this work automatically?)
 				class iterator_base_less {
 					public:
-						bool operator()(const typename tree<T, tree_nodeallocator>::iterator_base& one,
-											 const typename tree<T, tree_nodeallocator>::iterator_base& two) const
+						bool operator()(const typename tree<Node, tree_nodeallocator>::iterator_base& one,
+											 const typename tree<Node, tree_nodeallocator>::iterator_base& two) const
 							{
 							return one.node < two.node;
 							}
@@ -583,7 +586,7 @@ namespace ProjectBase{
 			private:
 				tree_nodeallocator alloc_;
 				void head_initialise_();
-				void copy_(const tree<T, tree_nodeallocator>& other);
+				void copy_(const tree<Node, tree_nodeallocator>& other);
 
 		      	/// Comparator class for two nodes of a tree (used for sorting and searching).
 				template<class StrictWeakOrdering>
@@ -600,38 +603,38 @@ namespace ProjectBase{
 				};
 			};
 
-		//template <class T, class tree_nodeallocator>
+		//template <typename Node, typename tree_nodeallocator>
 		//class iterator_base_less {
 		//	public:
-		//		bool operator()(const typename tree<T, tree_nodeallocator>::iterator_base& one,
-		//						  const typename tree<T, tree_nodeallocator>::iterator_base& two) const
+		//		bool operator()(const typename tree<Node, tree_nodeallocator>::iterator_base& one,
+		//						  const typename tree<Node, tree_nodeallocator>::iterator_base& two) const
 		//			{
 		//			txtout << "operatorclass<" << one.node < two.node << std::endl;
 		//			return one.node < two.node;
 		//			}
 		//};
 
-		// template <class T, class tree_nodeallocator>
-		// bool operator<(const typename tree<T, tree_nodeallocator>::iterator& one,
-		// 					const typename tree<T, tree_nodeallocator>::iterator& two)
+		// template <typename Node, typename tree_nodeallocator>
+		// bool operator<(const typename tree<Node, tree_nodeallocator>::iterator& one,
+		// 					const typename tree<Node, tree_nodeallocator>::iterator& two)
 		// 	{
 		// 	txtout << "operator< " << one.node < two.node << std::endl;
 		// 	if(one.node < two.node) return true;
 		// 	return false;
 		// 	}
 		// 
-		// template <class T, class tree_nodeallocator>
-		// bool operator==(const typename tree<T, tree_nodeallocator>::iterator& one,
-		// 					const typename tree<T, tree_nodeallocator>::iterator& two)
+		// template <typename Node, typename tree_nodeallocator>
+		// bool operator==(const typename tree<Node, tree_nodeallocator>::iterator& one,
+		// 					const typename tree<Node, tree_nodeallocator>::iterator& two)
 		// 	{
 		// 	txtout << "operator== " << one.node == two.node << std::endl;
 		// 	if(one.node == two.node) return true;
 		// 	return false;
 		// 	}
 		// 
-		// template <class T, class tree_nodeallocator>
-		// bool operator>(const typename tree<T, tree_nodeallocator>::iterator_base& one,
-		// 					const typename tree<T, tree_nodeallocator>::iterator_base& two)
+		// template <typename Node, typename tree_nodeallocator>
+		// bool operator>(const typename tree<Node, tree_nodeallocator>::iterator_base& one,
+		// 					const typename tree<Node, tree_nodeallocator>::iterator_base& two)
 		// 	{
 		// 	txtout << "operator> " << one.node < two.node << std::endl;
 		// 	if(one.node > two.node) return true;
@@ -642,21 +645,21 @@ namespace ProjectBase{
 
 		// Tree
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::tree() 
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::tree() 
 			{
 			head_initialise_();
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::tree(const T& x) 
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::tree(const T& x) 
 			{
 			head_initialise_();
 			set_head(x);
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::tree(tree<T, tree_nodeallocator>&& x) {
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::tree(tree<Node, tree_nodeallocator>&& x) {
 			head_initialise_();
 			if(x.head->_next_sibling != x.feet) { // move tree if non-empty only
 				head->_next_sibling =x.head->_next_sibling;
@@ -668,15 +671,15 @@ namespace ProjectBase{
 			}
 		}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::tree(const iterator_base& other) {
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::tree(const iterator_base& other) {
 			head_initialise_();
 			set_head((*other));
 			replace(begin(), other);
 		}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::~tree()
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::~tree()
 			{
 			clear();
 			std::allocator_traits<decltype(alloc_)>::destroy(alloc_, head);
@@ -685,8 +688,8 @@ namespace ProjectBase{
 			std::allocator_traits<decltype(alloc_)>::deallocate(alloc_, feet, 1);
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::head_initialise_() {
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::head_initialise_() {
 			head = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 		   	feet = std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, head, tree_node());
@@ -705,16 +708,16 @@ namespace ProjectBase{
 			feet->_next_sibling=0;
 		}
 
-		template <class T, class tree_nodeallocator>
-		tree<T,tree_nodeallocator>& tree<T, tree_nodeallocator>::operator=(const tree<T, tree_nodeallocator>& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node,tree_nodeallocator>& tree<Node, tree_nodeallocator>::operator=(const tree<Node, tree_nodeallocator>& other)
 			{
 			if(this != &other)
 				copy_(other);
 			return *this;
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T,tree_nodeallocator>& tree<T, tree_nodeallocator>::operator=(tree<T, tree_nodeallocator>&& x)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node,tree_nodeallocator>& tree<Node, tree_nodeallocator>::operator=(tree<Node, tree_nodeallocator>&& x)
 			{
 			if(this != &x) {
 				clear(); // clear any existing data.
@@ -729,15 +732,15 @@ namespace ProjectBase{
 			return *this;
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::tree(const tree<T, tree_nodeallocator>& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::tree(const tree<Node, tree_nodeallocator>& other)
 			{
 			head_initialise_();
 			copy_(other);
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::copy_(const tree<T, tree_nodeallocator>& other) 
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::copy_(const tree<Node, tree_nodeallocator>& other) 
 			{
 			clear();
 			pre_order_iterator it=other.begin(), to=begin();
@@ -757,16 +760,16 @@ namespace ProjectBase{
 				}
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::clear()
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::clear()
 			{
 			if(head)
 				while(head->_next_sibling!=feet)
 					erase(pre_order_iterator(head->_next_sibling));
 			}
 
-		template<class T, class tree_nodeallocator> 
-		void tree<T, tree_nodeallocator>::erase_children(const iterator_base& it)
+		template<typename Node, typename tree_nodeallocator> 
+		void tree<Node, tree_nodeallocator>::erase_children(const iterator_base& it)
 			{
 		//	std::cout << "erase_children " << it.node << std::endl;
 			if(it.node==0) return;
@@ -786,8 +789,8 @@ namespace ProjectBase{
 		//	std::cout << "exit" << std::endl;
 			}
 
-		template<class T, class tree_nodeallocator> 
-		void tree<T, tree_nodeallocator>::erase_right_siblings(const iterator_base& it)
+		template<typename Node, typename tree_nodeallocator> 
+		void tree<Node, tree_nodeallocator>::erase_right_siblings(const iterator_base& it)
 			{
 			if(it.node==0) return;
 
@@ -806,8 +809,8 @@ namespace ProjectBase{
 				it.node->_parent->_last_child=it.node;
 			}
 
-		template<class T, class tree_nodeallocator> 
-		void tree<T, tree_nodeallocator>::erase_left_siblings(const iterator_base& it)
+		template<typename Node, typename tree_nodeallocator> 
+		void tree<Node, tree_nodeallocator>::erase_left_siblings(const iterator_base& it)
 			{
 			if(it.node==0) return;
 
@@ -826,9 +829,9 @@ namespace ProjectBase{
 				it.node->_parent->_first_child=it.node;
 			}
 
-		template<class T, class tree_nodeallocator> 
+		template<typename Node, typename tree_nodeallocator> 
 		template<class iter>
-		iter tree<T, tree_nodeallocator>::erase(iter it)
+		iter tree<Node, tree_nodeallocator>::erase(iter it)
 			{
 			tree_node *cur=it.node;
 			assert(cur!=head);
@@ -854,32 +857,32 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::begin() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::begin() const
 			{
 			return pre_order_iterator(head->_next_sibling);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::end() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::end() const
 			{
 			return pre_order_iterator(feet);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::breadth_first_queued_iterator tree<T, tree_nodeallocator>::begin_breadth_first() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::breadth_first_queued_iterator tree<Node, tree_nodeallocator>::begin_breadth_first() const
 			{
 			return breadth_first_queued_iterator(head->_next_sibling);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::breadth_first_queued_iterator tree<T, tree_nodeallocator>::end_breadth_first() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::breadth_first_queued_iterator tree<Node, tree_nodeallocator>::end_breadth_first() const
 			{
 			return breadth_first_queued_iterator();
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator tree<T, tree_nodeallocator>::begin_post() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator tree<Node, tree_nodeallocator>::begin_post() const
 			{
 			tree_node *tmp=head->_next_sibling;
 			if(tmp!=feet) {
@@ -889,16 +892,16 @@ namespace ProjectBase{
 			return post_order_iterator(tmp);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator tree<T, tree_nodeallocator>::end_post() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator tree<Node, tree_nodeallocator>::end_post() const
 			{
 			return post_order_iterator(feet);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator tree<T, tree_nodeallocator>::begin_fixed(const iterator_base& pos, unsigned int dp, bool walk_back) const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator tree<Node, tree_nodeallocator>::begin_fixed(const iterator_base& pos, unsigned int dp, bool walk_back) const
 			{
-			typename tree<T, tree_nodeallocator>::fixed_depth_iterator ret;
+			typename tree<Node, tree_nodeallocator>::fixed_depth_iterator ret;
 			ret.top_node=pos.node;
 
 			tree_node *tmp=pos.node;
@@ -931,8 +934,8 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator tree<T, tree_nodeallocator>::end_fixed(const iterator_base& pos, unsigned int dp) const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator tree<Node, tree_nodeallocator>::end_fixed(const iterator_base& pos, unsigned int dp) const
 			{
 			assert(1==0); // FIXME: not correct yet: use is_valid() as a temporary workaround 
 			tree_node *tmp=pos.node;
@@ -949,8 +952,8 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::begin(const iterator_base& pos) 
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::begin(const iterator_base& pos) 
 			{
 			assert(pos.node!=0);
 			if(pos.node->_first_child==0) {
@@ -959,16 +962,16 @@ namespace ProjectBase{
 			return pos.node->_first_child;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::end(const iterator_base& pos) 
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::end(const iterator_base& pos) 
 			{
 			sibling_iterator ret(0);
 			ret.parent_=pos.node;
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::begin_leaf() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator tree<Node, tree_nodeallocator>::begin_leaf() const
 		   {
 		   tree_node *tmp=head->_next_sibling;
 		   if(tmp!=feet) {
@@ -978,14 +981,14 @@ namespace ProjectBase{
 		   return leaf_iterator(tmp);
 		   }
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::end_leaf() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator tree<Node, tree_nodeallocator>::end_leaf() const
 		   {
 		   return leaf_iterator(feet);
 		   }
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::path_t tree<T, tree_nodeallocator>::path_from_iterator(const iterator_base& iter, const iterator_base& top) const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::path_t tree<Node, tree_nodeallocator>::path_from_iterator(const iterator_base& iter, const iterator_base& top) const
 			{
 			path_t path;
 			tree_node *walk=iter.node;
@@ -1006,8 +1009,8 @@ namespace ProjectBase{
 			return path;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::iterator tree<T, tree_nodeallocator>::iterator_from_path(const path_t& path, const iterator_base& top) const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::iterator tree<Node, tree_nodeallocator>::iterator_from_path(const path_t& path, const iterator_base& top) const
 			{
 			iterator it=top;
 			tree_node *walk=it.node;
@@ -1028,8 +1031,8 @@ namespace ProjectBase{
 			return it;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::begin_leaf(const iterator_base& top) const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator tree<Node, tree_nodeallocator>::begin_leaf(const iterator_base& top) const
 		   {
 			tree_node *tmp=top.node;
 			while(tmp->_first_child)
@@ -1037,15 +1040,15 @@ namespace ProjectBase{
 		   return leaf_iterator(tmp, top.node);
 		   }
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::end_leaf(const iterator_base& top) const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator tree<Node, tree_nodeallocator>::end_leaf(const iterator_base& top) const
 		   {
 		   return leaf_iterator(top.node, top.node);
 		   }
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::parent(iter position) 
+		iter tree<Node, tree_nodeallocator>::parent(iter position) 
 			{
 			if(position.node==0)
 				throw navigation_error("tree: attempt to navigate from null iterator.");
@@ -1056,9 +1059,9 @@ namespace ProjectBase{
 			return iter(position.node->_parent);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::previous_sibling(iter position) 
+		iter tree<Node, tree_nodeallocator>::previous_sibling(iter position) 
 			{
 			assert(position.node!=0);
 			iter ret(position);
@@ -1066,9 +1069,9 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::next_sibling(iter position) 
+		iter tree<Node, tree_nodeallocator>::next_sibling(iter position) 
 			{
 			assert(position.node!=0);
 			iter ret(position);
@@ -1076,13 +1079,13 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::next_at_same_depth(iter position) const
+		iter tree<Node, tree_nodeallocator>::next_at_same_depth(iter position) const
 			{
 			// We make use of a temporary fixed_depth iterator to implement this.
 
-			typename tree<T, tree_nodeallocator>::fixed_depth_iterator tmp(position.node);
+			typename tree<Node, tree_nodeallocator>::fixed_depth_iterator tmp(position.node);
 
 			++tmp;
 			return iter(tmp);
@@ -1129,9 +1132,9 @@ namespace ProjectBase{
 		 * \return iter 返回增加的子节点额引用
 		 * \since v0.0.1
 		 * */
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::append_child(iter position)
+		iter tree<Node, tree_nodeallocator>::append_child(iter position)
 		 	{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1164,9 +1167,9 @@ namespace ProjectBase{
 		 * \retval retval
 		 * \since v0.0.1
 		 * */
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::prepend_child(iter position)
+		iter tree<Node, tree_nodeallocator>::prepend_child(iter position)
 		 	{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1200,9 +1203,9 @@ namespace ProjectBase{
 		 * \retval retval
 		 * \since v0.0.1
 		 * */
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::append_child(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::append_child(iter position, const T& x)
 			{
 			// If your program fails here you probably used 'append_child' to add the top
 			// node to an empty tree. From version 1.45 the top element should be added
@@ -1240,9 +1243,9 @@ namespace ProjectBase{
 		 * \retval retval
 		 * \since version
 		 * */
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::append_child(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::append_child(iter position, T&& x)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1268,9 +1271,9 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::prepend_child(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::prepend_child(iter position, const T& x)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1294,9 +1297,9 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::prepend_child(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::prepend_child(iter position, T&& x)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1322,9 +1325,9 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::append_child(iter position, iter other)
+		iter tree<Node, tree_nodeallocator>::append_child(iter position, iter other)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1334,9 +1337,9 @@ namespace ProjectBase{
 			return replace(aargh, other);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::prepend_child(iter position, iter other)
+		iter tree<Node, tree_nodeallocator>::prepend_child(iter position, iter other)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1346,9 +1349,9 @@ namespace ProjectBase{
 			return replace(aargh, other);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::append_children(iter position, sibling_iterator from, sibling_iterator to)
+		iter tree<Node, tree_nodeallocator>::append_children(iter position, sibling_iterator from, sibling_iterator to)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1363,9 +1366,9 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::prepend_children(iter position, sibling_iterator from, sibling_iterator to)
+		iter tree<Node, tree_nodeallocator>::prepend_children(iter position, sibling_iterator from, sibling_iterator to)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1383,23 +1386,23 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::set_head(const T& x)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::set_head(const T& x)
 			{
 			assert(head->_next_sibling==feet);
 			return insert(iterator(feet), x);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::set_head(T&& x)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::set_head(T&& x)
 			{
 			assert(head->_next_sibling==feet);
 			return insert(iterator(feet), x);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::insert(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::insert(iter position, const T& x)
 			{
 			if(position.node==0) {
 				position.node=feet; // Backward compatibility: when calling insert on a null node,
@@ -1426,9 +1429,9 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::insert(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::insert(iter position, T&& x)
 			{
 			if(position.node==0) {
 				position.node=feet; // Backward compatibility: when calling insert on a null node,
@@ -1454,8 +1457,8 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::insert(sibling_iterator position, const T& x)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::insert(sibling_iterator position, const T& x)
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
@@ -1483,9 +1486,9 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::insert_after(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::insert_after(iter position, const T& x)
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
@@ -1507,9 +1510,9 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::insert_after(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::insert_after(iter position, T&& x)
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp);
@@ -1532,9 +1535,9 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::insert_subtree(iter position, const iterator_base& subtree)
+		iter tree<Node, tree_nodeallocator>::insert_subtree(iter position, const iterator_base& subtree)
 			{
 			// insert dummy
 			iter it=insert(position, value_type());
@@ -1542,9 +1545,9 @@ namespace ProjectBase{
 			return replace(it, subtree);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::insert_subtree_after(iter position, const iterator_base& subtree)
+		iter tree<Node, tree_nodeallocator>::insert_subtree_after(iter position, const iterator_base& subtree)
 			{
 			// insert dummy
 			iter it=insert_after(position, value_type());
@@ -1552,9 +1555,9 @@ namespace ProjectBase{
 			return replace(it, subtree);
 			}
 
-		// template <class T, class tree_nodeallocator>
+		// template <typename Node, typename tree_nodeallocator>
 		// template <class iter>
-		// iter tree<T, tree_nodeallocator>::insert_subtree(sibling_iterator position, iter subtree)
+		// iter tree<Node, tree_nodeallocator>::insert_subtree(sibling_iterator position, iter subtree)
 		// 	{
 		// 	// insert dummy
 		// 	iter it(insert(position, value_type()));
@@ -1562,9 +1565,9 @@ namespace ProjectBase{
 		// 	return replace(it, subtree);
 		// 	}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::replace(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::replace(iter position, const T& x)
 			{
 		//	kp::destructor(&position.node->data);
 		//	kp::constructor(&position.node->data, x);
@@ -1574,9 +1577,9 @@ namespace ProjectBase{
 			return position;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<T, tree_nodeallocator>::replace(iter position, const iterator_base& from)
+		iter tree<Node, tree_nodeallocator>::replace(iter position, const iterator_base& from)
 			{
 			assert(position.node!=head);
 			tree_node *current_from=from.node;
@@ -1641,8 +1644,8 @@ namespace ProjectBase{
 			return current_to;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::replace(
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::replace(
 			sibling_iterator orig_begin, 
 			sibling_iterator orig_end, 
 			sibling_iterator new_begin, 
@@ -1686,9 +1689,9 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::flatten(iter position)
+		iter tree<Node, tree_nodeallocator>::flatten(iter position)
 			{
 			if(position.node->_first_child==0)
 				return position;
@@ -1714,9 +1717,9 @@ namespace ProjectBase{
 			}
 
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		iter tree<T, tree_nodeallocator>::reparent(iter position, sibling_iterator begin, sibling_iterator end)
+		iter tree<Node, tree_nodeallocator>::reparent(iter position, sibling_iterator begin, sibling_iterator end)
 			{
 			tree_node *first=begin.node;
 			tree_node *last=first;
@@ -1763,15 +1766,15 @@ namespace ProjectBase{
 			return first;
 			}
 
-		template <class T, class tree_nodeallocator>
-		template <typename iter> iter tree<T, tree_nodeallocator>::reparent(iter position, iter from)
+		template <typename Node, typename tree_nodeallocator>
+		template <typename iter> iter tree<Node, tree_nodeallocator>::reparent(iter position, iter from)
 			{
 			if(from.node->_first_child==0) return position;
 			return reparent(position, from.node->_first_child, end(from));
 			}
 
-		template <class T, class tree_nodeallocator>
-		template <typename iter> iter tree<T, tree_nodeallocator>::wrap(iter position, const T& x)
+		template <typename Node, typename tree_nodeallocator>
+		template <typename iter> iter tree<Node, tree_nodeallocator>::wrap(iter position, const T& x)
 			{
 			assert(position.node!=0);
 			sibling_iterator fr=position, to=position;
@@ -1781,8 +1784,8 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		template <typename iter> iter tree<T, tree_nodeallocator>::wrap(iter from, iter to, const T& x)
+		template <typename Node, typename tree_nodeallocator>
+		template <typename iter> iter tree<Node, tree_nodeallocator>::wrap(iter from, iter to, const T& x)
 			{
 			assert(from.node!=0);
 			iter ret = insert(from, x);
@@ -1790,8 +1793,8 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		template <typename iter> iter tree<T, tree_nodeallocator>::move_after(iter target, iter source)
+		template <typename Node, typename tree_nodeallocator>
+		template <typename iter> iter tree<Node, tree_nodeallocator>::move_after(iter target, iter source)
 		   {
 		   tree_node *dst=target.node;
 		   tree_node *src=source.node;
@@ -1819,8 +1822,8 @@ namespace ProjectBase{
 		   return src;
 		   }
 
-		template <class T, class tree_nodeallocator>
-		template <typename iter> iter tree<T, tree_nodeallocator>::move_before(iter target, iter source)
+		template <typename Node, typename tree_nodeallocator>
+		template <typename iter> iter tree<Node, tree_nodeallocator>::move_before(iter target, iter source)
 		   {
 		   tree_node *dst=target.node;
 		   tree_node *src=source.node;
@@ -1849,8 +1852,8 @@ namespace ProjectBase{
 		   }
 
 		// specialisation for sibling_iterators
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::move_before(sibling_iterator target, 
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::move_before(sibling_iterator target, 
 																															  sibling_iterator source)
 			{
 			tree_node *dst=target.node;
@@ -1889,8 +1892,8 @@ namespace ProjectBase{
 			return src;
 			}
 
-		template <class T, class tree_nodeallocator>
-		template <typename iter> iter tree<T, tree_nodeallocator>::move_ontop(iter target, iter source)
+		template <typename Node, typename tree_nodeallocator>
+		template <typename iter> iter tree<Node, tree_nodeallocator>::move_ontop(iter target, iter source)
 			{
 			tree_node *dst=target.node;
 			tree_node *src=source.node;
@@ -1941,8 +1944,8 @@ namespace ProjectBase{
 			}
 
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator> tree<T, tree_nodeallocator>::move_out(iterator source)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator> tree<Node, tree_nodeallocator>::move_out(iterator source)
 			{
 			tree ret;
 
@@ -1965,8 +1968,8 @@ namespace ProjectBase{
 			return ret; // A good compiler will move this, not copy.
 			}
 
-		template <class T, class tree_nodeallocator>
-		template<typename iter> iter tree<T, tree_nodeallocator>::move_in(iter loc, tree& other)
+		template <typename Node, typename tree_nodeallocator>
+		template<typename iter> iter tree<Node, tree_nodeallocator>::move_in(iter loc, tree& other)
 			{
 			if(other.head->_next_sibling==other.feet) return loc; // other tree is empty
 
@@ -1997,8 +2000,8 @@ namespace ProjectBase{
 			return other_first_head;
 			}
 
-		template <class T, class tree_nodeallocator>
-		template<typename iter> iter tree<T, tree_nodeallocator>::move_in_below(iter loc, tree& other)
+		template <typename Node, typename tree_nodeallocator>
+		template<typename iter> iter tree<Node, tree_nodeallocator>::move_in_below(iter loc, tree& other)
 			{
 			if(other.head->_next_sibling==other.feet) return loc; // other tree is empty
 
@@ -2006,8 +2009,8 @@ namespace ProjectBase{
 			return move_in_as_nth_child(loc, n, other);
 			}
 
-		template <class T, class tree_nodeallocator>
-		template<typename iter> iter tree<T, tree_nodeallocator>::move_in_as_nth_child(iter loc, size_t n, tree& other)
+		template <typename Node, typename tree_nodeallocator>
+		template<typename iter> iter tree<Node, tree_nodeallocator>::move_in_as_nth_child(iter loc, size_t n, tree& other)
 			{
 			if(other.head->_next_sibling==other.feet) return loc; // other tree is empty
 
@@ -2065,8 +2068,8 @@ namespace ProjectBase{
 			}
 
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::merge(sibling_iterator to1,   sibling_iterator to2,
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::merge(sibling_iterator to1,   sibling_iterator to2,
 																sibling_iterator from1, sibling_iterator from2,
 																bool duplicate_leaves)
 			{
@@ -2088,8 +2091,8 @@ namespace ProjectBase{
 				}
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::merge(iterator to, iterator from, bool duplicate_leaves)
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::merge(iterator to, iterator from, bool duplicate_leaves)
 			{
 			sibling_iterator to1(to);
 			sibling_iterator to2=to1;
@@ -2102,16 +2105,16 @@ namespace ProjectBase{
 			}
 
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::sort(sibling_iterator from, sibling_iterator to, bool deep)
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::sort(sibling_iterator from, sibling_iterator to, bool deep)
 			{
 			std::less<T> comp;
 			sort(from, to, comp, deep);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class StrictWeakOrdering>
-		void tree<T, tree_nodeallocator>::sort(sibling_iterator from, sibling_iterator to, 
+		void tree<Node, tree_nodeallocator>::sort(sibling_iterator from, sibling_iterator to, 
 															 StrictWeakOrdering comp, bool deep)
 			{
 			if(from==to) return;
@@ -2169,25 +2172,25 @@ namespace ProjectBase{
 				}
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		bool tree<T, tree_nodeallocator>::equal(const iter& one_, const iter& two, const iter& three_) const
+		bool tree<Node, tree_nodeallocator>::equal(const iter& one_, const iter& two, const iter& three_) const
 			{
 			std::equal_to<T> comp;
 			return equal(one_, two, three_, comp);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter>
-		bool tree<T, tree_nodeallocator>::equal_subtree(const iter& one_, const iter& two_) const
+		bool tree<Node, tree_nodeallocator>::equal_subtree(const iter& one_, const iter& two_) const
 			{
 			std::equal_to<T> comp;
 			return equal_subtree(one_, two_, comp);
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter, class BinaryPredicate>
-		bool tree<T, tree_nodeallocator>::equal(const iter& one_, const iter& two, const iter& three_, BinaryPredicate fun) const
+		bool tree<Node, tree_nodeallocator>::equal(const iter& one_, const iter& two, const iter& three_, BinaryPredicate fun) const
 			{
 			pre_order_iterator one(one_), three(three_);
 
@@ -2204,9 +2207,9 @@ namespace ProjectBase{
 			return true;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <typename iter, class BinaryPredicate>
-		bool tree<T, tree_nodeallocator>::equal_subtree(const iter& one_, const iter& two_, BinaryPredicate fun) const
+		bool tree<Node, tree_nodeallocator>::equal_subtree(const iter& one_, const iter& two_, BinaryPredicate fun) const
 			{
 			pre_order_iterator one(one_), two(two_);
 
@@ -2215,8 +2218,8 @@ namespace ProjectBase{
 			return equal(begin(one),end(one),begin(two),fun);
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator> tree<T, tree_nodeallocator>::subtree(sibling_iterator from, sibling_iterator to) const
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator> tree<Node, tree_nodeallocator>::subtree(sibling_iterator from, sibling_iterator to) const
 			{
 			assert(from!=to); // if from==to, the range is empty, hence no tree to return.
 
@@ -2226,8 +2229,8 @@ namespace ProjectBase{
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::subtree(tree& tmp, sibling_iterator from, sibling_iterator to) const
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::subtree(tree& tmp, sibling_iterator from, sibling_iterator to) const
 			{
 			assert(from!=to); // if from==to, the range is empty, hence no tree to return.
 
@@ -2235,8 +2238,8 @@ namespace ProjectBase{
 			tmp.replace(tmp.begin(), tmp.end(), from, to);
 			}
 
-		template <class T, class tree_nodeallocator>
-		size_t tree<T, tree_nodeallocator>::size() const {
+		template <typename Node, typename tree_nodeallocator>
+		size_t tree<Node, tree_nodeallocator>::size() const {
 			size_t i=0;
 			pre_order_iterator it=begin(), eit=end();
 			while(it!=eit) {
@@ -2246,8 +2249,8 @@ namespace ProjectBase{
 			return i;
 		}
 
-		template <class T, class tree_nodeallocator>
-		size_t tree<T, tree_nodeallocator>::size(const iterator_base& top) const {
+		template <typename Node, typename tree_nodeallocator>
+		size_t tree<Node, tree_nodeallocator>::size(const iterator_base& top) const {
 			size_t i=0;
 			pre_order_iterator it=top, eit=top;
 			eit.skip_children();
@@ -2259,15 +2262,15 @@ namespace ProjectBase{
 			return i;
 		}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::empty() const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::empty() const
 			{
 			pre_order_iterator it=begin(), eit=end();
 			return (it==eit);
 			}
 
-		template <class T, class tree_nodeallocator>
-		int tree<T, tree_nodeallocator>::depth(const iterator_base& it) {
+		template <typename Node, typename tree_nodeallocator>
+		int tree<Node, tree_nodeallocator>::depth(const iterator_base& it) {
 			tree_node* pos=it.node;
 			assert(pos!=0);
 			int ret=0;
@@ -2278,8 +2281,8 @@ namespace ProjectBase{
 			return ret;
 		}
 
-		template <class T, class tree_nodeallocator>
-		int tree<T, tree_nodeallocator>::depth(const iterator_base& it, const iterator_base& root) 
+		template <typename Node, typename tree_nodeallocator>
+		int tree<Node, tree_nodeallocator>::depth(const iterator_base& it, const iterator_base& root) 
 			{
 			tree_node* pos=it.node;
 			assert(pos!=0);
@@ -2291,9 +2294,9 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class Predicate>
-		int tree<T, tree_nodeallocator>::depth(const iterator_base& it, Predicate p) 
+		int tree<Node, tree_nodeallocator>::depth(const iterator_base& it, Predicate p) 
 			{
 			tree_node* pos=it.node;
 			assert(pos!=0);
@@ -2306,9 +2309,9 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
+		template <typename Node, typename tree_nodeallocator>
 		template <class Predicate>
-		int tree<T, tree_nodeallocator>::distance(const iterator_base& top, const iterator_base& bottom, Predicate p) 
+		int tree<Node, tree_nodeallocator>::distance(const iterator_base& top, const iterator_base& bottom, Predicate p) 
 			{
 			tree_node* pos=bottom.node;
 			assert(pos!=0);
@@ -2321,8 +2324,8 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		int tree<T, tree_nodeallocator>::max_depth() const
+		template <typename Node, typename tree_nodeallocator>
+		int tree<Node, tree_nodeallocator>::max_depth() const
 			{
 			int maxd=-1;
 			for(tree_node *it = head->_next_sibling; it!=feet; it=it->_next_sibling)
@@ -2332,8 +2335,8 @@ namespace ProjectBase{
 			}
 
 
-		template <class T, class tree_nodeallocator>
-		int tree<T, tree_nodeallocator>::max_depth(const iterator_base& pos) const{
+		template <typename Node, typename tree_nodeallocator>
+		int tree<Node, tree_nodeallocator>::max_depth(const iterator_base& pos) const{
 			tree_node *tmp = pos.node;
 
 			if(tmp == 0 || tmp == head || tmp == feet) return -1;
@@ -2360,8 +2363,8 @@ namespace ProjectBase{
 			} 
 		}
 
-		template <class T, class tree_nodeallocator>
-		unsigned int tree<T, tree_nodeallocator>::number_of_children(const iterator_base& it) 
+		template <typename Node, typename tree_nodeallocator>
+		unsigned int tree<Node, tree_nodeallocator>::number_of_children(const iterator_base& it) 
 		{
 			tree_node *pos=it.node->_first_child;
 			if(pos==0) return 0;
@@ -2376,8 +2379,8 @@ namespace ProjectBase{
 			return ret;
 		}
 
-		template <class T, class tree_nodeallocator>
-		unsigned int tree<T, tree_nodeallocator>::number_of_siblings(const iterator_base& it) const
+		template <typename Node, typename tree_nodeallocator>
+		unsigned int tree<Node, tree_nodeallocator>::number_of_siblings(const iterator_base& it) const
 			{
 			tree_node *pos=it.node;
 			unsigned int ret=0;
@@ -2400,8 +2403,8 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::swap(sibling_iterator it)
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::swap(sibling_iterator it)
 			{
 			tree_node *nxt=it.node->_next_sibling;
 			if(nxt) {
@@ -2421,8 +2424,8 @@ namespace ProjectBase{
 				}
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::swap(iterator one, iterator two)
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::swap(iterator one, iterator two)
 			{
 			// if one and two are adjacent siblings, use the sibling swap
 			if(one.node->_next_sibling==two.node) swap(one);
@@ -2455,7 +2458,7 @@ namespace ProjectBase{
 			}
 
 		// template <class BinaryPredicate>
-		// tree<T, tree_nodeallocator>::iterator tree<T, tree_nodeallocator>::find_subtree(
+		// tree<Node, tree_nodeallocator>::iterator tree<Node, tree_nodeallocator>::find_subtree(
 		// 	sibling_iterator subfrom, sibling_iterator subto, iterator from, iterator to, 
 		// 	BinaryPredicate fun) const
 		// 	{
@@ -2468,8 +2471,8 @@ namespace ProjectBase{
 		// 	return to;
 		// 	}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::is_in_subtree(const iterator_base& it, const iterator_base& top) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::is_in_subtree(const iterator_base& it, const iterator_base& top) const
 		   {
 			sibling_iterator first=top;
 			sibling_iterator last=first;
@@ -2477,8 +2480,8 @@ namespace ProjectBase{
 			return is_in_subtree(it, first, last);
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::is_in_subtree(const iterator_base& it, const iterator_base& begin, 
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::is_in_subtree(const iterator_base& it, const iterator_base& begin, 
 																		 const iterator_base& end) const
 			{
 			// FIXME: this should be optimised.
@@ -2490,22 +2493,22 @@ namespace ProjectBase{
 			return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::is_valid(const iterator_base& it) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::is_valid(const iterator_base& it) const
 			{
 			if(it.node==0 || it.node==feet || it.node==head) return false;
 			else return true;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::is_head(const iterator_base& it) 
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::is_head(const iterator_base& it) 
 		  	{
 			if(it.node->_parent==0) return true;
 			return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::iterator tree<T, tree_nodeallocator>::lowest_common_ancestor(
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::iterator tree<Node, tree_nodeallocator>::lowest_common_ancestor(
 			const iterator_base& one, const iterator_base& two) const
 			{
 			std::set<iterator, iterator_base_less> parents;
@@ -2529,8 +2532,8 @@ namespace ProjectBase{
 			return walk;
 			}
 
-		template <class T, class tree_nodeallocator>
-		unsigned int tree<T, tree_nodeallocator>::index(sibling_iterator it) const
+		template <typename Node, typename tree_nodeallocator>
+		unsigned int tree<Node, tree_nodeallocator>::index(sibling_iterator it) const
 			{
 			unsigned int ind=0;
 			if(it.node->_parent==0) {
@@ -2548,8 +2551,8 @@ namespace ProjectBase{
 			return ind;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::sibling(const iterator_base& it, unsigned int num) const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::sibling(const iterator_base& it, unsigned int num) const
 		   {
 		   tree_node *tmp;
 		   if(it.node->_parent==0) {
@@ -2570,8 +2573,8 @@ namespace ProjectBase{
 		   return tmp;
 		   }
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::debug_verify_consistency() const
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::debug_verify_consistency() const
 			{
 			iterator it=begin();
 			while(it!=end()) {
@@ -2590,8 +2593,8 @@ namespace ProjectBase{
 				}
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::child(const iterator_base& it, unsigned int num) 
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::child(const iterator_base& it, unsigned int num) 
 			{
 			tree_node *tmp=it.node->_first_child;
 			while(num--) {
@@ -2606,88 +2609,88 @@ namespace ProjectBase{
 
 		// Iterator base
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::iterator_base::iterator_base()
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::iterator_base::iterator_base()
 			: node(0), skip_current_children_(false)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::iterator_base::iterator_base(tree_node *tn)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::iterator_base::iterator_base(tree_node *tn)
 			: node(tn), skip_current_children_(false)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		T& tree<T, tree_nodeallocator>::iterator_base::operator*() const
+		template <typename Node, typename tree_nodeallocator>
+		typename Node::value_type& tree<Node, tree_nodeallocator>::iterator_base::operator*() const
 			{
 			return node->data;
 			}
 
-		template <class T, class tree_nodeallocator>
-		T* tree<T, tree_nodeallocator>::iterator_base::operator->() const
+		template <typename Node, typename tree_nodeallocator>
+		typename Node::value_type* tree<Node, tree_nodeallocator>::iterator_base::operator->() const
 			{
 			return &(node->data);
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::post_order_iterator::operator!=(const post_order_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::post_order_iterator::operator!=(const post_order_iterator& other) const
 			{
 			if(other.node!=this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::post_order_iterator::operator==(const post_order_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::post_order_iterator::operator==(const post_order_iterator& other) const
 			{
 			if(other.node==this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::pre_order_iterator::operator!=(const pre_order_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::pre_order_iterator::operator!=(const pre_order_iterator& other) const
 			{
 			if(other.node!=this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::pre_order_iterator::operator==(const pre_order_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::pre_order_iterator::operator==(const pre_order_iterator& other) const
 			{
 			if(other.node==this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::sibling_iterator::operator!=(const sibling_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::sibling_iterator::operator!=(const sibling_iterator& other) const
 			{
 			if(other.node!=this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::sibling_iterator::operator==(const sibling_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::sibling_iterator::operator==(const sibling_iterator& other) const
 			{
 			if(other.node==this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::leaf_iterator::operator!=(const leaf_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::leaf_iterator::operator!=(const leaf_iterator& other) const
 		   {
 		   if(other.node!=this->node) return true;
 		   else return false;
 		   }
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::leaf_iterator::operator==(const leaf_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::leaf_iterator::operator==(const leaf_iterator& other) const
 		   {
 		   if(other.node==this->node && other.top_node==this->top_node) return true;
 		   else return false;
 		   }
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::iterator_base::begin() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::iterator_base::begin() const
 			{
 			if(node->_first_child==0) 
 				return end();
@@ -2697,28 +2700,28 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::iterator_base::end() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::iterator_base::end() const
 			{
 			sibling_iterator ret(0);
 			ret.parent_=node;
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::iterator_base::skip_children()
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::iterator_base::skip_children()
 			{
 			skip_current_children_=true;
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::iterator_base::skip_children(bool skip)
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::iterator_base::skip_children(bool skip)
 		   {
 		   skip_current_children_=skip;
 		   }
 
-		template <class T, class tree_nodeallocator>
-		unsigned int tree<T, tree_nodeallocator>::iterator_base::number_of_children() const
+		template <typename Node, typename tree_nodeallocator>
+		unsigned int tree<Node, tree_nodeallocator>::iterator_base::number_of_children() const
 			{
 			tree_node *pos=node->_first_child;
 			if(pos==0) return 0;
@@ -2731,26 +2734,26 @@ namespace ProjectBase{
 			return ret;
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::pre_order_iterator::pre_order_iterator() 
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::pre_order_iterator::pre_order_iterator() 
 			: iterator_base(0)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::pre_order_iterator::pre_order_iterator(tree_node *tn)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::pre_order_iterator::pre_order_iterator(tree_node *tn)
 			: iterator_base(tn)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::pre_order_iterator::pre_order_iterator(const iterator_base &other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::pre_order_iterator::pre_order_iterator(const iterator_base &other)
 			: iterator_base(other.node)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::pre_order_iterator::pre_order_iterator(const sibling_iterator& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::pre_order_iterator::pre_order_iterator(const sibling_iterator& other)
 			: iterator_base(other.node)
 			{
 			if(this->node==0) {
@@ -2763,8 +2766,8 @@ namespace ProjectBase{
 				}
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator++() {
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator& tree<Node, tree_nodeallocator>::pre_order_iterator::operator++() {
 			assert(this->node!=0);
 			if(!this->skip_current_children_ && this->node->_first_child != 0) { // 如果当前节点有子节点，同时状态为<不跳过下一个子节点>
 				this->node=this->node->_first_child; // 将当前节点设置为当前节点的子节点
@@ -2782,8 +2785,8 @@ namespace ProjectBase{
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator--()
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator& tree<Node, tree_nodeallocator>::pre_order_iterator::operator--()
 			{
 			assert(this->node!=0);
 			if(this->node->_prev_sibling) {
@@ -2799,31 +2802,31 @@ namespace ProjectBase{
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::pre_order_iterator::operator++(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::pre_order_iterator::operator++(int)
 			{
 			pre_order_iterator copy = *this;
 			++(*this);
 			return copy;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::next_skip_children() {
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator& tree<Node, tree_nodeallocator>::pre_order_iterator::next_skip_children() {
 			(*this).skip_children();
 			(*this)++;
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::pre_order_iterator::operator--(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::pre_order_iterator::operator--(int)
 		{
 		  pre_order_iterator copy = *this;
 		  --(*this);
 		  return copy;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator+=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator& tree<Node, tree_nodeallocator>::pre_order_iterator::operator+=(unsigned int num)
 			{
 			while(num>0) {
 				++(*this);
@@ -2832,8 +2835,8 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator-=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator& tree<Node, tree_nodeallocator>::pre_order_iterator::operator-=(unsigned int num)
 			{
 			while(num>0) {
 				--(*this);
@@ -2843,26 +2846,26 @@ namespace ProjectBase{
 			}
 
 		// Post-order iterator
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::post_order_iterator::post_order_iterator() 
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::post_order_iterator::post_order_iterator() 
 			: iterator_base(0)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::post_order_iterator::post_order_iterator(tree_node *tn)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::post_order_iterator::post_order_iterator(tree_node *tn)
 			: iterator_base(tn)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::post_order_iterator::post_order_iterator(const iterator_base &other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::post_order_iterator::post_order_iterator(const iterator_base &other)
 			: iterator_base(other.node)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::post_order_iterator::post_order_iterator(const sibling_iterator& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::post_order_iterator::post_order_iterator(const sibling_iterator& other)
 			: iterator_base(other.node)
 			{
 			if(this->node==0) {
@@ -2875,8 +2878,8 @@ namespace ProjectBase{
 				}
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator++(){
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator& tree<Node, tree_nodeallocator>::post_order_iterator::operator++(){
 			assert(this->node != 0);
 			if(this->node->_next_sibling == 0) { // 如果当前节点没有兄弟节点了，那么将当前节点置为当前节点的父节点，往上回溯
 				this->node = this->node->_parent;
@@ -2895,8 +2898,8 @@ namespace ProjectBase{
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator--() {
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator& tree<Node, tree_nodeallocator>::post_order_iterator::operator--() {
 			assert(this->node != 0);
 			if(this->skip_current_children_ || this->node->_last_child == 0) { // 当状态<跳过下一个节点>成立，或者当前节点没有兄弟节点
 				this->skip_current_children_ = false;
@@ -2910,16 +2913,16 @@ namespace ProjectBase{
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator tree<T, tree_nodeallocator>::post_order_iterator::operator++(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator tree<Node, tree_nodeallocator>::post_order_iterator::operator++(int)
 			{
 			post_order_iterator copy = *this;
 			++(*this);
 			return copy;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator tree<T, tree_nodeallocator>::post_order_iterator::operator--(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator tree<Node, tree_nodeallocator>::post_order_iterator::operator--(int)
 			{
 			post_order_iterator copy = *this;
 			--(*this);
@@ -2927,8 +2930,8 @@ namespace ProjectBase{
 			}
 
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator+=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator& tree<Node, tree_nodeallocator>::post_order_iterator::operator+=(unsigned int num)
 			{
 			while(num>0) {
 				++(*this);
@@ -2937,8 +2940,8 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator-=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::post_order_iterator& tree<Node, tree_nodeallocator>::post_order_iterator::operator-=(unsigned int num)
 			{
 			while(num>0) {
 				--(*this);
@@ -2947,8 +2950,8 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::post_order_iterator::descend_all()
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::post_order_iterator::descend_all()
 			{
 			assert(this->node!=0);
 			while(this->node->_first_child)
@@ -2958,42 +2961,42 @@ namespace ProjectBase{
 
 		// Breadth-first iterator
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::breadth_first_queued_iterator::breadth_first_queued_iterator()
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::breadth_first_queued_iterator()
 			: iterator_base()
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::breadth_first_queued_iterator::breadth_first_queued_iterator(tree_node *tn)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::breadth_first_queued_iterator(tree_node *tn)
 			: iterator_base(tn)
 			{
 			traversal_queue.push(tn);
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::breadth_first_queued_iterator::breadth_first_queued_iterator(const iterator_base& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::breadth_first_queued_iterator(const iterator_base& other)
 			: iterator_base(other.node)
 			{
 			traversal_queue.push(other.node);
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::breadth_first_queued_iterator::operator!=(const breadth_first_queued_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::operator!=(const breadth_first_queued_iterator& other) const
 			{
 			if(other.node!=this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::breadth_first_queued_iterator::operator==(const breadth_first_queued_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::operator==(const breadth_first_queued_iterator& other) const
 			{
 			if(other.node==this->node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::breadth_first_queued_iterator& tree<T, tree_nodeallocator>::breadth_first_queued_iterator::operator++()
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::breadth_first_queued_iterator& tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::operator++()
 			{
 			assert(this->node!=0);
 
@@ -3011,16 +3014,16 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::breadth_first_queued_iterator tree<T, tree_nodeallocator>::breadth_first_queued_iterator::operator++(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::breadth_first_queued_iterator tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::operator++(int)
 			{
 			breadth_first_queued_iterator copy = *this;
 			++(*this);
 			return copy;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::breadth_first_queued_iterator& tree<T, tree_nodeallocator>::breadth_first_queued_iterator::operator+=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::breadth_first_queued_iterator& tree<Node, tree_nodeallocator>::breadth_first_queued_iterator::operator+=(unsigned int num)
 			{
 			while(num>0) {
 				++(*this);
@@ -3033,52 +3036,52 @@ namespace ProjectBase{
 
 		// Fixed depth iterator
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator()
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator()
 			: iterator_base()
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(tree_node *tn)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(tree_node *tn)
 			: iterator_base(tn), top_node(0)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(const iterator_base& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(const iterator_base& other)
 			: iterator_base(other.node), top_node(0)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(const sibling_iterator& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(const sibling_iterator& other)
 			: iterator_base(other.node), top_node(0)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(const fixed_depth_iterator& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::fixed_depth_iterator::fixed_depth_iterator(const fixed_depth_iterator& other)
 			: iterator_base(other.node), top_node(other.top_node)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::fixed_depth_iterator::operator==(const fixed_depth_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator==(const fixed_depth_iterator& other) const
 			{
 			if(other.node==this->node && other.top_node==top_node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		bool tree<T, tree_nodeallocator>::fixed_depth_iterator::operator!=(const fixed_depth_iterator& other) const
+		template <typename Node, typename tree_nodeallocator>
+		bool tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator!=(const fixed_depth_iterator& other) const
 			{
 			if(other.node!=this->node || other.top_node!=top_node) return true;
 			else return false;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator& tree<T, tree_nodeallocator>::fixed_depth_iterator::operator++()
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator& tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator++()
 			{
 			assert(this->node!=0);
 
@@ -3117,8 +3120,8 @@ namespace ProjectBase{
 			return *this;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator& tree<T, tree_nodeallocator>::fixed_depth_iterator::operator--()
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator& tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator--()
 			{
 			assert(this->node!=0);
 
@@ -3179,24 +3182,24 @@ namespace ProjectBase{
 		//	return *this;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator tree<T, tree_nodeallocator>::fixed_depth_iterator::operator++(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator++(int)
 			{
 			fixed_depth_iterator copy = *this;
 			++(*this);
 			return copy;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator tree<T, tree_nodeallocator>::fixed_depth_iterator::operator--(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator--(int)
 		   {
 			fixed_depth_iterator copy = *this;
 			--(*this);
 			return copy;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator& tree<T, tree_nodeallocator>::fixed_depth_iterator::operator-=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator& tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator-=(unsigned int num)
 			{
 			while(num>0) {
 				--(*this);
@@ -3205,8 +3208,8 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::fixed_depth_iterator& tree<T, tree_nodeallocator>::fixed_depth_iterator::operator+=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::fixed_depth_iterator& tree<Node, tree_nodeallocator>::fixed_depth_iterator::operator+=(unsigned int num)
 			{
 			while(num>0) {
 				++(*this);
@@ -3218,35 +3221,35 @@ namespace ProjectBase{
 
 		// Sibling iterator
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::sibling_iterator::sibling_iterator() 
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::sibling_iterator::sibling_iterator() 
 			: iterator_base()
 			{
 			set_parent_();
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::sibling_iterator::sibling_iterator(tree_node *tn)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::sibling_iterator::sibling_iterator(tree_node *tn)
 			: iterator_base(tn)
 			{
 			set_parent_();
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::sibling_iterator::sibling_iterator(const iterator_base& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::sibling_iterator::sibling_iterator(const iterator_base& other)
 			: iterator_base(other.node)
 			{
 			set_parent_();
 			}
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::sibling_iterator::sibling_iterator(const sibling_iterator& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::sibling_iterator::sibling_iterator(const sibling_iterator& other)
 			: iterator_base(other), parent_(other.parent_)
 			{
 			}
 
-		template <class T, class tree_nodeallocator>
-		void tree<T, tree_nodeallocator>::sibling_iterator::set_parent_()
+		template <typename Node, typename tree_nodeallocator>
+		void tree<Node, tree_nodeallocator>::sibling_iterator::set_parent_()
 			{
 			parent_=0;
 			if(this->node==0) return;
@@ -3254,16 +3257,16 @@ namespace ProjectBase{
 				parent_=this->node->_parent;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator& tree<T, tree_nodeallocator>::sibling_iterator::operator++()
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator& tree<Node, tree_nodeallocator>::sibling_iterator::operator++()
 			{
 			if(this->node)
 				this->node=this->node->_next_sibling;
 			return *this;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator& tree<T, tree_nodeallocator>::sibling_iterator::operator--()
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator& tree<Node, tree_nodeallocator>::sibling_iterator::operator--()
 			{
 			if(this->node) this->node=this->node->_prev_sibling;
 			else {
@@ -3273,24 +3276,24 @@ namespace ProjectBase{
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::sibling_iterator::operator++(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::sibling_iterator::operator++(int)
 			{
 			sibling_iterator copy = *this;
 			++(*this);
 			return copy;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::sibling_iterator::operator--(int)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::sibling_iterator::operator--(int)
 			{
 			sibling_iterator copy = *this;
 			--(*this);
 			return copy;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator& tree<T, tree_nodeallocator>::sibling_iterator::operator+=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator& tree<Node, tree_nodeallocator>::sibling_iterator::operator+=(unsigned int num)
 			{
 			while(num>0) {
 				++(*this);
@@ -3299,8 +3302,8 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::sibling_iterator& tree<T, tree_nodeallocator>::sibling_iterator::operator-=(unsigned int num)
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::sibling_iterator& tree<Node, tree_nodeallocator>::sibling_iterator::operator-=(unsigned int num)
 			{
 			while(num>0) {
 				--(*this);
@@ -3309,41 +3312,41 @@ namespace ProjectBase{
 			return (*this);
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::tree_node *tree<T, tree_nodeallocator>::sibling_iterator::range_first() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::tree_node *tree<Node, tree_nodeallocator>::sibling_iterator::range_first() const
 			{
 			tree_node *tmp=parent_->_first_child;
 			return tmp;
 			}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::tree_node *tree<T, tree_nodeallocator>::sibling_iterator::range_last() const
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::tree_node *tree<Node, tree_nodeallocator>::sibling_iterator::range_last() const
 			{
 			return parent_->_last_child;
 			}
 
 		// Leaf iterator
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::leaf_iterator::leaf_iterator() 
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::leaf_iterator::leaf_iterator() 
 		   : iterator_base(0), top_node(0)
 		   {
 		   }
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::leaf_iterator::leaf_iterator(tree_node *tn, tree_node *top)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::leaf_iterator::leaf_iterator(tree_node *tn, tree_node *top)
 		   : iterator_base(tn), top_node(top)
 		   {
 		   }
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::leaf_iterator::leaf_iterator(const iterator_base &other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::leaf_iterator::leaf_iterator(const iterator_base &other)
 		   : iterator_base(other.node), top_node(0)
 		   {
 		   }
 
-		template <class T, class tree_nodeallocator>
-		tree<T, tree_nodeallocator>::leaf_iterator::leaf_iterator(const sibling_iterator& other)
+		template <typename Node, typename tree_nodeallocator>
+		tree<Node, tree_nodeallocator>::leaf_iterator::leaf_iterator(const sibling_iterator& other)
 		   : iterator_base(other.node), top_node(0)
 		   {
 		   if(this->node==0) {
@@ -3355,8 +3358,8 @@ namespace ProjectBase{
 		      }
 		   }
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator++(){
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator& tree<Node, tree_nodeallocator>::leaf_iterator::operator++(){
 			assert(this->node!=0);
 			if(this->node->_first_child!=0) { // current node is no longer leaf (children got added)
 				 while(this->node->_first_child) 
@@ -3375,8 +3378,8 @@ namespace ProjectBase{
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator--(){
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator& tree<Node, tree_nodeallocator>::leaf_iterator::operator--(){
 			assert(this->node!=0);
 			while (this->node->_prev_sibling==0) {
 				if (this->node->_parent==0) return *this;
@@ -3389,22 +3392,22 @@ namespace ProjectBase{
 			return *this;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::leaf_iterator::operator++(int){
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator tree<Node, tree_nodeallocator>::leaf_iterator::operator++(int){
 		   leaf_iterator copy = *this;
 		   ++(*this);
 		   return copy;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::leaf_iterator::operator--(int){
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator tree<Node, tree_nodeallocator>::leaf_iterator::operator--(int){
 		   leaf_iterator copy = *this;
 		   --(*this);
 		   return copy;
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator+=(unsigned int num){
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator& tree<Node, tree_nodeallocator>::leaf_iterator::operator+=(unsigned int num){
 		   while(num>0) {
 		      ++(*this);
 		      --num;
@@ -3412,8 +3415,8 @@ namespace ProjectBase{
 		   return (*this);
 		}
 
-		template <class T, class tree_nodeallocator>
-		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator-=(unsigned int num){
+		template <typename Node, typename tree_nodeallocator>
+		typename tree<Node, tree_nodeallocator>::leaf_iterator& tree<Node, tree_nodeallocator>::leaf_iterator::operator-=(unsigned int num){
 		   while(num>0) {
 		      --(*this);
 		      --num;
