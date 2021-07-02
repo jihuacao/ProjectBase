@@ -105,43 +105,43 @@ namespace ProjectBase{
 		}; 
 
 		template<class T>
-		duplex_tree_node<T>::duplex_tree_node()
+		inline duplex_tree_node<T>::duplex_tree_node()
 			: _tree_node<T>(), _parent(0), _first_child(0), _last_child(0), _prev_sibling(0), _next_sibling(0)
 			{
 			}
 
 		template<class T>
-		duplex_tree_node<T>::duplex_tree_node(const T& val)
+		inline duplex_tree_node<T>::duplex_tree_node(const T& val)
 			: _tree_node<T>(val), _parent(0), _first_child(0), _last_child(0), _prev_sibling(0), _next_sibling(0){
 		}
 
 		template<class T>
-		duplex_tree_node<T>::duplex_tree_node(T&& val)
+		inline duplex_tree_node<T>::duplex_tree_node(T&& val)
 			: _tree_node<T>(val), _parent(0), _first_child(0), _last_child(0), _prev_sibling(0), _next_sibling(0){
 		}
 
 		template<class T>
-		_tree_node<T>* duplex_tree_node<T>::pre() const{
+		inline _tree_node<T>* duplex_tree_node<T>::pre() const{
 			return _prev_sibling;
 		}
 
 		template<class T> 
-		_tree_node<T>* duplex_tree_node<T>::next() const{
+		inline _tree_node<T>* duplex_tree_node<T>::next() const{
 			return _next_sibling;
 		}
 
 		template<class T> 
-		_tree_node<T>* duplex_tree_node<T>::first_child() const{
+		inline _tree_node<T>* duplex_tree_node<T>::first_child() const{
 			return _first_child;
 		}
 
 		template<class T> 
-		_tree_node<T>* duplex_tree_node<T>::last_child() const{
+		inline _tree_node<T>* duplex_tree_node<T>::last_child() const{
 			return _last_child;
 		}
 
 		template<class T> 
-		_tree_node<T>* duplex_tree_node<T>::parent() const{
+		inline _tree_node<T>* duplex_tree_node<T>::parent() const{
 			return _parent;
 		}
 
@@ -164,14 +164,20 @@ namespace ProjectBase{
 		//		std::string stacktrace;
 		};
 
+		/**
+		 * \brief brief
+		 * \note note
+		 * \param[in] Node 模板类型的Node类型指定
+		 * \author none
+		 * \since version
+		 * */
 		template <typename Node, typename tree_nodeallocator = std::allocator<duplex_tree_node<typename Node::value_type> > >
 		class tree {
 			protected:
 				typedef Node tree_node;
 			public:
 				/// Value of the data stored at a node.
-				typedef typename Node::value_type value_type;
-				typedef typename Node::value_type T;
+				//typedef typename Node::value_type value_type;
 
 				class iterator_base;
 				class pre_order_iterator;
@@ -180,7 +186,7 @@ namespace ProjectBase{
 		      	class leaf_iterator;
 
 				tree();                                         // empty constructor
-				tree(const T&);                                 // constructor setting given element as head
+				tree(const typename Node::value_type&);                                 // constructor setting given element as head
 				tree(const iterator_base&);
 				tree(const tree<Node, tree_nodeallocator>&);      // copy constructor
 				tree(tree<Node, tree_nodeallocator>&&);           // move constructor
@@ -189,15 +195,15 @@ namespace ProjectBase{
 				tree<Node,tree_nodeallocator>& operator=(tree<Node, tree_nodeallocator>&&);        // move assignment
 
 		      /// Base class for iterators, only pointers stored, no traversal logic.
-		#ifdef __SGI_STL_PORT
-				class iterator_base : public stlport::bidirectional_iterator<T, ptrdiff_t> {
+		#ifdef __SGI_Stypename Node::value_typeL_PORtypename Node::value_type
+				class iterator_base : public stlport::bidirectional_iterator<typename Node::value_type, ptrdiff_t> {
 		#else
 				class iterator_base {
 		#endif
 					public:
-						typedef T                               value_type;
-						typedef T*                              pointer;
-						typedef T&                              reference;
+						typedef typename Node::value_type                               value_type;
+						typedef typename Node::value_type*                              pointer;
+						typedef typename Node::value_type&                              reference;
 						typedef size_t                          size_type;
 						typedef ptrdiff_t                       difference_type;
 						typedef std::bidirectional_iterator_tag iterator_category;
@@ -205,8 +211,8 @@ namespace ProjectBase{
 						iterator_base();
 						iterator_base(tree_node *);
 
-						T&             operator*() const;
-						T*             operator->() const;
+						typename Node::value_type&             operator*() const;
+						typename Node::value_type*             operator->() const;
 
 		            /// When called, the next increment/decrement skips children of this node.
 						void         skip_children();
@@ -282,7 +288,7 @@ namespace ProjectBase{
 						std::queue<tree_node *> traversal_queue;
 				};
 
-				/// The default iterator types throughout the tree class.
+				/// typename Node::value_typehe default iterator types throughout the tree class.
 				typedef pre_order_iterator            iterator;
 				typedef breadth_first_queued_iterator breadth_first_iterator;
 
@@ -384,13 +390,13 @@ namespace ProjectBase{
 
 				typedef std::vector<int> path_t;
 				/// Return a path (to be taken from the 'top' node) corresponding to a node in the tree.
-				/// The first integer in path_t is the number of steps you need to go 'right' in the sibling
+				/// typename Node::value_typehe first integer in path_t is the number of steps you need to go 'right' in the sibling
 				/// chain (so 0 if we go straight to the children).
 				path_t path_from_iterator(const iterator_base& iter, const iterator_base& top) const;
 				/// Return an iterator given a path from the 'top' node.
 				iterator iterator_from_path(const path_t&, const iterator_base& top) const;
 
-				/// Return iterator to the parent of a node. Throws a `navigation_error` if the node
+				/// Return iterator to the parent of a node. typename Node::value_typehrows a `navigation_error` if the node
 				/// does not have a parent.
 				template<typename	iter> static iter parent(iter);
 				/// Return iterator to the previous sibling of a node.
@@ -424,10 +430,10 @@ namespace ProjectBase{
 				template<typename iter> iter append_child(iter position); 
 				template<typename iter> iter prepend_child(iter position); 
 				/// Insert node as last/first child of node pointed to by position.
-				template<typename iter> iter append_child(iter position, const T& x);
-				template<typename iter> iter append_child(iter position, T&& x);
-				template<typename iter> iter prepend_child(iter position, const T& x);
-				template<typename iter> iter prepend_child(iter position, T&& x);
+				template<typename iter> iter append_child(iter position, const typename Node::value_type& x);
+				template<typename iter> iter append_child(iter position, typename Node::value_type&& x);
+				template<typename iter> iter prepend_child(iter position, const typename Node::value_type& x);
+				template<typename iter> iter prepend_child(iter position, typename Node::value_type&& x);
 				/// Append the node (plus its children) at other_position as last/first child of position.
 				template<typename iter> iter append_child(iter position, iter other_position);
 				template<typename iter> iter prepend_child(iter position, iter other_position);
@@ -436,24 +442,24 @@ namespace ProjectBase{
 				template<typename iter> iter prepend_children(iter position, sibling_iterator from, sibling_iterator to);
 
 				/// Short-hand to insert topmost node in otherwise empty tree.
-				pre_order_iterator set_head(const T& x);
-				pre_order_iterator set_head(T&& x);
+				pre_order_iterator set_head(const typename Node::value_type& x);
+				pre_order_iterator set_head(typename Node::value_type&& x);
 				/// Insert node as previous sibling of node pointed to by position.
-				template<typename iter> iter insert(iter position, const T& x);
-				template<typename iter> iter insert(iter position, T&& x);
+				template<typename iter> iter insert(iter position, const typename Node::value_type& x);
+				template<typename iter> iter insert(iter position, typename Node::value_type&& x);
 				/// Specialisation of previous member.
-				sibling_iterator insert(sibling_iterator position, const T& x);
+				sibling_iterator insert(sibling_iterator position, const typename Node::value_type& x);
 				/// Insert node (with children) pointed to by subtree as previous sibling of node pointed to by position.
 				/// Does not change the subtree itself (use move_in or move_in_below for that).
 				template<typename iter> iter insert_subtree(iter position, const iterator_base& subtree);
 				/// Insert node as next sibling of node pointed to by position.
-				template<typename iter> iter insert_after(iter position, const T& x);
-				template<typename iter> iter insert_after(iter position, T&& x);
+				template<typename iter> iter insert_after(iter position, const typename Node::value_type& x);
+				template<typename iter> iter insert_after(iter position, typename Node::value_type&& x);
 				/// Insert node (with children) pointed to by subtree as next sibling of node pointed to by position.
 				template<typename iter> iter insert_subtree_after(iter position, const iterator_base& subtree);
 
 				/// Replace node at 'position' with other node (keeping same children); 'position' becomes invalid.
-				template<typename iter> iter replace(iter position, const T& x);
+				template<typename iter> iter replace(iter position, const typename Node::value_type& x);
 				/// Replace node at 'position' with subtree starting at 'from' (do not erase subtree at 'from'); see above.
 				template<typename iter> iter replace(iter position, const iterator_base& from);
 				/// Replace string of siblings (plus their children) with copy of a new string (with children); see above
@@ -468,9 +474,9 @@ namespace ProjectBase{
 				template<typename iter> iter reparent(iter position, iter from);
 
 				/// Replace node with a new node, making the old node (plus subtree) a child of the new node.
-				template<typename iter> iter wrap(iter position, const T& x);
+				template<typename iter> iter wrap(iter position, const typename Node::value_type& x);
 				/// Replace the range of sibling nodes (plus subtrees), making these children of the new node.
-				template<typename iter> iter wrap(iter from, iter to, const T& x);
+				template<typename iter> iter wrap(iter from, iter to, const typename Node::value_type& x);
 
 				/// Move 'source' node (plus its children) to become the next sibling of 'target'.
 				template<typename iter> iter move_after(iter target, iter source);
@@ -513,7 +519,7 @@ namespace ProjectBase{
 				void subtree(tree&, sibling_iterator from, sibling_iterator to) const;
 				/// Exchange the node (plus subtree) with its sibling node (do nothing if no sibling present).
 				void swap(sibling_iterator it);
-				/// Exchange two nodes (plus subtrees). The iterators will remain valid and keep 
+				/// Exchange two nodes (plus subtrees). typename Node::value_typehe iterators will remain valid and keep 
 				/// pointing to the same nodes, which now sit at different locations in the tree.
 			   	void swap(iterator, iterator);
 
@@ -547,7 +553,7 @@ namespace ProjectBase{
 				int max_depth(const iterator_base&) const;
 				/// Count the number of children of node at position.
 				static unsigned int number_of_children(const iterator_base&);
-				/// Count the number of siblings (left and right) of node at iterator. Total nodes at this level is +1.
+				/// Count the number of siblings (left and right) of node at iterator. typename Node::value_typeotal nodes at this level is +1.
 				unsigned int number_of_siblings(const iterator_base&) const;
 				/// Determine whether node at position is in the subtrees with indicated top node.
 		   		bool     is_in_subtree(const iterator_base& position, const iterator_base& top) const;
@@ -643,7 +649,7 @@ namespace ProjectBase{
 
 
 
-		// Tree
+		// typename Node::value_typeree
 
 		template <typename Node, typename tree_nodeallocator>
 		tree<Node, tree_nodeallocator>::tree() 
@@ -652,7 +658,7 @@ namespace ProjectBase{
 			}
 
 		template <typename Node, typename tree_nodeallocator>
-		tree<Node, tree_nodeallocator>::tree(const T& x) 
+		tree<Node, tree_nodeallocator>::tree(const typename Node::value_type& x) 
 			{
 			head_initialise_();
 			set_head(x);
@@ -1205,7 +1211,7 @@ namespace ProjectBase{
 		 * */
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::append_child(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::append_child(iter position, const typename Node::value_type& x)
 			{
 			// If your program fails here you probably used 'append_child' to add the top
 			// node to an empty tree. From version 1.45 the top element should be added
@@ -1245,7 +1251,7 @@ namespace ProjectBase{
 		 * */
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::append_child(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::append_child(iter position, typename Node::value_type&& x)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1273,7 +1279,7 @@ namespace ProjectBase{
 
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::prepend_child(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::prepend_child(iter position, const typename Node::value_type& x)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1299,7 +1305,7 @@ namespace ProjectBase{
 
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::prepend_child(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::prepend_child(iter position, typename Node::value_type&& x)
 			{
 			assert(position.node!=head);
 			assert(position.node!=feet);
@@ -1387,14 +1393,14 @@ namespace ProjectBase{
 			}
 
 		template <typename Node, typename tree_nodeallocator>
-		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::set_head(const T& x)
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::set_head(const typename Node::value_type& x)
 			{
 			assert(head->_next_sibling==feet);
 			return insert(iterator(feet), x);
 			}
 
 		template <typename Node, typename tree_nodeallocator>
-		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::set_head(T&& x)
+		typename tree<Node, tree_nodeallocator>::pre_order_iterator tree<Node, tree_nodeallocator>::set_head(typename Node::value_type&& x)
 			{
 			assert(head->_next_sibling==feet);
 			return insert(iterator(feet), x);
@@ -1402,7 +1408,7 @@ namespace ProjectBase{
 
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::insert(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::insert(iter position, const typename Node::value_type& x)
 			{
 			if(position.node==0) {
 				position.node=feet; // Backward compatibility: when calling insert on a null node,
@@ -1431,7 +1437,7 @@ namespace ProjectBase{
 
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::insert(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::insert(iter position, typename Node::value_type&& x)
 			{
 			if(position.node==0) {
 				position.node=feet; // Backward compatibility: when calling insert on a null node,
@@ -1458,7 +1464,7 @@ namespace ProjectBase{
 			}
 
 		template <typename Node, typename tree_nodeallocator>
-		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::insert(sibling_iterator position, const T& x)
+		typename tree<Node, tree_nodeallocator>::sibling_iterator tree<Node, tree_nodeallocator>::insert(sibling_iterator position, const typename Node::value_type& x)
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
@@ -1488,7 +1494,7 @@ namespace ProjectBase{
 
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::insert_after(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::insert_after(iter position, const typename Node::value_type& x)
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
@@ -1512,7 +1518,7 @@ namespace ProjectBase{
 
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::insert_after(iter position, T&& x)
+		iter tree<Node, tree_nodeallocator>::insert_after(iter position, typename Node::value_type&& x)
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp);
@@ -1567,7 +1573,7 @@ namespace ProjectBase{
 
 		template <typename Node, typename tree_nodeallocator>
 		template <class iter>
-		iter tree<Node, tree_nodeallocator>::replace(iter position, const T& x)
+		iter tree<Node, tree_nodeallocator>::replace(iter position, const typename Node::value_type& x)
 			{
 		//	kp::destructor(&position.node->data);
 		//	kp::constructor(&position.node->data, x);
@@ -1774,7 +1780,7 @@ namespace ProjectBase{
 			}
 
 		template <typename Node, typename tree_nodeallocator>
-		template <typename iter> iter tree<Node, tree_nodeallocator>::wrap(iter position, const T& x)
+		template <typename iter> iter tree<Node, tree_nodeallocator>::wrap(iter position, const typename Node::value_type& x)
 			{
 			assert(position.node!=0);
 			sibling_iterator fr=position, to=position;
@@ -1785,7 +1791,7 @@ namespace ProjectBase{
 			}
 
 		template <typename Node, typename tree_nodeallocator>
-		template <typename iter> iter tree<Node, tree_nodeallocator>::wrap(iter from, iter to, const T& x)
+		template <typename iter> iter tree<Node, tree_nodeallocator>::wrap(iter from, iter to, const typename Node::value_type& x)
 			{
 			assert(from.node!=0);
 			iter ret = insert(from, x);
@@ -2108,7 +2114,7 @@ namespace ProjectBase{
 		template <typename Node, typename tree_nodeallocator>
 		void tree<Node, tree_nodeallocator>::sort(sibling_iterator from, sibling_iterator to, bool deep)
 			{
-			std::less<T> comp;
+			std::less<typename Node::value_type> comp;
 			sort(from, to, comp, deep);
 			}
 
@@ -2176,7 +2182,7 @@ namespace ProjectBase{
 		template <typename iter>
 		bool tree<Node, tree_nodeallocator>::equal(const iter& one_, const iter& two, const iter& three_) const
 			{
-			std::equal_to<T> comp;
+			std::equal_to<typename Node::value_type> comp;
 			return equal(one_, two, three_, comp);
 			}
 
@@ -2184,7 +2190,7 @@ namespace ProjectBase{
 		template <typename iter>
 		bool tree<Node, tree_nodeallocator>::equal_subtree(const iter& one_, const iter& two_) const
 			{
-			std::equal_to<T> comp;
+			std::equal_to<typename Node::value_type> comp;
 			return equal_subtree(one_, two_, comp);
 			}
 
