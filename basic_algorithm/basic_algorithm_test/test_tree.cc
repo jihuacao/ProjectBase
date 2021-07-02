@@ -3,8 +3,8 @@
 
 #include "ProjectBase/basic_algorithm/tree.hpp"
 
-ProjectBase::Tree::tree<int> make_tree(){
-    auto tree = ProjectBase::Tree::tree<int>(0);
+ProjectBase::Tree::tree<ProjectBase::Tree::duplex_tree_node<int>> make_tree(){
+    auto tree = ProjectBase::Tree::tree<ProjectBase::Tree::duplex_tree_node<int>>(0);
     auto iter = tree.begin();
     tree.append_child(iter, 1);
     tree.append_child(iter, 2);

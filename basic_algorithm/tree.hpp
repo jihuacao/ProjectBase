@@ -47,6 +47,7 @@ namespace ProjectBase{
 				virtual _tree_node<T>* pre() const=0;
 				virtual _tree_node<T>* next() const=0;
 				virtual _tree_node<T>* first_child() const=0;
+				virtual void set_first_child(_tree_node<T>*)=0;
 				virtual _tree_node<T>* last_child() const=0;
 				virtual _tree_node<T>* parent() const=0;
 		};
@@ -100,6 +101,7 @@ namespace ProjectBase{
 				_tree_node<T>* pre() const;
 				_tree_node<T>* next() const;
 				_tree_node<T>* first_child() const;
+				void set_first_child(_tree_node<T>*);
 				_tree_node<T>* last_child() const;
 				_tree_node<T>* parent() const;
 		}; 
@@ -133,6 +135,11 @@ namespace ProjectBase{
 		template<class T> 
 		inline _tree_node<T>* duplex_tree_node<T>::first_child() const{
 			return _first_child;
+		}
+
+		template<class T> 
+		inline void duplex_tree_node<T>::set_first_child(_tree_node<T>* ptr) {
+			_first_child = static_cast<duplex_tree_node<T>*>(ptr);
 		}
 
 		template<class T> 
@@ -703,6 +710,7 @@ namespace ProjectBase{
 
 		   	head->_parent=0;
 		   	head->_first_child=0;
+			//head->set_first_child(nullptr);
 		   	head->_last_child=0;
 		   	head->_prev_sibling=0; //head;
 		   	head->_next_sibling=feet; //head;
@@ -1325,7 +1333,7 @@ namespace ProjectBase{
 			else {
 				position.node->_last_child=tmp;
 				}
-			tmp->_next_sibling=position.node->_first_child;
+			tmp->_next_sibling=position.node->first_child();
 			position.node->_first_child=tmp;
 			tmp->_prev_sibling=0;
 			return tmp;
