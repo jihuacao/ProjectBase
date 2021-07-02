@@ -41,6 +41,12 @@ namespace ProjectBase{
 				_tree_node(const T&);
 				_tree_node(T&&);
 				T data;
+			public:
+				virtual _tree_node<T>* pre() const=0;
+				virtual _tree_node<T>* next() const=0;
+				virtual _tree_node<T>* first_child() const=0;
+				virtual _tree_node<T>* last_child() const=0;
+				virtual _tree_node<T>* parent() const=0;
 		};
 
 		template<class T>
@@ -85,25 +91,56 @@ namespace ProjectBase{
 				duplex_tree_node(const T&);
 				duplex_tree_node(T&&);
 
-				duplex_tree_node<T> *parent; // 指针记录父节点
-				duplex_tree_node<T> *first_child, *last_child; // 链表方式记录子节点指针
-				duplex_tree_node<T> *prev_sibling, *next_sibling; // 链表的方式记录兄弟节点指针
+				duplex_tree_node<T> *_parent; // 指针记录父节点
+				duplex_tree_node<T> *_first_child, *_last_child; // 链表方式记录子节点指针
+				duplex_tree_node<T> *_prev_sibling, *_next_sibling; // 链表的方式记录兄弟节点指针
+			public:
+				_tree_node<T>* pre() const;
+				_tree_node<T>* next() const;
+				_tree_node<T>* first_child() const;
+				_tree_node<T>* last_child() const;
+				_tree_node<T>* parent() const;
 		}; 
 
 		template<class T>
 		duplex_tree_node<T>::duplex_tree_node()
-			: _tree_node<T>(), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0)
+			: _tree_node<T>(), _parent(0), _first_child(0), _last_child(0), _prev_sibling(0), _next_sibling(0)
 			{
 			}
 
 		template<class T>
 		duplex_tree_node<T>::duplex_tree_node(const T& val)
-			: _tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
+			: _tree_node<T>(val), _parent(0), _first_child(0), _last_child(0), _prev_sibling(0), _next_sibling(0){
 		}
 
 		template<class T>
 		duplex_tree_node<T>::duplex_tree_node(T&& val)
-			: _tree_node<T>(val), parent(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0){
+			: _tree_node<T>(val), _parent(0), _first_child(0), _last_child(0), _prev_sibling(0), _next_sibling(0){
+		}
+
+		template<class T>
+		_tree_node<T>* duplex_tree_node<T>::pre() const{
+			return _prev_sibling;
+		}
+
+		template<class T> 
+		_tree_node<T>* duplex_tree_node<T>::next() const{
+			return _next_sibling;
+		}
+
+		template<class T> 
+		_tree_node<T>* duplex_tree_node<T>::first_child() const{
+			return _first_child;
+		}
+
+		template<class T> 
+		_tree_node<T>* duplex_tree_node<T>::last_child() const{
+			return _last_child;
+		}
+
+		template<class T> 
+		_tree_node<T>* duplex_tree_node<T>::parent() const{
+			return _parent;
 		}
 
 		class navigation_error : public std::logic_error {
@@ -621,13 +658,13 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		tree<T, tree_nodeallocator>::tree(tree<T, tree_nodeallocator>&& x) {
 			head_initialise_();
-			if(x.head->next_sibling != x.feet) { // move tree if non-empty only
-				head->next_sibling =x.head->next_sibling;
-				feet->prev_sibling = x.feet->prev_sibling;
-				x.head->next_sibling->prev_sibling = head;
-				x.feet->prev_sibling->next_sibling = feet;
-				x.head->next_sibling = x.feet;
-				x.feet->prev_sibling = x.head;
+			if(x.head->_next_sibling != x.feet) { // move tree if non-empty only
+				head->_next_sibling =x.head->_next_sibling;
+				feet->_prev_sibling = x.feet->_prev_sibling;
+				x.head->_next_sibling->_prev_sibling = head;
+				x.feet->_prev_sibling->_next_sibling = feet;
+				x.head->_next_sibling = x.feet;
+				x.feet->_prev_sibling = x.head;
 			}
 		}
 
@@ -655,17 +692,17 @@ namespace ProjectBase{
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, head, tree_node());
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, feet, tree_node());	
 
-		   	head->parent=0;
-		   	head->first_child=0;
-		   	head->last_child=0;
-		   	head->prev_sibling=0; //head;
-		   	head->next_sibling=feet; //head;
+		   	head->_parent=0;
+		   	head->_first_child=0;
+		   	head->_last_child=0;
+		   	head->_prev_sibling=0; //head;
+		   	head->_next_sibling=feet; //head;
 
-			feet->parent=0;
-			feet->first_child=0;
-			feet->last_child=0;
-			feet->prev_sibling=head;
-			feet->next_sibling=0;
+			feet->_parent=0;
+			feet->_first_child=0;
+			feet->_last_child=0;
+			feet->_prev_sibling=head;
+			feet->_next_sibling=0;
 		}
 
 		template <class T, class tree_nodeallocator>
@@ -682,12 +719,12 @@ namespace ProjectBase{
 			if(this != &x) {
 				clear(); // clear any existing data.
 
-				head->next_sibling=x.head->next_sibling;
-				feet->prev_sibling=x.feet->prev_sibling;
-				x.head->next_sibling->prev_sibling=head;
-				x.feet->prev_sibling->next_sibling=feet;
-				x.head->next_sibling=x.feet;
-				x.feet->prev_sibling=x.head;
+				head->_next_sibling=x.head->_next_sibling;
+				feet->_prev_sibling=x.feet->_prev_sibling;
+				x.head->_next_sibling->_prev_sibling=head;
+				x.feet->_prev_sibling->_next_sibling=feet;
+				x.head->_next_sibling=x.feet;
+				x.feet->_prev_sibling=x.head;
 				}
 			return *this;
 			}
@@ -724,8 +761,8 @@ namespace ProjectBase{
 		void tree<T, tree_nodeallocator>::clear()
 			{
 			if(head)
-				while(head->next_sibling!=feet)
-					erase(pre_order_iterator(head->next_sibling));
+				while(head->_next_sibling!=feet)
+					erase(pre_order_iterator(head->_next_sibling));
 			}
 
 		template<class T, class tree_nodeallocator> 
@@ -734,18 +771,18 @@ namespace ProjectBase{
 		//	std::cout << "erase_children " << it.node << std::endl;
 			if(it.node==0) return;
 
-			tree_node *cur=it.node->first_child;
+			tree_node *cur=it.node->_first_child;
 			tree_node *prev=0;
 
 			while(cur!=0) {
 				prev=cur;
-				cur=cur->next_sibling;
+				cur=cur->_next_sibling;
 				erase_children(pre_order_iterator(prev));
 				std::allocator_traits<decltype(alloc_)>::destroy(alloc_, prev);
 				std::allocator_traits<decltype(alloc_)>::deallocate(alloc_, prev, 1);
 				}
-			it.node->first_child=0;
-			it.node->last_child=0;
+			it.node->_first_child=0;
+			it.node->_last_child=0;
 		//	std::cout << "exit" << std::endl;
 			}
 
@@ -754,19 +791,19 @@ namespace ProjectBase{
 			{
 			if(it.node==0) return;
 
-			tree_node *cur=it.node->next_sibling;
+			tree_node *cur=it.node->_next_sibling;
 			tree_node *prev=0;
 
 			while(cur!=0) {
 				prev=cur;
-				cur=cur->next_sibling;
+				cur=cur->_next_sibling;
 				erase_children(pre_order_iterator(prev));
 				std::allocator_traits<decltype(alloc_)>::destroy(alloc_, prev);
 				std::allocator_traits<decltype(alloc_)>::deallocate(alloc_, prev, 1);
 				}
-			it.node->next_sibling=0;
-			if(it.node->parent!=0)
-				it.node->parent->last_child=it.node;
+			it.node->_next_sibling=0;
+			if(it.node->_parent!=0)
+				it.node->_parent->_last_child=it.node;
 			}
 
 		template<class T, class tree_nodeallocator> 
@@ -774,19 +811,19 @@ namespace ProjectBase{
 			{
 			if(it.node==0) return;
 
-			tree_node *cur=it.node->prev_sibling;
+			tree_node *cur=it.node->_prev_sibling;
 			tree_node *prev=0;
 
 			while(cur!=0) {
 				prev=cur;
-				cur=cur->prev_sibling;
+				cur=cur->_prev_sibling;
 				erase_children(pre_order_iterator(prev));
 				std::allocator_traits<decltype(alloc_)>::destroy(alloc_, prev);
 				std::allocator_traits<decltype(alloc_)>::deallocate(alloc_, prev, 1);
 				}
-			it.node->prev_sibling=0;
-			if(it.node->parent!=0)
-				it.node->parent->first_child=it.node;
+			it.node->_prev_sibling=0;
+			if(it.node->_parent!=0)
+				it.node->_parent->_first_child=it.node;
 			}
 
 		template<class T, class tree_nodeallocator> 
@@ -799,17 +836,17 @@ namespace ProjectBase{
 			ret.skip_children();
 			++ret;
 			erase_children(it);
-			if(cur->prev_sibling==0) {
-				cur->parent->first_child=cur->next_sibling;
+			if(cur->_prev_sibling==0) {
+				cur->_parent->_first_child=cur->_next_sibling;
 				}
 			else {
-				cur->prev_sibling->next_sibling=cur->next_sibling;
+				cur->_prev_sibling->_next_sibling=cur->_next_sibling;
 				}
-			if(cur->next_sibling==0) {
-				cur->parent->last_child=cur->prev_sibling;
+			if(cur->_next_sibling==0) {
+				cur->_parent->_last_child=cur->_prev_sibling;
 				}
 			else {
-				cur->next_sibling->prev_sibling=cur->prev_sibling;
+				cur->_next_sibling->_prev_sibling=cur->_prev_sibling;
 				}
 
 			std::allocator_traits<decltype(alloc_)>::destroy(alloc_, cur);
@@ -820,7 +857,7 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::begin() const
 			{
-			return pre_order_iterator(head->next_sibling);
+			return pre_order_iterator(head->_next_sibling);
 			}
 
 		template <class T, class tree_nodeallocator>
@@ -832,7 +869,7 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::breadth_first_queued_iterator tree<T, tree_nodeallocator>::begin_breadth_first() const
 			{
-			return breadth_first_queued_iterator(head->next_sibling);
+			return breadth_first_queued_iterator(head->_next_sibling);
 			}
 
 		template <class T, class tree_nodeallocator>
@@ -844,10 +881,10 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::post_order_iterator tree<T, tree_nodeallocator>::begin_post() const
 			{
-			tree_node *tmp=head->next_sibling;
+			tree_node *tmp=head->_next_sibling;
 			if(tmp!=feet) {
-				while(tmp->first_child)
-					tmp=tmp->first_child;
+				while(tmp->_first_child)
+					tmp=tmp->_first_child;
 				}
 			return post_order_iterator(tmp);
 			}
@@ -867,28 +904,28 @@ namespace ProjectBase{
 			tree_node *tmp=pos.node;
 			unsigned int curdepth=0;
 			while(curdepth<dp) { // go down one level
-				while(tmp->first_child==0) {
-					if(tmp->next_sibling==0) {
+				while(tmp->_first_child==0) {
+					if(tmp->_next_sibling==0) {
 						// try to walk up and then right again
 						do {
 							if(tmp==ret.top_node)
 							   throw std::range_error("tree: begin_fixed out of range");
-							tmp=tmp->parent;
+							tmp=tmp->_parent;
 		               if(tmp==0) 
 							   throw std::range_error("tree: begin_fixed out of range");
 		               --curdepth;
-						   } while(tmp->next_sibling==0);
+						   } while(tmp->_next_sibling==0);
 						}
-					tmp=tmp->next_sibling;
+					tmp=tmp->_next_sibling;
 					}
-				tmp=tmp->first_child;
+				tmp=tmp->_first_child;
 				++curdepth;
 				}
 
 			// Now walk back to the first sibling in this range.
 			if(walk_back)
-			while(tmp->prev_sibling!=0)
-				tmp=tmp->prev_sibling;	
+			while(tmp->_prev_sibling!=0)
+				tmp=tmp->_prev_sibling;	
 
 			ret.node=tmp;
 			return ret;
@@ -901,12 +938,12 @@ namespace ProjectBase{
 			tree_node *tmp=pos.node;
 			unsigned int curdepth=1;
 			while(curdepth<dp) { // go down one level
-				while(tmp->first_child==0) {
-					tmp=tmp->next_sibling;
+				while(tmp->_first_child==0) {
+					tmp=tmp->_next_sibling;
 					if(tmp==0)
 						throw std::range_error("tree: end_fixed out of range");
 					}
-				tmp=tmp->first_child;
+				tmp=tmp->_first_child;
 				++curdepth;
 				}
 			return tmp;
@@ -916,10 +953,10 @@ namespace ProjectBase{
 		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::begin(const iterator_base& pos) 
 			{
 			assert(pos.node!=0);
-			if(pos.node->first_child==0) {
+			if(pos.node->_first_child==0) {
 				return end(pos);
 				}
-			return pos.node->first_child;
+			return pos.node->_first_child;
 			}
 
 		template <class T, class tree_nodeallocator>
@@ -933,10 +970,10 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::begin_leaf() const
 		   {
-		   tree_node *tmp=head->next_sibling;
+		   tree_node *tmp=head->_next_sibling;
 		   if(tmp!=feet) {
-		      while(tmp->first_child)
-		         tmp=tmp->first_child;
+		      while(tmp->_first_child)
+		         tmp=tmp->_first_child;
 		      }
 		   return leaf_iterator(tmp);
 		   }
@@ -955,15 +992,15 @@ namespace ProjectBase{
 
 			do {
 				if(path.size()>0)
-					walk=walk->parent;
+					walk=walk->_parent;
 				int num=0;
-				while(walk!=top.node && walk->prev_sibling!=0 && walk->prev_sibling!=head) {
+				while(walk!=top.node && walk->_prev_sibling!=0 && walk->_prev_sibling!=head) {
 					++num;
-					walk=walk->prev_sibling;
+					walk=walk->_prev_sibling;
 					}
 				path.push_back(num);
 				}
-			while(walk->parent!=0 && walk!=top.node);
+			while(walk->_parent!=0 && walk!=top.node);
 
 			std::reverse(path.begin(), path.end());
 			return path;
@@ -977,12 +1014,12 @@ namespace ProjectBase{
 
 			for(size_t step=0; step<path.size(); ++step) {
 				if(step>0)
-					walk=walk->first_child;
+					walk=walk->_first_child;
 				if(walk==0)
 					throw std::range_error("tree::iterator_from_path: no more nodes at step "+std::to_string(step));
 
 				for(int i=0; i<path[step]; ++i) {
-					walk=walk->next_sibling;
+					walk=walk->_next_sibling;
 					if(walk==0)
 						throw std::range_error("tree::iterator_from_path: out of siblings at step "+std::to_string(step));
 					}
@@ -995,8 +1032,8 @@ namespace ProjectBase{
 		typename tree<T, tree_nodeallocator>::leaf_iterator tree<T, tree_nodeallocator>::begin_leaf(const iterator_base& top) const
 		   {
 			tree_node *tmp=top.node;
-			while(tmp->first_child)
-				 tmp=tmp->first_child;
+			while(tmp->_first_child)
+				 tmp=tmp->_first_child;
 		   return leaf_iterator(tmp, top.node);
 		   }
 
@@ -1013,10 +1050,10 @@ namespace ProjectBase{
 			if(position.node==0)
 				throw navigation_error("tree: attempt to navigate from null iterator.");
 
-			if(position.node->parent==0) 
+			if(position.node->_parent==0) 
 				throw navigation_error("tree: attempt to navigate up past head node.");
 
-			return iter(position.node->parent);
+			return iter(position.node->_parent);
 			}
 
 		template <class T, class tree_nodeallocator>
@@ -1025,7 +1062,7 @@ namespace ProjectBase{
 			{
 			assert(position.node!=0);
 			iter ret(position);
-			ret.node=position.node->prev_sibling;
+			ret.node=position.node->_prev_sibling;
 			return ret;
 			}
 
@@ -1035,7 +1072,7 @@ namespace ProjectBase{
 			{
 			assert(position.node!=0);
 			iter ret(position);
-			ret.node=position.node->next_sibling;
+			ret.node=position.node->_next_sibling;
 			return ret;
 			}
 
@@ -1053,31 +1090,31 @@ namespace ProjectBase{
 			//	assert(position.node!=0);
 			//	iter ret(position);
 			//
-			//	if(position.node->next_sibling) {
-			//		ret.node=position.node->next_sibling;
+			//	if(position.node->_next_sibling) {
+			//		ret.node=position.node->_next_sibling;
 			//		}
 			//	else {
 			//		int relative_depth=0;
 			//	   upper:
 			//		do {
-			//			ret.node=ret.node->parent;
+			//			ret.node=ret.node->_parent;
 			//			if(ret.node==0) return ret;
 			//			--relative_depth;
-			//			} while(ret.node->next_sibling==0);
+			//			} while(ret.node->_next_sibling==0);
 			//	   lower:
-			//		ret.node=ret.node->next_sibling;
-			//		while(ret.node->first_child==0) {
-			//			if(ret.node->next_sibling==0)
+			//		ret.node=ret.node->_next_sibling;
+			//		while(ret.node->_first_child==0) {
+			//			if(ret.node->_next_sibling==0)
 			//				goto upper;
-			//			ret.node=ret.node->next_sibling;
+			//			ret.node=ret.node->_next_sibling;
 			//			if(ret.node==0) return ret;
 			//			}
-			//		while(relative_depth<0 && ret.node->first_child!=0) {
-			//			ret.node=ret.node->first_child;
+			//		while(relative_depth<0 && ret.node->_first_child!=0) {
+			//			ret.node=ret.node->_first_child;
 			//			++relative_depth;
 			//			}
 			//		if(relative_depth<0) {
-			//			if(ret.node->next_sibling==0) goto upper;
+			//			if(ret.node->_next_sibling==0) goto upper;
 			//			else                          goto lower;
 			//			}
 			//		}
@@ -1102,19 +1139,19 @@ namespace ProjectBase{
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, tree_node());
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node;
-			if(position.node->last_child!=0) {
-				position.node->last_child->next_sibling=tmp;
+			tmp->_parent=position.node;
+			if(position.node->_last_child!=0) {
+				position.node->_last_child->_next_sibling=tmp;
 				}
 			else {
-				position.node->first_child=tmp;
+				position.node->_first_child=tmp;
 				}
-			tmp->prev_sibling=position.node->last_child;
-			position.node->last_child=tmp;
-			tmp->next_sibling=0;
+			tmp->_prev_sibling=position.node->_last_child;
+			position.node->_last_child=tmp;
+			tmp->_next_sibling=0;
 			return tmp;
 		 	}
 
@@ -1137,19 +1174,19 @@ namespace ProjectBase{
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, tree_node());
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node;
-			if(position.node->first_child!=0) {
-				position.node->first_child->prev_sibling=tmp;
+			tmp->_parent=position.node;
+			if(position.node->_first_child!=0) {
+				position.node->_first_child->_prev_sibling=tmp;
 				}
 			else {
-				position.node->last_child=tmp;
+				position.node->_last_child=tmp;
 				}
-			tmp->next_sibling=position.node->first_child;
+			tmp->_next_sibling=position.node->_first_child;
 			position.node->prev_child=tmp;
-			tmp->prev_sibling=0;
+			tmp->_prev_sibling=0;
 			return tmp;
 		 	}
 
@@ -1177,19 +1214,19 @@ namespace ProjectBase{
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node;
-			if(position.node->last_child!=0) {
-				position.node->last_child->next_sibling=tmp;
+			tmp->_parent=position.node;
+			if(position.node->_last_child!=0) {
+				position.node->_last_child->_next_sibling=tmp;
 				}
 			else {
-				position.node->first_child=tmp;
+				position.node->_first_child=tmp;
 				}
-			tmp->prev_sibling=position.node->last_child;
-			position.node->last_child=tmp;
-			tmp->next_sibling=0;
+			tmp->_prev_sibling=position.node->_last_child;
+			position.node->_last_child=tmp;
+			tmp->_next_sibling=0;
 			return tmp;
 			}
 
@@ -1215,19 +1252,19 @@ namespace ProjectBase{
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp); // Here is where the move semantics kick in
 			std::swap(tmp->data, x);
 
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node;
-			if(position.node->last_child!=0) {
-				position.node->last_child->next_sibling=tmp;
+			tmp->_parent=position.node;
+			if(position.node->_last_child!=0) {
+				position.node->_last_child->_next_sibling=tmp;
 				}
 			else {
-				position.node->first_child=tmp;
+				position.node->_first_child=tmp;
 				}
-			tmp->prev_sibling=position.node->last_child;
-			position.node->last_child=tmp;
-			tmp->next_sibling=0;
+			tmp->_prev_sibling=position.node->_last_child;
+			position.node->_last_child=tmp;
+			tmp->_next_sibling=0;
 			return tmp;
 			}
 
@@ -1241,19 +1278,19 @@ namespace ProjectBase{
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node;
-			if(position.node->first_child!=0) {
-				position.node->first_child->prev_sibling=tmp;
+			tmp->_parent=position.node;
+			if(position.node->_first_child!=0) {
+				position.node->_first_child->_prev_sibling=tmp;
 				}
 			else {
-				position.node->last_child=tmp;
+				position.node->_last_child=tmp;
 				}
-			tmp->next_sibling=position.node->first_child;
-			position.node->first_child=tmp;
-			tmp->prev_sibling=0;
+			tmp->_next_sibling=position.node->_first_child;
+			position.node->_first_child=tmp;
+			tmp->_prev_sibling=0;
 			return tmp;
 			}
 
@@ -1269,19 +1306,19 @@ namespace ProjectBase{
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp);
 			std::swap(tmp->data, x);
 
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node;
-			if(position.node->first_child!=0) {
-				position.node->first_child->prev_sibling=tmp;
+			tmp->_parent=position.node;
+			if(position.node->_first_child!=0) {
+				position.node->_first_child->_prev_sibling=tmp;
 				}
 			else {
-				position.node->last_child=tmp;
+				position.node->_last_child=tmp;
 				}
-			tmp->next_sibling=position.node->first_child;
-			position.node->first_child=tmp;
-			tmp->prev_sibling=0;
+			tmp->_next_sibling=position.node->_first_child;
+			position.node->_first_child=tmp;
+			tmp->_prev_sibling=0;
 			return tmp;
 			}
 
@@ -1349,14 +1386,14 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::set_head(const T& x)
 			{
-			assert(head->next_sibling==feet);
+			assert(head->_next_sibling==feet);
 			return insert(iterator(feet), x);
 			}
 
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::pre_order_iterator tree<T, tree_nodeallocator>::set_head(T&& x)
 			{
-			assert(head->next_sibling==feet);
+			assert(head->_next_sibling==feet);
 			return insert(iterator(feet), x);
 			}
 
@@ -1372,20 +1409,20 @@ namespace ProjectBase{
 
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node->parent;
-			tmp->next_sibling=position.node;
-			tmp->prev_sibling=position.node->prev_sibling;
-			position.node->prev_sibling=tmp;
+			tmp->_parent=position.node->_parent;
+			tmp->_next_sibling=position.node;
+			tmp->_prev_sibling=position.node->_prev_sibling;
+			position.node->_prev_sibling=tmp;
 
-			if(tmp->prev_sibling==0) {
-				if(tmp->parent) // when inserting nodes at the head, there is no parent
-					tmp->parent->first_child=tmp;
+			if(tmp->_prev_sibling==0) {
+				if(tmp->_parent) // when inserting nodes at the head, there is no parent
+					tmp->_parent->_first_child=tmp;
 				}
 			else
-				tmp->prev_sibling->next_sibling=tmp;
+				tmp->_prev_sibling->_next_sibling=tmp;
 			return tmp;
 			}
 
@@ -1400,20 +1437,20 @@ namespace ProjectBase{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp);
 			std::swap(tmp->data, x); // Move semantics
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node->parent;
-			tmp->next_sibling=position.node;
-			tmp->prev_sibling=position.node->prev_sibling;
-			position.node->prev_sibling=tmp;
+			tmp->_parent=position.node->_parent;
+			tmp->_next_sibling=position.node;
+			tmp->_prev_sibling=position.node->_prev_sibling;
+			position.node->_prev_sibling=tmp;
 
-			if(tmp->prev_sibling==0) {
-				if(tmp->parent) // when inserting nodes at the head, there is no parent
-					tmp->parent->first_child=tmp;
+			if(tmp->_prev_sibling==0) {
+				if(tmp->_parent) // when inserting nodes at the head, there is no parent
+					tmp->_parent->_first_child=tmp;
 				}
 			else
-				tmp->prev_sibling->next_sibling=tmp;
+				tmp->_prev_sibling->_next_sibling=tmp;
 			return tmp;
 			}
 
@@ -1422,27 +1459,27 @@ namespace ProjectBase{
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->next_sibling=position.node;
+			tmp->_next_sibling=position.node;
 			if(position.node==0) { // iterator points to end of a subtree
-				tmp->parent=position.parent_;
-				tmp->prev_sibling=position.range_last();
-				tmp->parent->last_child=tmp;
+				tmp->_parent=position.parent_;
+				tmp->_prev_sibling=position.range_last();
+				tmp->_parent->_last_child=tmp;
 				}
 			else {
-				tmp->parent=position.node->parent;
-				tmp->prev_sibling=position.node->prev_sibling;
-				position.node->prev_sibling=tmp;
+				tmp->_parent=position.node->_parent;
+				tmp->_prev_sibling=position.node->_prev_sibling;
+				position.node->_prev_sibling=tmp;
 				}
 
-			if(tmp->prev_sibling==0) {
-				if(tmp->parent) // when inserting nodes at the head, there is no parent
-					tmp->parent->first_child=tmp;
+			if(tmp->_prev_sibling==0) {
+				if(tmp->_parent) // when inserting nodes at the head, there is no parent
+					tmp->_parent->_first_child=tmp;
 				}
 			else
-				tmp->prev_sibling->next_sibling=tmp;
+				tmp->_prev_sibling->_next_sibling=tmp;
 			return tmp;
 			}
 
@@ -1452,20 +1489,20 @@ namespace ProjectBase{
 			{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, x);
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node->parent;
-			tmp->prev_sibling=position.node;
-			tmp->next_sibling=position.node->next_sibling;
-			position.node->next_sibling=tmp;
+			tmp->_parent=position.node->_parent;
+			tmp->_prev_sibling=position.node;
+			tmp->_next_sibling=position.node->_next_sibling;
+			position.node->_next_sibling=tmp;
 
-			if(tmp->next_sibling==0) {
-				if(tmp->parent) // when inserting nodes at the head, there is no parent
-					tmp->parent->last_child=tmp;
+			if(tmp->_next_sibling==0) {
+				if(tmp->_parent) // when inserting nodes at the head, there is no parent
+					tmp->_parent->_last_child=tmp;
 				}
 			else {
-				tmp->next_sibling->prev_sibling=tmp;
+				tmp->_next_sibling->_prev_sibling=tmp;
 				}
 			return tmp;
 			}
@@ -1477,20 +1514,20 @@ namespace ProjectBase{
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp);
 			std::swap(tmp->data, x); // move semantics
-			tmp->first_child=0;
-			tmp->last_child=0;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
 
-			tmp->parent=position.node->parent;
-			tmp->prev_sibling=position.node;
-			tmp->next_sibling=position.node->next_sibling;
-			position.node->next_sibling=tmp;
+			tmp->_parent=position.node->_parent;
+			tmp->_prev_sibling=position.node;
+			tmp->_next_sibling=position.node->_next_sibling;
+			position.node->_next_sibling=tmp;
 
-			if(tmp->next_sibling==0) {
-				if(tmp->parent) // when inserting nodes at the head, there is no parent
-					tmp->parent->last_child=tmp;
+			if(tmp->_next_sibling==0) {
+				if(tmp->_parent) // when inserting nodes at the head, there is no parent
+					tmp->_parent->_last_child=tmp;
 				}
 			else {
-				tmp->next_sibling->prev_sibling=tmp;
+				tmp->_next_sibling->_prev_sibling=tmp;
 				}
 			return tmp;
 			}
@@ -1552,48 +1589,48 @@ namespace ProjectBase{
 		//	std::cout << "no warning!" << std::endl;
 			tree_node *tmp=std::allocator_traits<decltype(alloc_)>::allocate(alloc_, 1, 0);
 			std::allocator_traits<decltype(alloc_)>::construct(alloc_, tmp, (*from));
-			tmp->first_child=0;
-			tmp->last_child=0;
-			if(current_to->prev_sibling==0) {
-				if(current_to->parent!=0)
-					current_to->parent->first_child=tmp;
+			tmp->_first_child=0;
+			tmp->_last_child=0;
+			if(current_to->_prev_sibling==0) {
+				if(current_to->_parent!=0)
+					current_to->_parent->_first_child=tmp;
 				}
 			else {
-				current_to->prev_sibling->next_sibling=tmp;
+				current_to->_prev_sibling->_next_sibling=tmp;
 				}
-			tmp->prev_sibling=current_to->prev_sibling;
-			if(current_to->next_sibling==0) {
-				if(current_to->parent!=0)
-					current_to->parent->last_child=tmp;
+			tmp->_prev_sibling=current_to->_prev_sibling;
+			if(current_to->_next_sibling==0) {
+				if(current_to->_parent!=0)
+					current_to->_parent->_last_child=tmp;
 				}
 			else {
-				current_to->next_sibling->prev_sibling=tmp;
+				current_to->_next_sibling->_prev_sibling=tmp;
 				}
-			tmp->next_sibling=current_to->next_sibling;
-			tmp->parent=current_to->parent;
+			tmp->_next_sibling=current_to->_next_sibling;
+			tmp->_parent=current_to->_parent;
 		//	kp::destructor(&current_to->data);
 			std::allocator_traits<decltype(alloc_)>::destroy(alloc_, current_to);
 			std::allocator_traits<decltype(alloc_)>::deallocate(alloc_, current_to, 1);
 			current_to=tmp;
 
 			// only at this stage can we fix 'last'
-			tree_node *last=from.node->next_sibling;
+			tree_node *last=from.node->_next_sibling;
 
 			pre_order_iterator toit=tmp;
 			// copy all children
 			do {
 				assert(current_from!=0);
-				if(current_from->first_child != 0) {
-					current_from=current_from->first_child;
+				if(current_from->_first_child != 0) {
+					current_from=current_from->_first_child;
 					toit=append_child(toit, current_from->data);
 					}
 				else {
-					while(current_from->next_sibling==0 && current_from!=start_from) {
-						current_from=current_from->parent;
+					while(current_from->_next_sibling==0 && current_from!=start_from) {
+						current_from=current_from->_parent;
 						toit=parent(toit);
 						assert(current_from!=0);
 						}
-					current_from=current_from->next_sibling;
+					current_from=current_from->_next_sibling;
 					if(current_from!=last) {
 						toit=append_child(parent(toit), current_from->data);
 						}
@@ -1615,10 +1652,10 @@ namespace ProjectBase{
 			tree_node *new_first=new_begin.node;
 			tree_node *orig_last=orig_first;
 			while((++orig_begin)!=orig_end)
-				orig_last=orig_last->next_sibling;
+				orig_last=orig_last->_next_sibling;
 			tree_node *new_last=new_first;
 			while((++new_begin)!=new_end)
-				new_last=new_last->next_sibling;
+				new_last=new_last->_next_sibling;
 
 			// insert all siblings in new_first..new_last before orig_first
 			bool first=true;
@@ -1631,7 +1668,7 @@ namespace ProjectBase{
 					}
 				if(new_first==new_last)
 					break;
-				new_first=new_first->next_sibling;
+				new_first=new_first->_next_sibling;
 				}
 
 			// erase old range of siblings
@@ -1640,7 +1677,7 @@ namespace ProjectBase{
 			while(1==1) {
 				if(next==orig_last) 
 					last=true;
-				next=next->next_sibling;
+				next=next->_next_sibling;
 				erase((pre_order_iterator)orig_first);
 				if(last) 
 					break;
@@ -1653,25 +1690,25 @@ namespace ProjectBase{
 		template <typename iter>
 		iter tree<T, tree_nodeallocator>::flatten(iter position)
 			{
-			if(position.node->first_child==0)
+			if(position.node->_first_child==0)
 				return position;
 
-			tree_node *tmp=position.node->first_child;
+			tree_node *tmp=position.node->_first_child;
 			while(tmp) {
-				tmp->parent=position.node->parent;
-				tmp=tmp->next_sibling;
+				tmp->_parent=position.node->_parent;
+				tmp=tmp->_next_sibling;
 				} 
-			if(position.node->next_sibling) {
-				position.node->last_child->next_sibling=position.node->next_sibling;
-				position.node->next_sibling->prev_sibling=position.node->last_child;
+			if(position.node->_next_sibling) {
+				position.node->_last_child->_next_sibling=position.node->_next_sibling;
+				position.node->_next_sibling->_prev_sibling=position.node->_last_child;
 				}
 			else {
-				position.node->parent->last_child=position.node->last_child;
+				position.node->_parent->_last_child=position.node->_last_child;
 				}
-			position.node->next_sibling=position.node->first_child;
-			position.node->next_sibling->prev_sibling=position.node;
-			position.node->first_child=0;
-			position.node->last_child=0;
+			position.node->_next_sibling=position.node->_first_child;
+			position.node->_next_sibling->_prev_sibling=position.node;
+			position.node->_first_child=0;
+			position.node->_last_child=0;
 
 			return position;
 			}
@@ -1689,38 +1726,38 @@ namespace ProjectBase{
 			if(begin==end) return begin;
 			// determine last node
 			while((++begin)!=end) {
-				last=last->next_sibling;
+				last=last->_next_sibling;
 				}
 			// move subtree
-			if(first->prev_sibling==0) {
-				first->parent->first_child=last->next_sibling;
+			if(first->_prev_sibling==0) {
+				first->_parent->_first_child=last->_next_sibling;
 				}
 			else {
-				first->prev_sibling->next_sibling=last->next_sibling;
+				first->_prev_sibling->_next_sibling=last->_next_sibling;
 				}
-			if(last->next_sibling==0) {
-				last->parent->last_child=first->prev_sibling;
-				}
-			else {
-				last->next_sibling->prev_sibling=first->prev_sibling;
-				}
-			if(position.node->first_child==0) {
-				position.node->first_child=first;
-				position.node->last_child=last;
-				first->prev_sibling=0;
+			if(last->_next_sibling==0) {
+				last->_parent->_last_child=first->_prev_sibling;
 				}
 			else {
-				position.node->last_child->next_sibling=first;
-				first->prev_sibling=position.node->last_child;
-				position.node->last_child=last;
+				last->_next_sibling->_prev_sibling=first->_prev_sibling;
 				}
-			last->next_sibling=0;
+			if(position.node->_first_child==0) {
+				position.node->_first_child=first;
+				position.node->_last_child=last;
+				first->_prev_sibling=0;
+				}
+			else {
+				position.node->_last_child->_next_sibling=first;
+				first->_prev_sibling=position.node->_last_child;
+				position.node->_last_child=last;
+				}
+			last->_next_sibling=0;
 
 			tree_node *pos=first;
 		   for(;;) {
-				pos->parent=position.node;
+				pos->_parent=position.node;
 				if(pos==last) break;
-				pos=pos->next_sibling;
+				pos=pos->_next_sibling;
 				}
 
 			return first;
@@ -1729,8 +1766,8 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		template <typename iter> iter tree<T, tree_nodeallocator>::reparent(iter position, iter from)
 			{
-			if(from.node->first_child==0) return position;
-			return reparent(position, from.node->first_child, end(from));
+			if(from.node->_first_child==0) return position;
+			return reparent(position, from.node->_first_child, end(from));
 			}
 
 		template <class T, class tree_nodeallocator>
@@ -1762,23 +1799,23 @@ namespace ProjectBase{
 		   assert(src);
 
 		   if(dst==src) return source;
-			if(dst->next_sibling)
-				if(dst->next_sibling==src) // already in the right spot
+			if(dst->_next_sibling)
+				if(dst->_next_sibling==src) // already in the right spot
 					return source;
 
 		   // take src out of the tree
-		   if(src->prev_sibling!=0) src->prev_sibling->next_sibling=src->next_sibling;
-		   else                     src->parent->first_child=src->next_sibling;
-		   if(src->next_sibling!=0) src->next_sibling->prev_sibling=src->prev_sibling;
-		   else                     src->parent->last_child=src->prev_sibling;
+		   if(src->_prev_sibling!=0) src->_prev_sibling->_next_sibling=src->_next_sibling;
+		   else                     src->_parent->_first_child=src->_next_sibling;
+		   if(src->_next_sibling!=0) src->_next_sibling->_prev_sibling=src->_prev_sibling;
+		   else                     src->_parent->_last_child=src->_prev_sibling;
 
 		   // connect it to the new point
-		   if(dst->next_sibling!=0) dst->next_sibling->prev_sibling=src;
-		   else                     dst->parent->last_child=src;
-		   src->next_sibling=dst->next_sibling;
-		   dst->next_sibling=src;
-		   src->prev_sibling=dst;
-		   src->parent=dst->parent;
+		   if(dst->_next_sibling!=0) dst->_next_sibling->_prev_sibling=src;
+		   else                     dst->_parent->_last_child=src;
+		   src->_next_sibling=dst->_next_sibling;
+		   dst->_next_sibling=src;
+		   src->_prev_sibling=dst;
+		   src->_parent=dst->_parent;
 		   return src;
 		   }
 
@@ -1791,23 +1828,23 @@ namespace ProjectBase{
 		   assert(src);
 
 		   if(dst==src) return source;
-			if(dst->prev_sibling)
-				if(dst->prev_sibling==src) // already in the right spot
+			if(dst->_prev_sibling)
+				if(dst->_prev_sibling==src) // already in the right spot
 					return source;
 
 		   // take src out of the tree
-		   if(src->prev_sibling!=0) src->prev_sibling->next_sibling=src->next_sibling;
-		   else                     src->parent->first_child=src->next_sibling;
-		   if(src->next_sibling!=0) src->next_sibling->prev_sibling=src->prev_sibling;
-		   else                     src->parent->last_child=src->prev_sibling;
+		   if(src->_prev_sibling!=0) src->_prev_sibling->_next_sibling=src->_next_sibling;
+		   else                     src->_parent->_first_child=src->_next_sibling;
+		   if(src->_next_sibling!=0) src->_next_sibling->_prev_sibling=src->_prev_sibling;
+		   else                     src->_parent->_last_child=src->_prev_sibling;
 
 		   // connect it to the new point
-		   if(dst->prev_sibling!=0) dst->prev_sibling->next_sibling=src;
-		   else                     dst->parent->first_child=src;
-		   src->prev_sibling=dst->prev_sibling;
-		   dst->prev_sibling=src;
-		   src->next_sibling=dst;
-		   src->parent=dst->parent;
+		   if(dst->_prev_sibling!=0) dst->_prev_sibling->_next_sibling=src;
+		   else                     dst->_parent->_first_child=src;
+		   src->_prev_sibling=dst->_prev_sibling;
+		   dst->_prev_sibling=src;
+		   src->_next_sibling=dst;
+		   src->_parent=dst->_parent;
 		   return src;
 		   }
 
@@ -1820,10 +1857,10 @@ namespace ProjectBase{
 			tree_node *src=source.node;
 			tree_node *dst_prev_sibling;
 			if(dst==0) { // must then be an end iterator
-				dst_prev_sibling=target.parent_->last_child;
+				dst_prev_sibling=target.parent_->_last_child;
 				assert(dst_prev_sibling);
 				}
-			else dst_prev_sibling=dst->prev_sibling;
+			else dst_prev_sibling=dst->_prev_sibling;
 			assert(src);
 
 			if(dst==src) return source;
@@ -1832,23 +1869,23 @@ namespace ProjectBase{
 					return source;
 
 			// take src out of the tree
-			if(src->prev_sibling!=0) src->prev_sibling->next_sibling=src->next_sibling;
-			else                     src->parent->first_child=src->next_sibling;
-			if(src->next_sibling!=0) src->next_sibling->prev_sibling=src->prev_sibling;
-			else                     src->parent->last_child=src->prev_sibling;
+			if(src->_prev_sibling!=0) src->_prev_sibling->_next_sibling=src->_next_sibling;
+			else                     src->_parent->_first_child=src->_next_sibling;
+			if(src->_next_sibling!=0) src->_next_sibling->_prev_sibling=src->_prev_sibling;
+			else                     src->_parent->_last_child=src->_prev_sibling;
 
 			// connect it to the new point
-			if(dst_prev_sibling!=0) dst_prev_sibling->next_sibling=src;
-			else                    target.parent_->first_child=src;
-			src->prev_sibling=dst_prev_sibling;
+			if(dst_prev_sibling!=0) dst_prev_sibling->_next_sibling=src;
+			else                    target.parent_->_first_child=src;
+			src->_prev_sibling=dst_prev_sibling;
 			if(dst) {
-				dst->prev_sibling=src;
-				src->parent=dst->parent;
+				dst->_prev_sibling=src;
+				src->_parent=dst->_parent;
 				}
 			else {
-				src->parent=dst_prev_sibling->parent;
+				src->_parent=dst_prev_sibling->_parent;
 				}
-			src->next_sibling=dst;
+			src->_next_sibling=dst;
 			return src;
 			}
 
@@ -1862,44 +1899,44 @@ namespace ProjectBase{
 
 			if(dst==src) return source;
 
-		//	if(dst==src->prev_sibling) {
+		//	if(dst==src->_prev_sibling) {
 		//
 		//		}
 
 			// remember connection points
-			tree_node *b_prev_sibling=dst->prev_sibling;
-			tree_node *b_next_sibling=dst->next_sibling;
-			tree_node *b_parent=dst->parent;
+			tree_node *b_prev_sibling=dst->_prev_sibling;
+			tree_node *b_next_sibling=dst->_next_sibling;
+			tree_node *b_parent=dst->_parent;
 
 			// remove target
 			erase(target);
 
 			// take src out of the tree
-			if(src->prev_sibling!=0) src->prev_sibling->next_sibling=src->next_sibling;
+			if(src->_prev_sibling!=0) src->_prev_sibling->_next_sibling=src->_next_sibling;
 			else {
-				assert(src->parent!=0);
-				src->parent->first_child=src->next_sibling;
+				assert(src->_parent!=0);
+				src->_parent->_first_child=src->_next_sibling;
 				}
-			if(src->next_sibling!=0) src->next_sibling->prev_sibling=src->prev_sibling;
+			if(src->_next_sibling!=0) src->_next_sibling->_prev_sibling=src->_prev_sibling;
 			else {
-				assert(src->parent!=0);
-				src->parent->last_child=src->prev_sibling;
+				assert(src->_parent!=0);
+				src->_parent->_last_child=src->_prev_sibling;
 				}
 
 			// connect it to the new point
-			if(b_prev_sibling!=0) b_prev_sibling->next_sibling=src;
+			if(b_prev_sibling!=0) b_prev_sibling->_next_sibling=src;
 			else {
 				assert(b_parent!=0);
-				b_parent->first_child=src;
+				b_parent->_first_child=src;
 				}
-			if(b_next_sibling!=0) b_next_sibling->prev_sibling=src;
+			if(b_next_sibling!=0) b_next_sibling->_prev_sibling=src;
 			else {
 				assert(b_parent!=0);
-				b_parent->last_child=src;
+				b_parent->_last_child=src;
 				}
-			src->prev_sibling=b_prev_sibling;
-			src->next_sibling=b_next_sibling;
-			src->parent=b_parent;
+			src->_prev_sibling=b_prev_sibling;
+			src->_next_sibling=b_next_sibling;
+			src->_parent=b_parent;
 			return src;
 			}
 
@@ -1910,20 +1947,20 @@ namespace ProjectBase{
 			tree ret;
 
 			// Move source node into the 'ret' tree.
-			ret.head->next_sibling = source.node;
-			ret.feet->prev_sibling = source.node;
-			source.node->parent=0;
+			ret.head->_next_sibling = source.node;
+			ret.feet->_prev_sibling = source.node;
+			source.node->_parent=0;
 
 			// Close the links in the current tree.
-			if(source.node->prev_sibling!=0) 
-				source.node->prev_sibling->next_sibling = source.node->next_sibling;
+			if(source.node->_prev_sibling!=0) 
+				source.node->_prev_sibling->_next_sibling = source.node->_next_sibling;
 
-			if(source.node->next_sibling!=0) 
-				source.node->next_sibling->prev_sibling = source.node->prev_sibling;
+			if(source.node->_next_sibling!=0) 
+				source.node->_next_sibling->_prev_sibling = source.node->_prev_sibling;
 
 			// Fix source prev/next links.
-			source.node->prev_sibling = ret.head;
-			source.node->next_sibling = ret.feet;
+			source.node->_prev_sibling = ret.head;
+			source.node->_next_sibling = ret.feet;
 
 			return ret; // A good compiler will move this, not copy.
 			}
@@ -1931,31 +1968,31 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		template<typename iter> iter tree<T, tree_nodeallocator>::move_in(iter loc, tree& other)
 			{
-			if(other.head->next_sibling==other.feet) return loc; // other tree is empty
+			if(other.head->_next_sibling==other.feet) return loc; // other tree is empty
 
-			tree_node *other_first_head = other.head->next_sibling;
-			tree_node *other_last_head  = other.feet->prev_sibling;
+			tree_node *other_first_head = other.head->_next_sibling;
+			tree_node *other_last_head  = other.feet->_prev_sibling;
 
 			sibling_iterator prev(loc);
 			--prev;
 
-			prev.node->next_sibling = other_first_head;
-			loc.node->prev_sibling  = other_last_head;
-			other_first_head->prev_sibling = prev.node;
-			other_last_head->next_sibling  = loc.node;
+			prev.node->_next_sibling = other_first_head;
+			loc.node->_prev_sibling  = other_last_head;
+			other_first_head->_prev_sibling = prev.node;
+			other_last_head->_next_sibling  = loc.node;
 
 			// Adjust parent pointers.
 			tree_node *walk=other_first_head;
 			while(true) {
-				walk->parent=loc.node->parent;
+				walk->_parent=loc.node->_parent;
 				if(walk==other_last_head)
 					break;
-				walk=walk->next_sibling;
+				walk=walk->_next_sibling;
 				}
 
 			// Close other tree.
-			other.head->next_sibling=other.feet;
-			other.feet->prev_sibling=other.head;
+			other.head->_next_sibling=other.feet;
+			other.feet->_prev_sibling=other.head;
 
 			return other_first_head;
 			}
@@ -1963,7 +2000,7 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		template<typename iter> iter tree<T, tree_nodeallocator>::move_in_below(iter loc, tree& other)
 			{
-			if(other.head->next_sibling==other.feet) return loc; // other tree is empty
+			if(other.head->_next_sibling==other.feet) return loc; // other tree is empty
 
 			auto n = other.number_of_children(loc);
 			return move_in_as_nth_child(loc, n, other);
@@ -1972,57 +2009,57 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		template<typename iter> iter tree<T, tree_nodeallocator>::move_in_as_nth_child(iter loc, size_t n, tree& other)
 			{
-			if(other.head->next_sibling==other.feet) return loc; // other tree is empty
+			if(other.head->_next_sibling==other.feet) return loc; // other tree is empty
 
-			tree_node *other_first_head = other.head->next_sibling;
-			tree_node *other_last_head  = other.feet->prev_sibling;
+			tree_node *other_first_head = other.head->_next_sibling;
+			tree_node *other_last_head  = other.feet->_prev_sibling;
 
 			if(n==0) {
-				if(loc.node->first_child==0) {
-					loc.node->first_child=other_first_head;
-					loc.node->last_child=other_last_head;
-					other_last_head->next_sibling=0;
-					other_first_head->prev_sibling=0;
+				if(loc.node->_first_child==0) {
+					loc.node->_first_child=other_first_head;
+					loc.node->_last_child=other_last_head;
+					other_last_head->_next_sibling=0;
+					other_first_head->_prev_sibling=0;
 					} 
 				else {
-					loc.node->first_child->prev_sibling=other_last_head;
-					other_last_head->next_sibling=loc.node->first_child;
-					loc.node->first_child=other_first_head;
-					other_first_head->prev_sibling=0;
+					loc.node->_first_child->_prev_sibling=other_last_head;
+					other_last_head->_next_sibling=loc.node->_first_child;
+					loc.node->_first_child=other_first_head;
+					other_first_head->_prev_sibling=0;
 					}
 				}
 			else {
 				--n;
-				tree_node *walk = loc.node->first_child;
+				tree_node *walk = loc.node->_first_child;
 				while(true) {
 					if(walk==0)
 						throw std::range_error("tree: move_in_as_nth_child position out of range");
 					if(n==0) 
 						break;
 					--n;
-					walk = walk->next_sibling;
+					walk = walk->_next_sibling;
 					}
-				if(walk->next_sibling==0) 
-					loc.node->last_child=other_last_head;
+				if(walk->_next_sibling==0) 
+					loc.node->_last_child=other_last_head;
 				else 
-					walk->next_sibling->prev_sibling=other_last_head;
-				other_last_head->next_sibling=walk->next_sibling;
-				walk->next_sibling=other_first_head;
-				other_first_head->prev_sibling=walk;
+					walk->_next_sibling->_prev_sibling=other_last_head;
+				other_last_head->_next_sibling=walk->_next_sibling;
+				walk->_next_sibling=other_first_head;
+				other_first_head->_prev_sibling=walk;
 				}
 
 			// Adjust parent pointers.
 			tree_node *walk=other_first_head;
 			while(true) {
-				walk->parent=loc.node;
+				walk->_parent=loc.node;
 				if(walk==other_last_head)
 					break;
-				walk=walk->next_sibling;
+				walk=walk->_next_sibling;
 				}
 
 			// Close other tree.
-			other.head->next_sibling=other.feet;
-			other.feet->prev_sibling=other.head;
+			other.head->_next_sibling=other.feet;
+			other.feet->_prev_sibling=other.head;
 
 			return other_first_head;
 			}
@@ -2091,35 +2128,35 @@ namespace ProjectBase{
 			--it2;
 
 			// prev and next are the nodes before and after the sorted range
-			tree_node *prev=from.node->prev_sibling;
-			tree_node *next=it2.node->next_sibling;
+			tree_node *prev=from.node->_prev_sibling;
+			tree_node *next=it2.node->_next_sibling;
 			typename std::multiset<tree_node *, compare_nodes<StrictWeakOrdering> >::iterator nit=nodes.begin(), eit=nodes.end();
 			if(prev==0) {
-				if((*nit)->parent!=0) // to catch "sorting the head" situations, when there is no parent
-					(*nit)->parent->first_child=(*nit);
+				if((*nit)->_parent!=0) // to catch "sorting the head" situations, when there is no parent
+					(*nit)->_parent->_first_child=(*nit);
 				}
-			else prev->next_sibling=(*nit);
+			else prev->_next_sibling=(*nit);
 
 			--eit;
 			while(nit!=eit) {
-				(*nit)->prev_sibling=prev;
+				(*nit)->_prev_sibling=prev;
 				if(prev)
-					prev->next_sibling=(*nit);
+					prev->_next_sibling=(*nit);
 				prev=(*nit);
 				++nit;
 				}
 			// prev now points to the last-but-one node in the sorted range
 			if(prev)
-				prev->next_sibling=(*eit);
+				prev->_next_sibling=(*eit);
 
 			// eit points to the last node in the sorted range.
-			(*eit)->next_sibling=next;
-		   (*eit)->prev_sibling=prev; // missed in the loop above
+			(*eit)->_next_sibling=next;
+		   (*eit)->_prev_sibling=prev; // missed in the loop above
 			if(next==0) {
-				if((*eit)->parent!=0) // to catch "sorting the head" situations, when there is no parent
-					(*eit)->parent->last_child=(*eit);
+				if((*eit)->_parent!=0) // to catch "sorting the head" situations, when there is no parent
+					(*eit)->_parent->_last_child=(*eit);
 				}
-			else next->prev_sibling=(*eit);
+			else next->_prev_sibling=(*eit);
 
 			if(deep) {	// sort the children of each node too
 				sibling_iterator bcs(*nodes.begin());
@@ -2234,8 +2271,8 @@ namespace ProjectBase{
 			tree_node* pos=it.node;
 			assert(pos!=0);
 			int ret=0;
-			while(pos->parent!=0) {
-				pos=pos->parent;
+			while(pos->_parent!=0) {
+				pos=pos->_parent;
 				++ret;
 			}
 			return ret;
@@ -2247,8 +2284,8 @@ namespace ProjectBase{
 			tree_node* pos=it.node;
 			assert(pos!=0);
 			int ret=0;
-			while(pos->parent!=0 && pos!=root.node) {
-				pos=pos->parent;
+			while(pos->_parent!=0 && pos!=root.node) {
+				pos=pos->_parent;
 				++ret;
 				}
 			return ret;
@@ -2261,8 +2298,8 @@ namespace ProjectBase{
 			tree_node* pos=it.node;
 			assert(pos!=0);
 			int ret=0;
-			while(pos->parent!=0) {
-				pos=pos->parent;
+			while(pos->_parent!=0) {
+				pos=pos->_parent;
 				if(p(pos))
 					++ret;
 				}
@@ -2276,8 +2313,8 @@ namespace ProjectBase{
 			tree_node* pos=bottom.node;
 			assert(pos!=0);
 			int ret=0;
-			while(pos->parent!=0 && pos!=top.node) {
-				pos=pos->parent;
+			while(pos->_parent!=0 && pos!=top.node) {
+				pos=pos->_parent;
 				if(p(pos))
 					++ret;
 				}
@@ -2288,7 +2325,7 @@ namespace ProjectBase{
 		int tree<T, tree_nodeallocator>::max_depth() const
 			{
 			int maxd=-1;
-			for(tree_node *it = head->next_sibling; it!=feet; it=it->next_sibling)
+			for(tree_node *it = head->_next_sibling; it!=feet; it=it->_next_sibling)
 				maxd=std::max(maxd, max_depth(it));
 
 			return maxd;
@@ -2303,21 +2340,21 @@ namespace ProjectBase{
 
 			int curdepth = 0, maxdepth = 0;
 			while(true) { // try to walk the bottom of the tree
-				while(tmp->first_child == 0) {
+				while(tmp->_first_child == 0) {
 					if(tmp == pos.node) return maxdepth;
-					if(tmp->next_sibling == 0) {
+					if(tmp->_next_sibling == 0) {
 						// try to walk up and then right again
 						do {
-							tmp = tmp->parent;
+							tmp = tmp->_parent;
 		               		if(tmp == 0) return maxdepth;
 		               		--curdepth;
 						}
-						while(tmp->next_sibling == 0);
+						while(tmp->_next_sibling == 0);
 					}
 		         if(tmp == pos.node) return maxdepth;
-					tmp = tmp->next_sibling;
+					tmp = tmp->_next_sibling;
 				}
-				tmp = tmp->first_child;
+				tmp = tmp->_first_child;
 				++curdepth;
 				maxdepth = std::max(curdepth, maxdepth);
 			} 
@@ -2326,15 +2363,15 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		unsigned int tree<T, tree_nodeallocator>::number_of_children(const iterator_base& it) 
 		{
-			tree_node *pos=it.node->first_child;
+			tree_node *pos=it.node->_first_child;
 			if(pos==0) return 0;
 
 			unsigned int ret=1;
-		//	  while(pos!=it.node->last_child) {
+		//	  while(pos!=it.node->_last_child) {
 		//		  ++ret;
-		//		  pos=pos->next_sibling;
+		//		  pos=pos->_next_sibling;
 		//		  }
-			while((pos=pos->next_sibling))
+			while((pos=pos->_next_sibling))
 				++ret;
 			return ret;
 		}
@@ -2345,19 +2382,19 @@ namespace ProjectBase{
 			tree_node *pos=it.node;
 			unsigned int ret=0;
 			// count forward
-			while(pos->next_sibling && 
-					pos->next_sibling!=head &&
-					pos->next_sibling!=feet) {
+			while(pos->_next_sibling && 
+					pos->_next_sibling!=head &&
+					pos->_next_sibling!=feet) {
 				++ret;
-				pos=pos->next_sibling;
+				pos=pos->_next_sibling;
 				}
 			// count backward
 			pos=it.node;
-			while(pos->prev_sibling && 
-					pos->prev_sibling!=head &&
-					pos->prev_sibling!=feet) {
+			while(pos->_prev_sibling && 
+					pos->_prev_sibling!=head &&
+					pos->_prev_sibling!=feet) {
 				++ret;
-				pos=pos->prev_sibling;
+				pos=pos->_prev_sibling;
 				}
 
 			return ret;
@@ -2366,21 +2403,21 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		void tree<T, tree_nodeallocator>::swap(sibling_iterator it)
 			{
-			tree_node *nxt=it.node->next_sibling;
+			tree_node *nxt=it.node->_next_sibling;
 			if(nxt) {
-				if(it.node->prev_sibling)
-					it.node->prev_sibling->next_sibling=nxt;
+				if(it.node->_prev_sibling)
+					it.node->_prev_sibling->_next_sibling=nxt;
 				else
-					it.node->parent->first_child=nxt;
-				nxt->prev_sibling=it.node->prev_sibling;
-				tree_node *nxtnxt=nxt->next_sibling;
+					it.node->_parent->_first_child=nxt;
+				nxt->_prev_sibling=it.node->_prev_sibling;
+				tree_node *nxtnxt=nxt->_next_sibling;
 				if(nxtnxt)
-					nxtnxt->prev_sibling=it.node;
+					nxtnxt->_prev_sibling=it.node;
 				else
-					it.node->parent->last_child=it.node;
-				nxt->next_sibling=it.node;
-				it.node->prev_sibling=nxt;
-				it.node->next_sibling=nxtnxt;
+					it.node->_parent->_last_child=it.node;
+				nxt->_next_sibling=it.node;
+				it.node->_prev_sibling=nxt;
+				it.node->_next_sibling=nxtnxt;
 				}
 			}
 
@@ -2388,32 +2425,32 @@ namespace ProjectBase{
 		void tree<T, tree_nodeallocator>::swap(iterator one, iterator two)
 			{
 			// if one and two are adjacent siblings, use the sibling swap
-			if(one.node->next_sibling==two.node) swap(one);
-			else if(two.node->next_sibling==one.node) swap(two);
+			if(one.node->_next_sibling==two.node) swap(one);
+			else if(two.node->_next_sibling==one.node) swap(two);
 			else {
-				tree_node *nxt1=one.node->next_sibling;
-				tree_node *nxt2=two.node->next_sibling;
-				tree_node *pre1=one.node->prev_sibling;
-				tree_node *pre2=two.node->prev_sibling;
-				tree_node *par1=one.node->parent;
-				tree_node *par2=two.node->parent;
+				tree_node *nxt1=one.node->_next_sibling;
+				tree_node *nxt2=two.node->_next_sibling;
+				tree_node *pre1=one.node->_prev_sibling;
+				tree_node *pre2=two.node->_prev_sibling;
+				tree_node *par1=one.node->_parent;
+				tree_node *par2=two.node->_parent;
 
 				// reconnect
-				one.node->parent=par2;
-				one.node->next_sibling=nxt2;
-				if(nxt2) nxt2->prev_sibling=one.node;
-				else     par2->last_child=one.node;
-				one.node->prev_sibling=pre2;
-				if(pre2) pre2->next_sibling=one.node;
-				else     par2->first_child=one.node;    
+				one.node->_parent=par2;
+				one.node->_next_sibling=nxt2;
+				if(nxt2) nxt2->_prev_sibling=one.node;
+				else     par2->_last_child=one.node;
+				one.node->_prev_sibling=pre2;
+				if(pre2) pre2->_next_sibling=one.node;
+				else     par2->_first_child=one.node;    
 
-				two.node->parent=par1;
-				two.node->next_sibling=nxt1;
-				if(nxt1) nxt1->prev_sibling=two.node;
-				else     par1->last_child=two.node;
-				two.node->prev_sibling=pre1;
-				if(pre1) pre1->next_sibling=two.node;
-				else     par1->first_child=two.node;
+				two.node->_parent=par1;
+				two.node->_next_sibling=nxt1;
+				if(nxt1) nxt1->_prev_sibling=two.node;
+				else     par1->_last_child=two.node;
+				two.node->_prev_sibling=pre1;
+				if(pre1) pre1->_next_sibling=two.node;
+				else     par1->_first_child=two.node;
 				}
 			}
 
@@ -2463,7 +2500,7 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		bool tree<T, tree_nodeallocator>::is_head(const iterator_base& it) 
 		  	{
-			if(it.node->parent==0) return true;
+			if(it.node->_parent==0) return true;
 			return false;
 			}
 
@@ -2479,7 +2516,7 @@ namespace ProjectBase{
 				walk=parent(walk);
 				parents.insert(walk);
 				}
-			while( walk.node->parent );
+			while( walk.node->_parent );
 
 			// Walk up from 'two' until we encounter a node in parents.
 			walk=two;
@@ -2487,7 +2524,7 @@ namespace ProjectBase{
 				walk=parent(walk);
 				if(parents.find(walk) != parents.end()) break;
 				}
-			while( walk.node->parent );
+			while( walk.node->_parent );
 
 			return walk;
 			}
@@ -2496,15 +2533,15 @@ namespace ProjectBase{
 		unsigned int tree<T, tree_nodeallocator>::index(sibling_iterator it) const
 			{
 			unsigned int ind=0;
-			if(it.node->parent==0) {
-				while(it.node->prev_sibling!=head) {
-					it.node=it.node->prev_sibling;
+			if(it.node->_parent==0) {
+				while(it.node->_prev_sibling!=head) {
+					it.node=it.node->_prev_sibling;
 					++ind;
 					}
 				}
 			else {
-				while(it.node->prev_sibling!=0) {
-					it.node=it.node->prev_sibling;
+				while(it.node->_prev_sibling!=0) {
+					it.node=it.node->_prev_sibling;
 					++ind;
 					}
 				}
@@ -2515,18 +2552,18 @@ namespace ProjectBase{
 		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::sibling(const iterator_base& it, unsigned int num) const
 		   {
 		   tree_node *tmp;
-		   if(it.node->parent==0) {
-		      tmp=head->next_sibling;
+		   if(it.node->_parent==0) {
+		      tmp=head->_next_sibling;
 		      while(num) {
-		         tmp = tmp->next_sibling;
+		         tmp = tmp->_next_sibling;
 		         --num;
 		         }
 		      }
 		   else {
-		      tmp=it.node->parent->first_child;
+		      tmp=it.node->_parent->_first_child;
 		      while(num) {
 		         assert(tmp!=0);
-		         tmp = tmp->next_sibling;
+		         tmp = tmp->_next_sibling;
 		         --num;
 		         }
 		      }
@@ -2539,15 +2576,15 @@ namespace ProjectBase{
 			iterator it=begin();
 			while(it!=end()) {
 				// std::cerr << *it << " (" << it.node << ")" << std::endl;
-				if(it.node->parent!=0) {
-					if(it.node->prev_sibling==0) 
-						assert(it.node->parent->first_child==it.node);
+				if(it.node->_parent!=0) {
+					if(it.node->_prev_sibling==0) 
+						assert(it.node->_parent->_first_child==it.node);
 					else 
-						assert(it.node->prev_sibling->next_sibling==it.node);
-					if(it.node->next_sibling==0) 
-						assert(it.node->parent->last_child==it.node);
+						assert(it.node->_prev_sibling->_next_sibling==it.node);
+					if(it.node->_next_sibling==0) 
+						assert(it.node->_parent->_last_child==it.node);
 					else
-						assert(it.node->next_sibling->prev_sibling==it.node);
+						assert(it.node->_next_sibling->_prev_sibling==it.node);
 					}
 				++it;
 				}
@@ -2556,10 +2593,10 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::child(const iterator_base& it, unsigned int num) 
 			{
-			tree_node *tmp=it.node->first_child;
+			tree_node *tmp=it.node->_first_child;
 			while(num--) {
 				assert(tmp!=0);
-				tmp=tmp->next_sibling;
+				tmp=tmp->_next_sibling;
 				}
 			return tmp;
 			}
@@ -2652,10 +2689,10 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::sibling_iterator tree<T, tree_nodeallocator>::iterator_base::begin() const
 			{
-			if(node->first_child==0) 
+			if(node->_first_child==0) 
 				return end();
 
-			sibling_iterator ret(node->first_child);
+			sibling_iterator ret(node->_first_child);
 			ret.parent_=this->node;
 			return ret;
 			}
@@ -2683,13 +2720,13 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		unsigned int tree<T, tree_nodeallocator>::iterator_base::number_of_children() const
 			{
-			tree_node *pos=node->first_child;
+			tree_node *pos=node->_first_child;
 			if(pos==0) return 0;
 
 			unsigned int ret=1;
-			while(pos!=node->last_child) {
+			while(pos!=node->_last_child) {
 				++ret;
-				pos=pos->next_sibling;
+				pos=pos->_next_sibling;
 				}
 			return ret;
 			}
@@ -2729,18 +2766,18 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator++() {
 			assert(this->node!=0);
-			if(!this->skip_current_children_ && this->node->first_child != 0) { // 如果当前节点有子节点，同时状态为<不跳过下一个子节点>
-				this->node=this->node->first_child; // 将当前节点设置为当前节点的子节点
+			if(!this->skip_current_children_ && this->node->_first_child != 0) { // 如果当前节点有子节点，同时状态为<不跳过下一个子节点>
+				this->node=this->node->_first_child; // 将当前节点设置为当前节点的子节点
 				}
 			else { // 状态为<跳过子节点以及子节点子树> 或者为没有子节点，反正就是不会查询到子节点
 				this->skip_current_children_=false;	// 直接重置状态，等待下一次设置
-				while(this->node->next_sibling==0) { // 如果当前节点没有下一个兄弟节点，将当前节点设置为当前节点的父节点，向上查询，
+				while(this->node->_next_sibling==0) { // 如果当前节点没有下一个兄弟节点，将当前节点设置为当前节点的父节点，向上查询，
 				//指导查到有下一个兄弟节点的节点，或者直到根节点，停止
-					this->node=this->node->parent;
+					this->node=this->node->_parent;
 					if(this->node==0)
 						return *this;
 					}
-				this->node=this->node->next_sibling; // 如果当前节点有下一个兄弟节点，当前节点设置为当前节点的下一个兄弟节点
+				this->node=this->node->_next_sibling; // 如果当前节点有下一个兄弟节点，当前节点设置为当前节点的下一个兄弟节点
 				}
 			return *this;
 		}
@@ -2749,13 +2786,13 @@ namespace ProjectBase{
 		typename tree<T, tree_nodeallocator>::pre_order_iterator& tree<T, tree_nodeallocator>::pre_order_iterator::operator--()
 			{
 			assert(this->node!=0);
-			if(this->node->prev_sibling) {
-				this->node=this->node->prev_sibling;
-				while(this->node->last_child)
-					this->node=this->node->last_child;
+			if(this->node->_prev_sibling) {
+				this->node=this->node->_prev_sibling;
+				while(this->node->_last_child)
+					this->node=this->node->_last_child;
 				}
 			else {
-				this->node=this->node->parent;
+				this->node=this->node->_parent;
 				if(this->node==0)
 					return *this;
 				}
@@ -2841,18 +2878,18 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator++(){
 			assert(this->node != 0);
-			if(this->node->next_sibling == 0) { // 如果当前节点没有兄弟节点了，那么将当前节点置为当前节点的父节点，往上回溯
-				this->node = this->node->parent;
+			if(this->node->_next_sibling == 0) { // 如果当前节点没有兄弟节点了，那么将当前节点置为当前节点的父节点，往上回溯
+				this->node = this->node->_parent;
 				this->skip_current_children_ = false;
 			}
 			else { // 如果当前节点存在兄弟节点，那么
-				this->node = this->node->next_sibling;
+				this->node = this->node->_next_sibling;
 				if(this->skip_current_children_) { // 如果状态<跳过子节点子树>成立，则
 					this->skip_current_children_ = false;
 				}
 				else {
-					while(this->node->first_child) // 如果当前节点存在子节点，那么往下查询指导获得叶子结点
-						this->node = this->node->first_child;
+					while(this->node->_first_child) // 如果当前节点存在子节点，那么往下查询指导获得叶子结点
+						this->node = this->node->_first_child;
 				}
 			}
 			return *this;
@@ -2861,14 +2898,14 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::post_order_iterator& tree<T, tree_nodeallocator>::post_order_iterator::operator--() {
 			assert(this->node != 0);
-			if(this->skip_current_children_ || this->node->last_child == 0) { // 当状态<跳过下一个节点>成立，或者当前节点没有兄弟节点
+			if(this->skip_current_children_ || this->node->_last_child == 0) { // 当状态<跳过下一个节点>成立，或者当前节点没有兄弟节点
 				this->skip_current_children_ = false;
-				while(this->node->prev_sibling == 0)
-					this->node = this->node->parent;
-				this->node = this->node->prev_sibling;
+				while(this->node->_prev_sibling == 0)
+					this->node = this->node->_parent;
+				this->node = this->node->_prev_sibling;
 			}
 			else {
-				this->node = this->node->last_child;
+				this->node = this->node->_last_child;
 			}
 			return *this;
 		}
@@ -2914,8 +2951,8 @@ namespace ProjectBase{
 		void tree<T, tree_nodeallocator>::post_order_iterator::descend_all()
 			{
 			assert(this->node!=0);
-			while(this->node->first_child)
-				this->node=this->node->first_child;
+			while(this->node->_first_child)
+				this->node=this->node->_first_child;
 			}
 
 
@@ -3045,8 +3082,8 @@ namespace ProjectBase{
 			{
 			assert(this->node!=0);
 
-			if(this->node->next_sibling) {
-				this->node=this->node->next_sibling;
+			if(this->node->_next_sibling) {
+				this->node=this->node->_next_sibling;
 				}
 			else { 
 				int relative_depth=0;
@@ -3056,24 +3093,24 @@ namespace ProjectBase{
 						this->node=0; // FIXME: return a proper fixed_depth end iterator once implemented
 						return *this;
 						}
-					this->node=this->node->parent;
+					this->node=this->node->_parent;
 					if(this->node==0) return *this;
 					--relative_depth;
-					} while(this->node->next_sibling==0);
+					} while(this->node->_next_sibling==0);
 			   lower:
-				this->node=this->node->next_sibling;
-				while(this->node->first_child==0) {
-					if(this->node->next_sibling==0)
+				this->node=this->node->_next_sibling;
+				while(this->node->_first_child==0) {
+					if(this->node->_next_sibling==0)
 						goto upper;
-					this->node=this->node->next_sibling;
+					this->node=this->node->_next_sibling;
 					if(this->node==0) return *this;
 					}
-				while(relative_depth<0 && this->node->first_child!=0) {
-					this->node=this->node->first_child;
+				while(relative_depth<0 && this->node->_first_child!=0) {
+					this->node=this->node->_first_child;
 					++relative_depth;
 					}
 				if(relative_depth<0) {
-					if(this->node->next_sibling==0) goto upper;
+					if(this->node->_next_sibling==0) goto upper;
 					else                          goto lower;
 					}
 				}
@@ -3085,8 +3122,8 @@ namespace ProjectBase{
 			{
 			assert(this->node!=0);
 
-			if(this->node->prev_sibling) {
-				this->node=this->node->prev_sibling;
+			if(this->node->_prev_sibling) {
+				this->node=this->node->_prev_sibling;
 				}
 			else { 
 				int relative_depth=0;
@@ -3096,24 +3133,24 @@ namespace ProjectBase{
 						this->node=0;
 						return *this;
 						}
-					this->node=this->node->parent;
+					this->node=this->node->_parent;
 					if(this->node==0) return *this;
 					--relative_depth;
-					} while(this->node->prev_sibling==0);
+					} while(this->node->_prev_sibling==0);
 			   lower:
-				this->node=this->node->prev_sibling;
-				while(this->node->last_child==0) {
-					if(this->node->prev_sibling==0)
+				this->node=this->node->_prev_sibling;
+				while(this->node->_last_child==0) {
+					if(this->node->_prev_sibling==0)
 						goto upper;
-					this->node=this->node->prev_sibling;
+					this->node=this->node->_prev_sibling;
 					if(this->node==0) return *this;
 					}
-				while(relative_depth<0 && this->node->last_child!=0) {
-					this->node=this->node->last_child;
+				while(relative_depth<0 && this->node->_last_child!=0) {
+					this->node=this->node->_last_child;
 					++relative_depth;
 					}
 				if(relative_depth<0) {
-					if(this->node->prev_sibling==0) goto upper;
+					if(this->node->_prev_sibling==0) goto upper;
 					else                            goto lower;
 					}
 				}
@@ -3122,22 +3159,22 @@ namespace ProjectBase{
 		//
 		//
 		//	assert(this->node!=0);
-		//	if(this->node->prev_sibling!=0) {
-		//		this->node=this->node->prev_sibling;
+		//	if(this->node->_prev_sibling!=0) {
+		//		this->node=this->node->_prev_sibling;
 		//		assert(this->node!=0);
-		//		if(this->node->parent==0 && this->node->prev_sibling==0) // head element
+		//		if(this->node->_parent==0 && this->node->_prev_sibling==0) // head element
 		//			this->node=0;
 		//		}
 		//	else {
-		//		tree_node *par=this->node->parent;
+		//		tree_node *par=this->node->_parent;
 		//		do {
-		//			par=par->prev_sibling;
+		//			par=par->_prev_sibling;
 		//			if(par==0) { // FIXME: need to keep track of this!
 		//				this->node=0;
 		//				return *this;
 		//				}
-		//			} while(par->last_child==0);
-		//		this->node=par->last_child;
+		//			} while(par->_last_child==0);
+		//		this->node=par->_last_child;
 		//		}
 		//	return *this;
 			}
@@ -3213,25 +3250,25 @@ namespace ProjectBase{
 			{
 			parent_=0;
 			if(this->node==0) return;
-			if(this->node->parent!=0)
-				parent_=this->node->parent;
+			if(this->node->_parent!=0)
+				parent_=this->node->_parent;
 			}
 
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::sibling_iterator& tree<T, tree_nodeallocator>::sibling_iterator::operator++()
 			{
 			if(this->node)
-				this->node=this->node->next_sibling;
+				this->node=this->node->_next_sibling;
 			return *this;
 			}
 
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::sibling_iterator& tree<T, tree_nodeallocator>::sibling_iterator::operator--()
 			{
-			if(this->node) this->node=this->node->prev_sibling;
+			if(this->node) this->node=this->node->_prev_sibling;
 			else {
 				assert(parent_);
-				this->node=parent_->last_child;
+				this->node=parent_->_last_child;
 				}
 			return *this;
 		}
@@ -3275,14 +3312,14 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::tree_node *tree<T, tree_nodeallocator>::sibling_iterator::range_first() const
 			{
-			tree_node *tmp=parent_->first_child;
+			tree_node *tmp=parent_->_first_child;
 			return tmp;
 			}
 
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::tree_node *tree<T, tree_nodeallocator>::sibling_iterator::range_last() const
 			{
-			return parent_->last_child;
+			return parent_->_last_child;
 			}
 
 		// Leaf iterator
@@ -3321,19 +3358,19 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator++(){
 			assert(this->node!=0);
-			if(this->node->first_child!=0) { // current node is no longer leaf (children got added)
-				 while(this->node->first_child) 
-					  this->node=this->node->first_child;
+			if(this->node->_first_child!=0) { // current node is no longer leaf (children got added)
+				 while(this->node->_first_child) 
+					  this->node=this->node->_first_child;
 				 }
 			else {
-				 while(this->node->next_sibling==0) { 
-					  if (this->node->parent==0) return *this;
-					  this->node=this->node->parent;
+				 while(this->node->_next_sibling==0) { 
+					  if (this->node->_parent==0) return *this;
+					  this->node=this->node->_parent;
 					  if (top_node != 0 && this->node==top_node) return *this;
 					  }
-				 this->node=this->node->next_sibling;
-				 while(this->node->first_child)
-					  this->node=this->node->first_child;
+				 this->node=this->node->_next_sibling;
+				 while(this->node->_first_child)
+					  this->node=this->node->_first_child;
 				 }
 			return *this;
 		}
@@ -3341,14 +3378,14 @@ namespace ProjectBase{
 		template <class T, class tree_nodeallocator>
 		typename tree<T, tree_nodeallocator>::leaf_iterator& tree<T, tree_nodeallocator>::leaf_iterator::operator--(){
 			assert(this->node!=0);
-			while (this->node->prev_sibling==0) {
-				if (this->node->parent==0) return *this;
-				this->node=this->node->parent;
+			while (this->node->_prev_sibling==0) {
+				if (this->node->_parent==0) return *this;
+				this->node=this->node->_parent;
 				if (top_node !=0 && this->node==top_node) return *this; 
 				}
-			this->node=this->node->prev_sibling;
-			while(this->node->last_child)
-				this->node=this->node->last_child;
+			this->node=this->node->_prev_sibling;
+			while(this->node->_last_child)
+				this->node=this->node->_last_child;
 			return *this;
 		}
 
