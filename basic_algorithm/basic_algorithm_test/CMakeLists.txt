@@ -7,7 +7,7 @@ set(basic_algorithm_test_module_name ${module} CACHE INTERNAL "module name")
 obj_name_provide(CMAKE_BUILD_TYPE project_base_build_shared_lib module)
 
  # generate executable
-set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS} -fpermissive")
+set(CMAKE_CXX_FLAGS "-DPROJECT_BASE_FUNCTION=1 ${CMAKE_CXX_FLAGS} -fpermissive --save-temps")
 
 file(GLOB test_${module}_src *.h *.cc)
 debug_the_src_with_abspath(test_${module}_src)

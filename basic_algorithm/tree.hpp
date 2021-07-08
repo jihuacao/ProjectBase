@@ -221,7 +221,7 @@ namespace ProjectBase{
 						typename Node::value_type&             operator*() const;
 						typename Node::value_type*             operator->() const;
 
-		            /// When called, the next increment/decrement skips children of this node.
+		            	/// When called, the next increment/decrement skips children of this node.
 						void         skip_children();
 						void         skip_children(bool skip);
 						/// Number of children of the node pointed to by the iterator.
