@@ -37,3 +37,166 @@ TEST(OneThreeEightSeven, single_test){
     });
     int aa = 0;
 }
+
+/*
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为 “Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+
+问总共有多少条不同的路径？
+示例 1：
+输入：m = 3, n = 7
+输出：28
+
+可行解法：
+1.动态规划
+2.组合数学
+
+来源：力扣（LeetCode）
+链接：```https://leetcode-cn.com/problems/unique-paths/```
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+*/
+int get(int m, int n, int* ptr, int m_now, int n_now){
+    int temp = 0;
+    if(ptr[m_now * n + n_now] == -1){
+        if(m_now - 1 >= 0){
+            temp += get(m, n, ptr, m_now - 1, n_now);
+        }
+        if(n_now - 1 >= 0){
+            temp += get(m, n, ptr, m_now, n_now - 1);
+        }
+        ptr[m_now * n + n_now] = temp;
+        return temp;
+    }
+    else{
+        return ptr[m_now * n + n_now];
+    }
+};
+
+int uniquePaths(int m, int n) {
+    int* ptr = (int*)malloc(sizeof(int) * m * n);
+    memset(ptr, -1, sizeof(int) * m * n);
+    ptr[0] = 1;
+    int temp = 0;
+    temp = get(m, n, ptr, m - 1, n - 1);
+    free(ptr);
+    return temp;
+}
+
+TEST(SixTwo, single_test){
+    uniquePaths(3, 7);
+}
+
+/*
+64. 最小路径和
+给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+说明：每次只能向下或者向右移动一步。
+
+示例 1：
+输入：grid = [[1,3,1],[1,5,1],[4,2,1]]
+输出：7
+解释：因为路径 1→3→1→1→1 的总和最小。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/minimum-path-sum
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
+/**
+ * \brief brief
+ * \note note
+ *  f(m, n)=v(m, n)+max(f(m-1, n), f(m, n-1))
+ * \author none
+ * \param[in] in
+ * \param[out] out
+ * \return return
+ * \retval retval
+ * \since version
+ * */
+int get_min_path(int* ptr, std::vector<std::vector<int>>& grid, int m, int n, int m_now, int n_now){
+    int temp;
+    if(ptr[m_now * m + n_now] == -1){
+        if(m_now - 1 >= 0 && n_now - 1 >= 0){
+            temp = std::min(get_min_path(ptr, grid, m, n, m_now, n_now - 1), get_min_path(ptr, grid, m, n, m_now - 1, n_now)) + grid[m_now][n_now];
+        }
+        else{
+            if(m_now - 1 < 0){
+                temp = get_min_path(ptr, grid, m, n, m_now, n_now - 1) + grid[m_now][n_now];
+            }
+            if(n_now - 1 < 0){
+                temp = get_min_path(ptr, grid, m, n, m_now - 1, n_now) + grid[m_now][n_now];
+            }
+        }
+        ptr[m_now * m + n_now] = temp;
+        return temp;
+    }
+    else{
+        return ptr[m_now * m + n_now];
+    }
+}
+int minPathSum(std::vector<std::vector<int>>& grid) {
+    int m = grid.size();
+    int n = grid[0].size();
+    int ret = 0;
+    int* ptr = (int*)malloc(m * n * sizeof(int));
+    memset(ptr, -1, m * n * sizeof(int));
+    ptr[0] = grid[0][0];
+    ret = get_min_path(ptr, grid, m, n, m - 1, n - 1);
+    free(ptr);
+    return ret;
+}
+
+TEST(SixFour, single_test){
+    std::vector<std::vector<int>> grid;
+    grid.push_back(std::vector<int>({1, 2, 3}));
+    grid.push_back(std::vector<int>({4, 5, 6}));
+    minPathSum(grid);
+}
+
+/*
+1191. K 次串联后最大子数组之和
+给你一个整数数组 arr 和一个整数 k。
+
+首先，我们要对该数组进行修改，即把原数组 arr 重复 k 次。
+
+举个例子，如果 arr = [1, 2] 且 k = 3，那么修改后的数组就是 [1, 2, 1, 2, 1, 2]。
+
+然后，请你返回修改后的数组中的最大的子数组之和。
+
+注意，子数组长度可以是 0，在这种情况下它的总和也是 0。
+
+由于 结果可能会很大，所以需要 模（mod） 10^9 + 7 后再返回。 
+
+示例 1：
+
+输入：arr = [1,2], k = 3
+输出：9
+示例 2：
+
+输入：arr = [1,-2,1], k = 5
+输出：2
+示例 3：
+
+输入：arr = [-1,-2], k = 7
+输出：0
+*/
+int kConcatenationMaxSum(std::vector<int>& arr, int k) {
+    int p = 0;
+    int m = 0;
+    int s = 0;
+    int l = k >= 3 ? 3 : k;
+    for(auto i = 0; i < l * arr.size(); ++i){
+        p = std::max(p + arr[i % arr.size()], arr[i % arr.size()]);
+        m = std::max(p, m);
+        if(i < arr.size()){
+            s += arr[i];
+        }
+    }
+    m = std::max(p, m);
+    m = std::max(k * s, m);
+    return m;
+}
+
+TEST(OneOneNineOne, signle_test){
+    auto a = std::vector<int>({-5,-2,0,0,3,9,-2,-5,4});
+    auto k = 5;
+    kConcatenationMaxSum(a, k);
+}
