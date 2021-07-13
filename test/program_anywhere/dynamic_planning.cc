@@ -28,14 +28,59 @@
  * 区间内的数按权重排序以后的结果为 [12,13,14,15] 。对于 k = 2 ，答案是第二个整数也就是 13 。
  * 注意，12 和 13 有相同的权重，所以我们按照它们本身升序排序。14 和 15 同理。
  * */
-TEST(OneThreeEightSeven, single_test){
-    std::vector<int> a = {5, 4, 3, 2, 1};
-    std::vector<int> b = {1, 2, 3, 4, 5};
-
-    std::sort(b.begin(), b.end(), [&](std::size_t i, std::size_t j){
-        return a[i] < a[j];
+int getKth(int lo, int hi, int k){
+    std::map<int, int> w;
+    std::vector<int> wt;
+    std::vector<int> mid;
+    int size;
+    int temp;
+    w.insert({1, 0});
+    for(auto i = lo; i <= hi; ++i){
+        temp = i;
+        do{
+            if(w.find(temp) != w.end()){
+                mid.push_back(w.find(temp)->second);
+                break;
+            }else{
+                mid.push_back(temp);
+                if((temp / 2) * 2 == temp){
+                    temp = temp / 2;
+                }else{
+                    temp = 3 * temp + 1;
+                }
+            }
+        }while(temp != 1);
+        if(temp == 1){
+            mid.push_back(0);
+        }
+        size = mid.size();
+        wt.push_back(i);
+        for(auto t = 0; t < size - 1; ++t){
+            w.insert({mid[t], *mid.rbegin() + size - 1 - t});
+        }
+        mid.clear();
+    }
+    for(auto i = w.begin(); i != w.end(); ){
+        if(lo <= i->first && i->first <= hi){
+            ++i;
+            continue;
+        }else{
+            w.erase(i++);
+        }
+    }
+    std::sort(wt.begin(), wt.end(), [&](int i, int j){
+        if (w[i] != w[j]){
+            return w[i] < w[j];
+        }
+        else{
+            return i < j;
+        }
     });
-    int aa = 0;
+    return wt[k - 1];
+}
+
+TEST(OneThreeEightSeven, single_test){
+    getKth(12, 15, 2);
 }
 
 /*
