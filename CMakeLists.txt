@@ -33,6 +33,7 @@ include(popular_message)
 project_base_system_message()
 
 #生成链接库
+# 关于计算设备的问题，本工程中可能包含有众多计算设备的调用，因此需要在这里进行判断
 set(cm_module_name cm)
 if (OPENCL)
     find_package(OpenCL REQUIRED)
@@ -80,6 +81,8 @@ include(boost)
 include(eigen3)
 # protobuf
 include(protobuf)
+## opencl
+#include(OpenCL)
 
 # glog depend
 
