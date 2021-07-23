@@ -23,13 +23,13 @@
 //	int device_id = 0;
 //	string image_filename = "test.ppm";
 //
-//	for (int i = 1; i < argc; i++) {
-//		if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
-//		else if ((strcmp(argv[i], "-d") == 0) && (i < (argc - 1))) { device_id = atoi(argv[++i]); }
-//		else if (strcmp(argv[i], "-l") == 0) { std::cout << ListPlatformsDevices() << std::endl; }
-//		else if ((strcmp(argv[i], "-f") == 0) && (i < (argc - 1))) { image_filename = argv[++i]; }
-//		else if (strcmp(argv[i], "-h") == 0) { print_help(); return 0; }
-//	}
+//	//for (int i = 1; i < argc; i++) {
+//	//	if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
+//	//	else if ((strcmp(argv[i], "-d") == 0) && (i < (argc - 1))) { device_id = atoi(argv[++i]); }
+//	//	else if (strcmp(argv[i], "-l") == 0) { std::cout << ListPlatformsDevices() << std::endl; }
+//	//	else if ((strcmp(argv[i], "-f") == 0) && (i < (argc - 1))) { image_filename = argv[++i]; }
+//	//	else if (strcmp(argv[i], "-h") == 0) { print_help(); return 0; }
+//	//}
 //
 //	cimg::exception_mode(0);
 //

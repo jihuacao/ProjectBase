@@ -13,7 +13,7 @@ file(GLOB test_${module}_src *.h *.cc)
 debug_the_src_with_abspath(test_${module}_src)
 add_executable(${${program_opencl_module_name}_target_name} ${test_${module}_src})
 target_link_libraries(${${program_opencl_module_name}_target_name} ${${gtest_module_name}_target_name})
-target_link_libraries(${${program_opencl_module_name}_target_name} ${${gflag_module_name}_target_name})
+target_link_libraries(${${program_opencl_module_name}_target_name} ${${gflags_module_name}_target_name})
 
 
 ## obj
