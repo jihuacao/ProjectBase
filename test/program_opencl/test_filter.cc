@@ -56,13 +56,13 @@ TEST(opencl, ddfilter){
 		//3.2 Load & build the device code
 		cl::Program::Sources sources;
 
-		AddSources(sources, "test/program_opencl/kernels/test_filter.cl");
+		AddSources(sources, "test/program_opencl/kernel/test_filter.cl");
 
 		cl::Program program(context, sources);
 
 		//build and debug the kernel code
 		try { 
-			program.build();
+			program.build("-g");
 		}
 		catch (const cl::Error& err) {
 			std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(context.getInfo<CL_CONTEXT_DEVICES>()[0]) << std::endl;
