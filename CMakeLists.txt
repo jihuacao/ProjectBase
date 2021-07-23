@@ -67,6 +67,7 @@ include_directories(${project_include_dir})
 
 option(project_base_build_shared_lib "build the shared library or not" ON)
 option(project_base_build_python_interface "build the interface for python or not" OFF)
+option(project_base_build_with_opencl "build the project with opencl, if not the component which depend on opencl would not be built" ON)
 
 # gflags depend
 include(gflags)
@@ -80,6 +81,8 @@ include(boost)
 include(eigen3)
 # protobuf
 include(protobuf)
+# opencl
+include(opencl)
 
 # glog depend
 
