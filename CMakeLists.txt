@@ -33,6 +33,7 @@ include(popular_message)
 project_base_system_message()
 
 #生成链接库
+# 关于计算设备的问题，本工程中可能包含有众多计算设备的调用，因此需要在这里进行判断
 set(cm_module_name cm)
 if (OPENCL)
     find_package(OpenCL REQUIRED)
@@ -67,7 +68,6 @@ include_directories(${project_include_dir})
 
 option(project_base_build_shared_lib "build the shared library or not" ON)
 option(project_base_build_python_interface "build the interface for python or not" OFF)
-option(project_base_build_with_opencl "build the project with opencl, if not the component which depend on opencl would not be built" ON)
 
 # gflags depend
 include(gflags)
@@ -81,8 +81,8 @@ include(boost)
 include(eigen3)
 # protobuf
 include(protobuf)
-# opencl
-include(opencl)
+## opencl
+#include(OpenCL)
 
 # glog depend
 
