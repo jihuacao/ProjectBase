@@ -2,8 +2,8 @@
 #include <vector>
 #include <gtest/gtest.h>
 
-#include "Utils.hh"
-#include "CImg.hh"
+#include "Utils.h"
+#include "CImg.h"
 
 using namespace cimg_library;
 
@@ -21,7 +21,7 @@ TEST(opencl, ddfilter){
 	//Part 1 - handle command line options such as device selection, verbosity, etc.
 	int platform_id = 0;
 	int device_id = 0;
-	string image_filename = "test.ppm";
+	string image_filename = "test/program_opencl/image/test.ppm";
 
 	//for (int i = 1; i < argc; i++) {
 	//	if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
@@ -56,13 +56,13 @@ TEST(opencl, ddfilter){
 		//3.2 Load & build the device code
 		cl::Program::Sources sources;
 
-		AddSources(sources, "kernels/test_filter.cl");
+		AddSources(sources, "test/program_opencl/kernels/test_filter.cl");
 
 		cl::Program program(context, sources);
 
 		//build and debug the kernel code
 		try { 
-			program.build("-g");
+			program.build();
 		}
 		catch (const cl::Error& err) {
 			std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(context.getInfo<CL_CONTEXT_DEVICES>()[0]) << std::endl;
