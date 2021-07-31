@@ -18,6 +18,22 @@ void print_help() {
 }
 
 TEST(opencl, ddfilter){
+	cl_int status;
+	cl_uint pnum = 0;
+	// 获取host支持平台数目
+	clGetPlatformIDs(NULL, nullptr, &pnum);
+
+	cl_platform_id* pids = (cl_platform_id*)malloc(pnum * sizeof(cl_platform_id));
+	// 提取所有_cl_platform_id的二级指针，_cl_platform_id存于栈中
+	clGetPlatformIDs(pnum, pids, NULL);
+	// 检索设备的数量
+	cl_uint dnum = 0;
+	status = clGetDeviceIDs(pids[0], CL_DEVICE_TYPE_ALL, 0, NULL, &dnum);
+	// 为每个设备对象分配足够的空间
+	cl_device_id *did;
+	did = (cl_device_id *)malloc(dnum * sizeof(cl_device_id));
+	// 将具体的设备对象填充其中
+	status = clGetDeviceIDs(pids[0], CL_DEVICE_TYPE_ALL, dnum, did, NULL);
 	//Part 1 - handle command line options such as device selection, verbosity, etc.
 	int platform_id = 0;
 	int device_id = 0;
