@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "/data2/process_data/caojihua/workspace",
                 "${workspaceFolder}/install/include",
-                "${workspaceFolder}/install/include/eigen3"
+                "${workspaceFolder}/install/include/eigen3",
+                "/usr/local/cuda/include",
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
