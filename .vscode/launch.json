@@ -217,7 +217,7 @@
             "name": "ProgramOpencld",
             "type": "cppdbg",
             "request": "launch",
-            "miDebuggerServerAddress": "localhost:12345",
+            //"miDebuggerServerAddress": "localhost:12345",
             "program": "${workspaceFolder}/build-debug/test/program_opencl/ProgramOpencld",
             "args": [],
             "stopAtEntry": false,
