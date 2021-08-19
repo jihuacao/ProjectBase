@@ -8,6 +8,7 @@ extern "C"{
 #ifdef __cplusplus
 }
 #endif
+#include "ProjectBase/cross_platform/util_method.hpp"
 
 #define DEVICE_INFO_NEED_SIZE(INFO_NAME, INFO_TYPE, DEVICE_ID_PTR, WHICH_DEVICE, \
 DEVICE_INFO_SIZE, DEVICE_INFO_PTR, ALL_INFO, INFO_PTR_WITH_SIZE) \
@@ -21,9 +22,23 @@ clGetDeviceInfo(*(DEVICE_ID_PTR + WHICH_DEVICE), INFO_NAME, NULL, nullptr, &DEVI
 DEVICE_INFO_PTR = (cl_device_info*)malloc(DEVICE_INFO_SIZE); \
 clGetDeviceInfo(*(DEVICE_ID_PTR + WHICH_DEVICE), INFO_NAME, DEVICE_INFO_SIZE, DEVICE_INFO_PTR, NULL);
 
+#define CHAR_PTR_DEVICE_INFO(INFO_NAME, DEVICE_ID_PTR, WHICH_DEVICE, DEVICE_INFO_SIZE, DEVICE_INFO_PTR, ALL_INFO) \
+GET_DEVICE_INFO(INFO_NAME, INFO_TYPE, DEVICE_ID_PTR, WHICH_DEVICE, DEVICE_INFO_SIZE, DEVICE_INFO_PTR) \
+ALL_INFO += std::string("       ") + #INFO_NAME + "(char*)" + ":\n" + "         " + std::string((char*)DEVICE_INFO_PTR) + "\n"; \
+delete DEVICE_INFO_PTR;
+
+#define CHAR_PTR_PTR_DEVICE_INFO(INFO_NAME, DEVICE_ID_PTR, WHICH_DEVICE, DEVICE_INFO_SIZE, DEVICE_INFO_PTR, ALL_INFO) \
+GET_DEVICE_INFO(INFO_NAME, INFO_TYPE, DEVICE_ID_PTR, WHICH_DEVICE, DEVICE_INFO_SIZE, DEVICE_INFO_PTR) \
+ALL_INFO += std::string("       ") + #INFO_NAME + "(char**)" + ":\n"; \
+for(auto i = 0; i < DEVICE_INFO_SIZE; ++i){ \
+    ALL_INFO += std::string(*((char**)DEVICE_INFO_PTR + i)) + "\n"; \
+} \
+delete DEVICE_INFO_PTR;
+
+
 #define DEVICE_INFO(INFO_NAME, INFO_TYPE, TO_STRING_METHOD, DEVICE_ID_PTR, WHICH_DEVICE, \
 DEVICE_INFO_SIZE, DEVICE_INFO_PTR, ALL_INFO) \
-GET_DEVICE_INFO(#INFO_NAME, INFO_TYPE, DEVICE_ID_PTR, WHICH_DEVICE, DEVICE_INFO_SIZE, DEVICE_INFO_PTR) \
+GET_DEVICE_INFO(INFO_NAME, INFO_TYPE, DEVICE_ID_PTR, WHICH_DEVICE, DEVICE_INFO_SIZE, DEVICE_INFO_PTR) \
 if (#INFO_TYPE == "cl_device_fp_config"){ \
     if (#INFO_NAME == "CL_DEVICE_EXECUTION_CAPABILITIES"){ \
         ALL_INFO += std::string("       ") + #INFO_NAME + "(" + #INFO_TYPE + ")" + ":\n" + "         " + "error: need decode" + "\n"; \
@@ -59,8 +74,14 @@ else if (#INFO_TYPE == "cl_device_type"){ \
 else if (#INFO_TYPE == "size_t*"){ \
     ALL_INFO += std::string("       ") + #INFO_NAME + "(" + #INFO_TYPE + ")" + ":\n" + "         " + "error: USE THE DEVICE_INFO_WITH_SIZE" + "\n"; \
 } \
+else if (#INFO_TYPE == "char*"){ \
+    ALL_INFO += std::string("       ") + #INFO_NAME + "(" + #INFO_TYPE + ")" + ":\n"; \
+    for(auto i = 0; i < DEVICE_INFO_SIZE; ++i){ \
+        ALL_INFO += std::string(*((char**)DEVICE_INFO_PTR + i)) + "\n"; \
+    } \
+} \
 else{ \
-    ALL_INFO += std::string("       ") + #INFO_NAME + "(" + #INFO_TYPE + ")" + ":\n" + "         " + /*TO_STRING_METHOD(*(INFO_TYPE*)DEVICE_INFO_PTR)*/ + "\n"; \
+    ALL_INFO += std::string("       ") + #INFO_NAME + "(" + #INFO_TYPE + ")" + ":\n" + "         " + TO_STRING_METHOD(*(INFO_TYPE*)DEVICE_INFO_PTR) + "\n"; \
 } \
 delete DEVICE_INFO_PTR;
 
@@ -110,17 +131,18 @@ int main(int argc, int* argv[]){
         clGetDeviceIDs(*(platform_id_ptr + p), CL_DEVICE_TYPE_ALL, dnum, device_id_ptr, NULL);
         for(int d = 0; d < dnum; ++d){
             info += std::string("   |\n    ->") + "Device " + std::to_string(d) + "\n";
-            TO_STRING_DEVICE_INFO(CL_DEVICE_ADDRESS_BITS, cl_uint, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_AVAILABLE, cl_bool, device_id_ptr, d, device_info_size, device_info, info);
-            STRING_DEVICE_INFO(CL_DEVICE_BUILT_IN_KERNELS, char*, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_COMPILER_AVAILABLE, cl_bool, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_DOUBLE_FP_CONFIG, cl_device_fp_config, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_ENDIAN_LITTLE, cl_bool, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_ERROR_CORRECTION_SUPPORT, cl_bool, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_EXECUTION_CAPABILITIES, cl_device_exec_capabilities, device_id_ptr, d, device_info_size, device_info, info);
-            STRING_DEVICE_INFO(CL_DEVICE_EXTENSIONS, char*, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, cl_ulong, device_id_ptr, d, device_info_size, device_info, info);
-            TO_STRING_DEVICE_INFO(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, cl_device_mem_cache_type, device_id_ptr, d, device_info_size, device_info, info);
+            #pragma message(MACRO_TO_STRING(DEVICE_INFO(CL_DEVICE_ADDRESS_BITS, cl_uint, std::to_string, device_id_ptr, d, device_info_size, device_info, info)))
+            DEVICE_INFO(CL_DEVICE_AVAILABLE, cl_bool, std::to_string, device_id_ptr, d, device_info_size, device_info, info);
+            #pragma message(MACRO_TO_STRING(CHAR_PTR_PTR_DEVICE_INFO(CL_DEVICE_BUILT_IN_KERNELS, device_id_ptr, d, device_info_size, device_info, info);))
+            CHAR_PTR_DEVICE_INFO(CL_DEVICE_BUILT_IN_KERNELS, device_id_ptr, d, device_info_size, device_info, info);
+            //TO_STRING_DEVICE_INFO(CL_DEVICE_COMPILER_AVAILABLE, cl_bool, device_id_ptr, d, device_info_size, device_info, info);
+            //TO_STRING_DEVICE_INFO(CL_DEVICE_DOUBLE_FP_CONFIG, cl_device_fp_config, device_id_ptr, d, device_info_size, device_info, info);
+            //TO_STRING_DEVICE_INFO(CL_DEVICE_ENDIAN_LITTLE, cl_bool, device_id_ptr, d, device_info_size, device_info, info);
+            //TO_STRING_DEVICE_INFO(CL_DEVICE_ERROR_CORRECTION_SUPPORT, cl_bool, device_id_ptr, d, device_info_size, device_info, info);
+            //TO_STRING_DEVICE_INFO(CL_DEVICE_EXECUTION_CAPABILITIES, cl_device_exec_capabilities, device_id_ptr, d, device_info_size, device_info, info);
+            //STRING_DEVICE_INFO(CL_DEVICE_EXTENSIONS, char*, device_id_ptr, d, device_info_size, device_info, info);
+            //TO_STRING_DEVICE_INFO(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, cl_ulong, device_id_ptr, d, device_info_size, device_info, info);
+            //TO_STRING_DEVICE_INFO(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, cl_device_mem_cache_type, device_id_ptr, d, device_info_size, device_info, info);
             //DEVICE_INFO(, , device_id_ptr, d, device_info_size, device_info, info);
             //DEVICE_INFO(, , device_id_ptr, d, device_info_size, device_info, info);
             //DEVICE_INFO(, , device_id_ptr, d, device_info_size, device_info, info);

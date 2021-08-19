@@ -20,6 +20,7 @@ target_compile_definitions(${${device_info_module_name}_target_name} PRIVATE ${P
 # link
 target_link_libraries(${${device_info_module_name}_target_name} ${${opencl_base_module_name}_target_name})
 target_link_libraries(${${device_info_module_name}_target_name} ${${gtest_module_name}_target_name})
+target_link_libraries(${${device_info_module_name}_target_name} ${${cross_platform}_target_name})
 
 
 ## obj
