@@ -14,7 +14,10 @@ project(${${module}_target_name} CXX C)
 
  #生成链接库
 add_library(${${module}_target_name} ${${module}_build_link_type} ${DIR_LIB_SRCS})
+# compile
 target_compile_definitions(${${module}_target_name} PRIVATE ${PRIVATE_COMPILE_DEFINE})
+# link
+target_link_libraries(${${module}_target_name} ${${cm_module_name}_target_name})
 
 ## install opencl_base 
 message(STATUS ${CMAKE_CURRENT_LIST_FILE})
