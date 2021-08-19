@@ -86,6 +86,10 @@ include(protobuf)
 
 # glog depend
 
+if(${OPENCL})
+    # build opencl base
+    add_subdirectory(opencl_base)
+endif()
 # build plugin_manager
 add_subdirectory(plugin_manager)
 # build cmake_module
