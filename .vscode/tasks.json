@@ -73,5 +73,15 @@
                 "$gcc"
             ]
         },
+        {
+            // 该task被launch调用，实现启动前调用，此处编译IndicatorTest
+            "label": "BuildDeviceInfod",
+            "type": "shell",
+            "command": "make DeviceInfod -C ./build-debug",
+            "problemMatcher":[
+                //　捕获编译错误
+                "$gcc"
+            ]
+        },
     ]
 }
