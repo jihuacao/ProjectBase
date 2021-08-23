@@ -30,6 +30,11 @@ enum InfoType{
     SIZET,
     CLDEVICELOCALMEMTYPE,
     BUFFER,
+    POINTER,
+    CLDEVICEPARTITIONPROPERTIES,
+    CLDEVICEAFFINITYDOMAIN,
+    CLCOMMANDQUEUEPROPERTIES,
+    CLDEVICETYPE,
     TheFlag,
 };
 
@@ -60,17 +65,49 @@ class InfoTypeInfo{
         };
     public:
         virtual InfoType get_buffer_type(){
-
+            return InfoType();
         };
         virtual size_t get_buffer_size(){
             return NULL;
         };
+        virtual void set_buffer_size(size_t size){
+            return;
+        }
+        virtual std::string get_pointer_name(){
+            return "";
+        }
 };
 
-template<typename _BufferType>
-class _InfoTypeInfoBuffer : public InfoTypeInfo{
+class _InfoTypeInfoPointer : public InfoTypeInfo{
     public:
-        typedef _BufferType BufferType;
+        std::string _pointer_name;
+    public:
+        _InfoTypeInfoPointer(
+            const std::string& name,
+            InfoType type,
+            const std::string& help="",
+            const BitFieldNameType& bit_field_name=BitFieldNameType(),
+            const std::string& pointer_name="None",
+            InfoType flag=TheFlag)
+            : InfoTypeInfo(name, type, help, bit_field_name, TheFlag),
+            _pointer_name(pointer_name)
+        {};
+    public:
+        virtual std::string get_pointer_name(){
+            return _pointer_name;
+        }
+};
+
+/**
+ * \brief brief
+ * \note note 用于Buffer类型，也就是说：需要知道单元类型与buffer长度，如size_t[],cl_uint[]等信息，
+ * 但是char[]得看文档，看看是表示char*，还是buffer(char*, size)
+ * \param[in] size size_t buffer的单元个数
+ * \param[in] buffer_type InfoType buffer单元数据类型
+ * \author none
+ * \since version
+ * */
+class _InfoTypeInfoBuffer : public InfoTypeInfo{
     public:
         size_t _size;
         InfoType _buffer_type;
@@ -96,8 +133,18 @@ class _InfoTypeInfoBuffer : public InfoTypeInfo{
         virtual size_t get_buffer_size(){
             return _size;
         };
+        virtual void set_buffer_size(size_t size){
+            _size = size;
+        }
 }; 
 
+/**
+ * \brief brief
+ * \note note 用于表示需要有单元名称与数据的类型，比如某些信息是几个类别只有一个成立，这时候就需要传入{信息类型，信息名称}，相当于匹配类型信息
+ * \param[in] options_name map {OptionType, std::string} string 用来输出字符，OptionType用来
+ * \author none
+ * \since version
+ * */
 template<typename OptionType> class _InfoTypeInfo : public InfoTypeInfo{
     public:
         typedef std::map<OptionType, std::string> OptionsNameType;
@@ -152,10 +199,13 @@ Default_Info_Format(INFO_TYPE_INFO, #TYPE) + ((_InfoTypeInfo<TYPE>::OptionsNameT
 
 #define BufferDeviceInfoFormat(INFO_TYPE_INFO, TYPE, DEVICE_INFO_PPTR, SIZE) \
 std::string temp = "["; \
-for(auto i = 0; i < SIZE; ++i){ \
-    temp += std::to_string(*((TYPE*)(DEVICE_INFO_PPTR) + i)) + (i != (SIZE - 1) ? ", " : "]"); \
+for(size_t i = 0; i < SIZE; ++i){ \
+    temp += std::to_string(*(*(TYPE**)(DEVICE_INFO_PPTR) + i)) + (i != (SIZE - 1) ? ", " : "]"); \
 } \
 temp = Default_Info_Format(INFO_TYPE_INFO, #TYPE) + temp + "\n";
+
+#define PointerDeviceInfoFormat(INFO_TYPE_INFO, TYPE, DEVICE_INFO_PPTR) \
+Default_Info_Format(INFO_TYPE_INFO, TYPE) + std::to_string(reinterpret_cast<std::uintptr_t>(*DEVICE_INFO_PPTR)) + "\n";
 
 std::string get_device_info(cl_device_info info, std::shared_ptr<InfoTypeInfo> info_type_info, \
 cl_device_id device_id, size_t* device_info_size, cl_device_info** device_info_pptr){
@@ -204,12 +254,36 @@ cl_device_id device_id, size_t* device_info_size, cl_device_info** device_info_p
         case BUFFER:{
             switch(info_type_info->get_buffer_type()){
                 case SIZET:{
-                    BufferDeviceInfoFormat(info_type_info, size_t, device_info_pptr);
+                    BufferDeviceInfoFormat(info_type_info, size_t, device_info_pptr, info_type_info->get_buffer_size());
                     return temp;
+                    break;
+                }
+                default:{
                     break;
                 }
             }
             //BufferDeviceInfoFormat(info_type_info, info_type_info->)
+            break;
+        }
+        case POINTER:{
+            return PointerDeviceInfoFormat(info_type_info, info_type_info->get_pointer_name(), device_info_pptr);
+            break;
+        }
+        case CLDEVICEPARTITIONPROPERTIES:{
+            break;
+        }
+        case CLDEVICEAFFINITYDOMAIN:{
+            BitDeviceInfoFormat(info_type_info, cl_device_fp_config, device_info_pptr);
+            return temp;
+            break;
+        }
+        case CLCOMMANDQUEUEPROPERTIES:{
+            BitDeviceInfoFormat(info_type_info, cl_command_queue_properties, device_info_pptr);
+            return temp;
+            break;
+        }
+        case CLDEVICETYPE:{
+            return OptionsDeviceInfoFormat(info_type_info, cl_device_type, device_info_pptr);
             break;
         }
         default:{
@@ -218,20 +292,19 @@ cl_device_id device_id, size_t* device_info_size, cl_device_info** device_info_p
         }
     }
     delete *device_info_pptr;
-}
+    return "";
+};
 
-std::string get_device_info_buffer(cl_device_info info, std::shared_ptr<InfoTypeInfo> info_type_info, \
-cl_device_id device_id, size_t* device_info_size, cl_device_info** device_info_pptr, size_t buffer_size){
-}
-
-cl_uint get_CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS(cl_device_id device_id){
+cl_uint get_dimensions(cl_device_id device_id, int type){
     size_t size;
     cl_device_info* device_info_ptr;
-    clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, NULL, nullptr, &size);
+    clGetDeviceInfo(device_id, type, NULL, nullptr, &size);
     device_info_ptr = (cl_device_info*)malloc(size);
-    clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, size, device_info_ptr, NULL);
-    return *(cl_uint*)device_info_ptr;
-}
+    clGetDeviceInfo(device_id, type, size, device_info_ptr, NULL);
+    cl_uint temp = *(cl_uint*)device_info_ptr;
+    delete (cl_uint*)device_info_ptr;
+    return temp;
+};
 
 int get_info(){
     cl_uint pnum;
@@ -246,15 +319,15 @@ int get_info(){
     {CL_PLATFORM_VENDOR, "platform_vendor"}, \
     {CL_PLATFORM_EXTENSIONS, "platform_extensions"}};
 
-    cl_uint dnum = 0;
-    cl_device_id* device_id_ptr = nullptr;
+    cl_uint dnum = NULL;
+    //cl_device_id* device_id_ptr = nullptr;
 
-    size_t platform_info_size;
-    cl_platform_info* platform_info;
-    size_t device_info_size;
-    cl_device_info* device_info;
-    std::string info;
-    for(int p = 0; p < pnum; ++p){
+    size_t platform_info_size = 0;
+    cl_platform_info* platform_info = nullptr;
+    size_t device_info_size = 0;
+    cl_device_info* device_info = nullptr;
+    std::string info = "";
+    for(unsigned int p = 0; p < pnum; ++p){
         info += "Platform " + std::to_string(p) + "\n";
         for(auto platform_info_item = platform_info_names.begin(); platform_info_item != platform_info_names.end(); ++platform_info_item){
             clGetPlatformInfo(*(platform_id_ptr + p), platform_info_item->first, NULL, nullptr, &platform_info_size);
@@ -339,51 +412,107 @@ int get_info(){
         device_info_type.push_back(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS);
         device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS", CLUINT, "Maximum dimensions that specify the global and local work-item IDs used by the data parallel execution model. (Refer to clEnqueueNDRangeKernel). The minimum value is 3 for devices that are not of type CL_DEVICE_TYPE_CUSTOM.")));
         device_info_type.push_back(CL_DEVICE_MAX_WORK_ITEM_SIZES);
-        device_infos.push_back(std::shared_ptr<_InfoTypeInfoBuffer<size_t>>(new _InfoTypeInfoBuffer<size_t>("CL_DEVICE_MAX_WORK_ITEM_SIZES", BUFFER, "", InfoTypeInfo::BitFieldNameType(), )));
-        //device_infos.push_back(CL_DEVICE_MAX_WRITE_IMAGE_ARGS, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_MAX_WRITE_IMAGE_ARGS",)));
-        //device_infos.push_back(CL_DEVICE_MEM_BASE_ADDR_ALIGN, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_MEM_BASE_ADDR_ALIGN",)));
-        //device_infos.push_back(CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE",)));
-        //device_infos.push_back(CL_DEVICE_NAME, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NAME",)));
-        //device_infos.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR",)));
-        //device_infos.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT",)));
-        //device_infos.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_INT",)));
-        //device_infos.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG",)));
-        //device_infos.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT",)));
-        //device_infos.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE",)));
-        //device_infos.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF",)));
-        //device_infos.push_back(CL_DEVICE_OPENCL_C_VERSION, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_OPENCL_C_VERSION",)));
-        //device_infos.push_back(CL_DEVICE_PARENT_DEVICE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARENT_DEVICE",)));
-        //device_infos.push_back(CL_DEVICE_PARTITION_MAX_SUB_DEVICES, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_MAX_SUB_DEVICES",)));
-        //device_infos.push_back(CL_DEVICE_PARTITION_PROPERTIES, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_PROPERTIES",)));
-        //device_infos.push_back(CL_DEVICE_PARTITION_AFFINITY_DOMAIN, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_AFFINITY_DOMAIN",)));
-        //device_infos.push_back(CL_DEVICE_PARTITION_TYPE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_TYPE",)));
-        //device_infos.push_back(CL_DEVICE_PLATFORM, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PLATFORM",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF",)));
-        //device_infos.push_back(CL_DEVICE_PRINTF_BUFFER_SIZE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PRINTF_BUFFER_SIZE",)));
-        //device_infos.push_back(CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_INTEROP_USER_SYNC",)));
-        //device_infos.push_back(CL_DEVICE_PROFILE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PROFILE",)));
-        //device_infos.push_back(CL_DEVICE_PROFILING_TIMER_RESOLUTION, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PROFILING_TIMER_RESOLUTION",)));
-        //device_infos.push_back(CL_DEVICE_QUEUE_PROPERTIES, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_QUEUE_PROPERTIES",)));
-        //device_infos.push_back(CL_DEVICE_REFERENCE_COUNT, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_REFERENCE_COUNT",)));
-        //device_infos.push_back(CL_DEVICE_SINGLE_FP_CONFIG, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_SINGLE_FP_CONFIG",)));
-        //device_infos.push_back(CL_DEVICE_TYPE, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_TYPE");
-        //device_infos.push_back(CL_DEVICE_VENDOR, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_VENDOR");
-        //device_infos.push_back(CL_DEVICE_VENDOR_ID, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_VENDOR_ID");
-        //device_infos.push_back(CL_DEVICE_VERSION, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_VERSION");
-        //device_infos.push_back(CL_DRIVER_VERSION, std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DRIVER_VERSION");
+        device_infos.push_back(std::shared_ptr<_InfoTypeInfoBuffer>(new _InfoTypeInfoBuffer("CL_DEVICE_MAX_WORK_ITEM_SIZES", BUFFER, "", InfoTypeInfo::BitFieldNameType(), NULL, SIZET)));
+        device_info_type.push_back(CL_DEVICE_MAX_WRITE_IMAGE_ARGS);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_MAX_WRITE_IMAGE_ARGS", CLUINT, "Max number of simultaneous image objects that can be written to by a kernel. The minimum value is 8 if CL_DEVICE_IMAGE_SUPPORT is CL_TRUE.")));
+        device_info_type.push_back(CL_DEVICE_MEM_BASE_ADDR_ALIGN);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_MEM_BASE_ADDR_ALIGN", CLUINT, "The minimum value is the size (in bits) of the largest OpenCL built-in data type supported by the device (long16 in FULL profile, long16 or int16 in EMBEDDED profile) for devices that are not of type CL_DEVICE_TYPE_CUSTOM.")));
+        device_info_type.push_back(CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE", CLUINT, "Deprecated in OpenCL 1.2. The smallest alignment in bytes which can be used for any data type.")));
+        device_info_type.push_back(CL_DEVICE_NAME);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NAME", CHAR, "CL_DEVICE_NAME")));
+        device_info_type.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_INT);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_INT", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_OPENCL_C_VERSION);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_OPENCL_C_VERSION", CHAR)));
+        device_info_type.push_back(CL_DEVICE_PARENT_DEVICE);
+        device_infos.push_back(std::shared_ptr<_InfoTypeInfoPointer>(new _InfoTypeInfoPointer("CL_DEVICE_PARENT_DEVICE", POINTER, "", InfoTypeInfo::BitFieldNameType(), "cl_device_parent_device")));
+        device_info_type.push_back(CL_DEVICE_PARTITION_MAX_SUB_DEVICES);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_MAX_SUB_DEVICES", CLUINT)));
+        //device_info_type.push_back(CL_DEVICE_PARTITION_PROPERTIES);
+        //device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_PROPERTIES", CLDEVICEPARTITIONPROPERTIES)));
+        device_info_type.push_back(CL_DEVICE_PARTITION_AFFINITY_DOMAIN);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_AFFINITY_DOMAIN", CLDEVICEAFFINITYDOMAIN, "", {"CL_DEVICE_AFFINITY_DOMAIN_NUMA", "CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE", "CL_DEVICE_AFFINITY_DOMAIN_L3_CACHE", "CL_DEVICE_AFFINITY_DOMAIN_L2_CACHE", "CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE", "CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE"})));
+        //device_info_type.push_back(CL_DEVICE_PARTITION_TYPE);
+        //device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PARTITION_TYPE",)));
+        device_info_type.push_back(CL_DEVICE_PLATFORM);
+        device_infos.push_back(std::shared_ptr<_InfoTypeInfoPointer>(new _InfoTypeInfoPointer("CL_DEVICE_PLATFORM", POINTER, "", InfoTypeInfo::BitFieldNameType(), "cl_device_platform")));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_PRINTF_BUFFER_SIZE);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PRINTF_BUFFER_SIZE", SIZET)));
+        device_info_type.push_back(CL_DEVICE_PREFERRED_INTEROP_USER_SYNC);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PREFERRED_INTEROP_USER_SYNC", CLBOOL, "Is CL_TRUE if the device's preference is for the user to be responsible for synchronization, when sharing memory objects between OpenCL and other APIs such as DirectX, CL_FALSE if the device / implementation has a performant path for performing synchronization of memory object shared between OpenCL and other APIs such as DirectX")));
+        device_info_type.push_back(CL_DEVICE_PROFILE);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PROFILE", CHAR)));
+        device_info_type.push_back(CL_DEVICE_PROFILING_TIMER_RESOLUTION);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_PROFILING_TIMER_RESOLUTION", SIZET)));
+        device_info_type.push_back(CL_DEVICE_QUEUE_PROPERTIES);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_QUEUE_PROPERTIES", CLCOMMANDQUEUEPROPERTIES, 
+        "Describes the command-queue properties supported by the device. This is a bit-field that describes one or more of the following values:CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE-CL_QUEUE_PROFILING_ENABLE These properties are described in the table for clCreateCommandQueue. The mandated minimum capability is CL_QUEUE_PROFILING_ENABLE.", 
+        InfoTypeInfo::BitFieldNameType({"CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE", "CL_QUEUE_PROFILING_ENABLE"}))));
+        device_info_type.push_back(CL_DEVICE_REFERENCE_COUNT);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_REFERENCE_COUNT", CLUINT, "Returns the device reference count. If the device is a root-level device, a reference count of one is returned.")));
+        device_info_type.push_back(CL_DEVICE_SINGLE_FP_CONFIG);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_SINGLE_FP_CONFIG", CLDEVICEFPCONFIG, "", {"CL_FP_DENORM", "CL_FP_INF_NAN", "CL_FP_ROUND_TO_NEAREST", "CL_FP_ROUND_TO_ZERO", "CL_FP_ROUND_TO_INF", "CL_FP_FMA", "CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT", "CL_FP_SOFT_FLOAT"})));
+        device_info_type.push_back(CL_DEVICE_TYPE);
+        device_infos.push_back(std::shared_ptr<_InfoTypeInfo<cl_device_type>>(new _InfoTypeInfo<cl_device_type>("CL_DEVIC, E_TYPE", CLDEVICETYPE, "", InfoTypeInfo::BitFieldNameType(), {{CL_DEVICE_TYPE_CPU, "CL_DEVICE_TYPE_CPU"}, {CL_DEVICE_TYPE_GPU, "CL_DEVICE_TYPE_GPU"}, {CL_DEVICE_TYPE_ACCELERATOR, "CL_DEVICE_TYPE_ACCELERATOR"}, {CL_DEVICE_TYPE_ACCELERATOR, "CL_DEVICE_TYPE_ACCELERATOR"}})));
+        device_info_type.push_back(CL_DEVICE_VENDOR);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_VENDOR", CHAR)));
+        device_info_type.push_back(CL_DEVICE_VENDOR_ID);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_VENDOR_ID", CLUINT)));
+        device_info_type.push_back(CL_DEVICE_VERSION);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DEVICE_VERSION", CHAR)));
+        device_info_type.push_back(CL_DRIVER_VERSION);
+        device_infos.push_back(std::shared_ptr<InfoTypeInfo>(new InfoTypeInfo("CL_DRIVER_VERSION", CHAR)));
         clGetDeviceIDs(*(platform_id_ptr + p), CL_DEVICE_TYPE_ALL, NULL, nullptr, &dnum);
         cl_device_id* device_id_ptr = (cl_device_id*)malloc(dnum * sizeof(cl_device_id));
         clGetDeviceIDs(*(platform_id_ptr + p), CL_DEVICE_TYPE_ALL, dnum, device_id_ptr, NULL);
-        for(int d = 0; d < dnum; ++d){
-            info += std::string("   |\n    ->") + "Device " + std::to_string(d) + "\n";
+        for(unsigned int d = 0; d < dnum; ++d){
+            info += std::string("   |\n    ->") + "Device " + std::to_string(d) + "(" + std::to_string(reinterpret_cast<std::uintptr_t>(platform_id_ptr + d)) + ")" + "\n";
             device_infos.reserve(device_infos.size());
-            for(auto i = 0; i < device_info_type.size(); ++i){
+            for(size_t i = 0; i < device_info_type.size(); ++i){
+                switch(device_infos[i]->_type){
+                    case BUFFER:{
+                        switch(device_info_type[i]){
+                            case CL_DEVICE_MAX_WORK_ITEM_SIZES:{
+                                device_infos[i]->set_buffer_size(get_dimensions(*(device_id_ptr + d), CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS));
+                                break;
+                            };
+                            default:{
+                                break;
+                            };
+                        }
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
                 info += get_device_info(device_info_type[i], device_infos[i], *(device_id_ptr + d), &device_info_size, &device_info);
             }
         }
@@ -394,6 +523,6 @@ int get_info(){
     return 0;
 }
 
-int main(int argc, int* argv[]){
+int main(int argc, char* argv[]){
     return get_info();
 };
