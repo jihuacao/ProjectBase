@@ -1,0 +1,1 @@
+option(project_base_build_CG "build the shared library or not" ON)

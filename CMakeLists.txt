@@ -24,6 +24,8 @@ set(PACKAGE_DESCRIPTION "")
 set(PACKAGE_URL "")
 project(${PACKAGE_NAME} VERSION ${PACKAGE_VERSION} LANGUAGES C CXX)
 
+include(cmake/features.cmake)
+
 # add cmake_module to CMAKE_MODULE_PATH
 set(cmake_module_dir ${ProjectBase_SOURCE_DIR}/cmake_module)
 set(CMAKE_MODULE_PATH ${cmake_module_dir} ${CMAKE_MODULE_PATH})

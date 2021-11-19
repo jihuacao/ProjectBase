@@ -1,7 +1,8 @@
 message(STATUS ${CMAKE_CURRENT_LIST_FILE})
-aux_source_directory(. DIR_SRCS)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
+set(module TestGTest)
+set(test_gtest_module_name ${module})
 include(obj_name_provide)
-set(Obj TestUiStyleConfig)
-executable_name_provide(CMAKE_BUILD_TYPE Obj)
+executable_name_provide(CMAKE_BUILD_TYPE test_gtest_module_name)
+file(GLOB test_${test_gtest_module_name}_src *.h *.cc)
+add_executable(${${test_gtest_module_name}_target_name} ${test_${test_gtest_module_name}_src})
+target_link_libraries(${${test_gtest_module_name}_target_name} ${${gtest_module_name}_target_name})
