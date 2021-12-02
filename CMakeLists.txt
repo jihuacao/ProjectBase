@@ -85,6 +85,9 @@ include(eigen3)
 include(protobuf)
 ## opencl
 #include(OpenCL)
+if(project_base_using_tbb)
+    include(./external_process/tbb.cmake)
+endif()
 
 # glog depend
 

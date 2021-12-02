@@ -1,0 +1,8 @@
+﻿message(STATUS ${CMAKE_CURRENT_LIST_FILE})
+set(module TestTBB)
+set(test_tbb_module_name ${module})
+include(obj_name_provide)
+executable_name_provide(CMAKE_BUILD_TYPE test_tbb_module_name)
+file(GLOB test_${test_tbb_module_name}_src *.h *.cc)
+add_executable(${${test_tbb_module_name}_target_name} ${test_${test_tbb_module_name}_src})
+target_link_libraries(${${test_tbb_module_name}_target_name} ${${tbb_module_name}_target_name})

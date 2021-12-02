@@ -7,3 +7,7 @@ add_subdirectory(test_opencv)
 if(OPENCL)
     add_subdirectory(program_opencl)
 endif()
+
+if(project_base_using_tbb)
+    add_subdirectory(test_tbb)
+endif()
