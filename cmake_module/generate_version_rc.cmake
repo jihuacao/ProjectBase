@@ -17,8 +17,8 @@ set (GenerateProductVersionCurrentDir ${CMAKE_CURRENT_LIST_DIR})
 #     ICON ${PATH_TO_APP_ICON}
 #     VERSION_MAJOR 2
 #     VERSION_MINOR 3
-#     VERSION_PATCH ${BUILD_COUNTER}
-#     VERSION_REVISION ${BUILD_REVISION}
+#     VERSION_MAINTENANCE ${BUILD_COUNTER}
+#     VERSION_BUILD ${BUILD_REVISION}
 #   )
 # where BUILD_COUNTER and BUILD_REVISION could be values from your CI server.
 #
@@ -31,8 +31,8 @@ set (GenerateProductVersionCurrentDir ${CMAKE_CURRENT_LIST_DIR})
 #   ICON               - path to application icon (${CMAKE_SOURCE_DIR}/product.ico by default)
 #   VERSION_MAJOR      - 1 is default
 #   VERSION_MINOR      - 0 is default
-#   VERSION_PATCH      - 0 is default
-#   VERSION_REVISION   - 0 is default
+#   VERSION_MAINTENANCE      - 0 is default
+#   VERSION_BUILD   - 0 is default
 #   COMPANY_NAME       - your company name (no defaults)
 #   COMPANY_COPYRIGHT  - ${COMPANY_NAME} (C) Copyright ${CURRENT_YEAR} is default
 #   COMMENTS           - ${NAME} v${VERSION_MAJOR}.${VERSION_MINOR} is default
@@ -47,8 +47,8 @@ function(generate_product_version outfiles)
         ICON
         VERSION_MAJOR
         VERSION_MINOR
-        VERSION_PATCH
-        VERSION_REVISION
+        VERSION_MAINTENANCE
+        VERSION_BUILD
         COMPANY_NAME
         COMPANY_COPYRIGHT
         COMMENTS
@@ -71,11 +71,11 @@ function(generate_product_version outfiles)
     if (NOT PRODUCT_VERSION_MINOR EQUAL 0 AND (NOT PRODUCT_VERSION_MINOR OR "${PRODUCT_VERSION_MINOR}" STREQUAL ""))
         set(PRODUCT_VERSION_MINOR 0)
     endif()
-    if (NOT PRODUCT_VERSION_PATCH EQUAL 0 AND (NOT PRODUCT_VERSION_PATCH OR "${PRODUCT_VERSION_PATCH}" STREQUAL ""))
-        set(PRODUCT_VERSION_PATCH 0)
+    if (NOT PRODUCT_VERSION_MAINTENANCE EQUAL 0 AND (NOT PRODUCT_VERSION_MAINTENANCE OR "${PRODUCT_VERSION_MAINTENANCE}" STREQUAL ""))
+        set(PRODUCT_VERSION_MAINTENANCE 0)
     endif()
-    if (NOT PRODUCT_VERSION_REVISION EQUAL 0 AND (NOT PRODUCT_VERSION_REVISION OR "${PRODUCT_VERSION_REVISION}" STREQUAL ""))
-        set(PRODUCT_VERSION_REVISION 0)
+    if (NOT PRODUCT_VERSION_BUILD EQUAL 0 AND (NOT PRODUCT_VERSION_BUILD OR "${PRODUCT_VERSION_BUILD}" STREQUAL ""))
+        set(PRODUCT_VERSION_BUILD 0)
     endif()
 
     if (NOT PRODUCT_COMPANY_COPYRIGHT OR "${PRODUCT_COMPANY_COPYRIGHT}" STREQUAL "")
