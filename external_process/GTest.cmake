@@ -1,3 +1,7 @@
+################################################
+# the third party gtest target construct
+# generate target: ${GTest_target_name}
+################################################
 # base on gtest v2.2.2
 include(popular_message)
 include(external_setting)
