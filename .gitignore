@@ -40,3 +40,4 @@ CMakeCache*
 latex/*
 DOXYGEN_OUTPUT
 doc/*
+.vscode/*
