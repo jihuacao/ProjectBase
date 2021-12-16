@@ -1,15 +1,43 @@
 # 消息等级:FATAL_ERROR WARNING STATUS DEBUG...
-set(var_external_install_path ${CMAKE_SOURCE_DIR}/install CACHE STRING "the path for installing the external")
-# 获取运行cmake命令的目录路径：PROJECT_BINARY_DIR 
-# 获取路径：可用与转化相对路径为绝对路径，获取路径的相关集合操作，注意这里是通过相对路径获取绝对路径，注意指定父路径需要使用BASE_DIR <dir>
-get_filename_component(external_install_path ${var_external_install_path} ABSOLUTE BASE_DIR ${PROJECT_BINARY_DIR} CACHE)
-message(STATUS "external_install_path: ${external_install_path}")
-option(external_build_shared "the lib link type for building the external" ON)
-message(STATUS "external_build_shared: ${external_build_shared}")
-set(var_external_download_dir ${CMAKE_SOURCE_DIR}/external CACHE STRING "the dir for download the source of the third party repo")
-get_filename_component(external_download_dir ${var_external_download_dir} ABSOLUTE BASE_DIR ${PROJECT_BINARY_DIR} CACHE)
-message(STATUS "external_download_dir: ${external_download_dir}")
+function(external_cmake_args)
+    #[[
+        cache更新，然后再更新非cache变量，因为cache往往是传入相对路径，
+        而使用中的变量最好是绝对路径
+    ]]
 
+    #[[ 获取路径：可用与转化相对路径为绝对路径，
+    获取路径的相关集合操作，
+    注意这里是通过相对路径获取绝对路径，
+    注意指定父路径需要使用BASE_DIR <dir>]]
+    # 
+    set(var_external_root_dir ${CMAKE_CURRENT_SOURCE_DIR}/external CACHE STRING "the absolute dir to install the external, You Should Specify An Absolute Dir")
+    set(external_root_dir ${var_external_root_dir})
+    # get_filename_component(external_root_dir ${var_external_root_dir} ABSOLUTE BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    message(STATUS "external_root_dir: ${external_root_dir}")
+    set(external_root_dir ${external_root_dir} PARENT_SCOPE)
+
+    # todo: 逐步替换external_install_path为external_install_dir
+    set(var_external_install_dir ${external_root_dir}/external_install CACHE STRING "the dir to install the external")
+    set(external_install_dir ${var_external_install_dir})
+    message(STATUS "external_install_dir: ${external_install_dir}")
+    set(external_install_dir ${external_install_dir} PARENT_SCOPE)
+    set(external_install_path ${external_install_dir} PARENT_SCOPE)
+
+    option(external_build_shared "the lib link type for building the external" ON)
+    message(STATUS "external_build_shared: ${external_build_shared}")
+
+    set(var_external_download_dir ${external_root_dir}/external_download CACHE STRING "the dir to store the external")
+    set(external_download_dir ${var_external_download_dir})
+    # get_filename_component(external_download_dir ${var_external_download_dir} ABSOLUTE BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    message(STATUS "external_download_dir: ${external_download_dir}")
+    set(external_download_dir ${external_download_dir} PARENT_SCOPE)
+
+    set(var_external_build_dir ${external_root_dir}/external_build CACHE STRING "the dir to build the external project")
+    # get_filename_component(external_build_dir ${var_external_build_dir}  ABSOLUTE BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    set(external_build_dir ${var_external_build_dir})
+    message(STATUS "external_build_dir: ${external_build_dir}")
+    set(external_build_dir ${external_build_dir} PARENT_SCOPE)
+endfunction(external_cmake_args)
 ##################################################################
 # create a external_dependencies property in CACHED_VARIABLE
 # this property 
@@ -103,6 +131,9 @@ macro(default_external_project_build_type project)
     external_project_build_type(${project} supported_build_type default_build_type)
 endmacro(default_external_project_build_type)
 
+function(default_external_project_install_dir module)
+    set(gtest_install_dir ${external_install_dir} CACHE STRING "${module} install dir")
+endfunction(default_external_project_install_dir)
 
 ##################################################################
 # this macro find the matched url and hash for the version
@@ -176,3 +207,107 @@ macro(external_configs_getter targets to_target)
         eval("${target}_get_config" to_target)
     endforeach()
 endmacro(external_configs_getter)
+
+#[[
+    解析外部依赖构建函数的参数
+    * common_args
+        * options
+            * EXTERNAL_EXPORT 
+                * 如果被设置，那么外部依赖将会被当做向外暴露的第三方库
+                * 如果没设置，那么该依赖会被当做内部依赖
+]]
+function(configure_git_args)
+endfunction(configure_git_args)
+macro(configure_common_args)
+    set(external_options
+        EXTERNAL_EXPORT
+        ${external_options}
+    )
+    set(external_one_value_args
+        ${external_one_value_args}
+    )
+    set(external_multi_value_args
+        ${external_multi_value_args}
+    )
+endmacro(configure_common_args)
+macro(parser_the_arguments external_project_name external_project_type)
+    configure_common_args()
+    if(${external_project_type} MATCHES "git")
+        configure_git_args()
+    else()
+        message(FATAL "Not Support this TYPE: ${type}")
+    endif()
+    cmake_parse_arguments(${external_project_name} "${external_options}" "${external_one_value_args}" "${external_multi_value_args}" ${ARGN})
+endmacro(parser_the_arguments)
+
+#[[
+    cmake_external_project_common_args
+    @param[in] external_project_name 传入标志名称
+]]
+function(cmake_external_project_common_args external_project_name)
+    string(TOLOWER ${CMAKE_BUILD_TYPE} lower_cmake_build_type)
+    string(TOLOWER ${CMAKE_GENERATOR_PLATFORM} lower_cmake_generator_platform)
+    macro(do_message msg)
+        message(DEBUG 
+        "${external_project_name} ExternalProject_Add::${msg}")
+    endmacro(do_message)
+    macro(set_args_variable option var)
+        string(TOUPPER ${option} upper_option)
+        do_message(
+        "${upper_option}(${external_project_name}_${option})=${var}")
+        set(${external_project_name}_${option} ${var} PARENT_SCOPE)
+    endmacro(set_args_variable)
+    macro(do_cmake_message msg)
+        message(DEBUG 
+        "${external_project_name} ExternalProject_Add::${msg}")
+    endmacro(do_cmake_message)
+    macro(set_cmake_args_variable option var)
+        string(TOUPPER ${option} upper_option)
+        do_cmake_message(
+        "${upper_option}(${external_project_name}_${option})=${var}")
+        set(${external_project_name}_${option} ${var} PARENT_SCOPE)
+    endmacro(set_cmake_args_variable)
+     
+    set_args_variable(build_in_source OFF)
+    set_args_variable(source_dir ${external_download_dir}/${external_project_name})
+    #[[
+        :generate the build dir
+        * visual studio可以多种configuration共存于同一build dir中，**但是还是放到不同位置吧**
+        * visual studio可以多种configuration编译中间文件相互独立
+        * **但有些project不对不同configuration的output name进行处理，因此不能install到同一dir中**
+        * makefiles类型不能多种configuration共存，build_dir install_dir跟随不同的configuration platform变化
+        * ${${external_project_name}_EXTERNAL_EXPORT}为True安装到public位置，为False安装到internal位置
+    ]]
+    if(${CMAKE_GENERATOR} MATCHES "Makefiles")
+        set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
+        set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform}_${lower_cmake_build_type})
+    elseif(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+        set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
+        set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform})
+        if(${${external_project_name}_EXTERNAL_EXPORT})
+            set_cmake_args_variable(cmake_install_prefix ${external_install_dir}/${lower_cmake_build_type}_public)
+        else()
+            set_cmake_args_variable(cmake_install_prefix ${external_install_dir}/${lower_cmake_build_type}_internal)
+        endif()
+    else()
+        message(FATAL "${external_project_name} UNKNOWN CMAKE_GENERATOR")
+    endif()
+    #[[
+        todo: configuration the build command
+        do not need build command，because the external project is cmake project.
+        using cmake -build as default.
+        different build command for different generator would be call.
+    ]]
+    set_args_variable(build_commnad "")
+    #[[
+        todo: configure the install command
+        * install or not is depend on the target link_library type
+            * PUBLIC INTERFACE: need install
+            * PRIVATE: do not need install
+    ]]
+    if(${${external_project_name}_build_shared})
+        set_args_variable(install_command "")
+    else()
+        set_args_variable(install_command "")
+    endif()
+endfunction(cmake_external_project_common_args)

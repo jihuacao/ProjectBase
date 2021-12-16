@@ -71,12 +71,15 @@ include_directories(${project_include_dir})
 option(project_base_build_shared_lib "build the shared library or not" ON)
 option(project_base_build_python_interface "build the interface for python or not" OFF)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/external_process/external_setting.cmake)
+external_cmake_args()
 # gflags depend
 include(gflags)
 # glog depend
 include(glog)
 # gtest depend
-include(GTest)
+include(./external_process/gtest.cmake)
+gtest_target()
 # boost depend
 include(boost)
 # eigen3 depend
