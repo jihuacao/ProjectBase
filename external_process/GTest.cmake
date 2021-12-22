@@ -21,14 +21,15 @@ function(gtest_target)
     parser_the_arguments(${module} git)
 
     # this is a list contain versions which have the same behavior
+    set(${module}_url https://github.com/google/googletest.git)
     set(${module}_supported_version 1.10.0 1.8.0)
     set(${module}_supported_tag v1.10.x v1.8.x)
     version_selector(${module} ${module}_supported_version 1.10.0)
-
+    version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
     default_external_project_build_type(${module})
     project_build_shared(${module})
     cmake_external_project_common_args(${module})
-    # todo: 应该查找已经安装或者已经构建的依赖（因为有些依赖并不会进行install）
+
     find_package(GTest ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${${module}_cmake_install_prefix} ${${module}_binary_dir})
 
     if(GTest_FOUND)
@@ -36,9 +37,6 @@ function(gtest_target)
         add_library(interface_lib${module} INTERFACE)
         target_link_libraries(interface_lib${module} INTERFACE GTest::gmock)
     else()
-        set(${module}_url https://github.com/google/googletest.git)
-        version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
-
         set(${module}_disable_pthreads OFF CACHE BOOL "disable thread of gtest or not")
         set_property(CACHE ${module}_disable_pthreads PROPERTY ADVANCED)
         set_property(CACHE ${module}_disable_pthreads PROPERTY STRINGS "ON" "OFF")
@@ -105,12 +103,12 @@ function(gtest_target)
         endif()
 
         set(${module}_definition "")
-        set(${module}_include ${${module}_cmake_install_prefix}/include)
+        set(${module}_include_dir ${${module}_cmake_install_prefix}/include)
         set(${module}_lib_dir ${${module}_cmake_install_prefix}/lib)
         set(${module}_gtest_lib ${${module}_lib_dir}/${gtest_lib_name})
         set(${module}_gmock_lib ${${module}_lib_dir}/${gmock_lib_name})
         if(_${${module}_build_shared})
-            set(${module}_definition "${${module}_definition} GTEST_LINKED_AS_SHARED_LIBRARY")
+            set(${module}_definition "${${module}_definition};GTEST_LINKED_AS_SHARED_LIBRARY")
         else()
         endif()
         if(${${module}_disable_pthreads})
@@ -119,7 +117,7 @@ function(gtest_target)
             set(dep Threads::Threads)
         endif()
         # make sure the dir existed
-        touch_fold(${module}_include)
+        touch_fold(${module}_include_dir)
         touch_fold(${module}_lib_dir)
         if(${${module}_disable_pthreads})
         else()
@@ -152,7 +150,8 @@ function(gtest_target)
             interface_lib${module}
             PROPERTIES
             INTERFACE_COMPILE_DEFINITIONS "${${module}_definition}"
-            INTERFACE_INCLUDE_DIRECTORIES ${${module}_include}
+            INTERFACE_INCLUDE_DIRECTORIES "${${module}_include_dir}"
+            INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
             )
         add_dependencies(interface_lib${module} PRIVATE _${module})
     endif()
