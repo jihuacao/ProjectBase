@@ -34,7 +34,6 @@
 # CMake
 CMakeCache*
 
-*external
 *CMakeFiles
 *.swp
 latex/*
