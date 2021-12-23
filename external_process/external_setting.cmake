@@ -44,10 +44,16 @@ endfunction(external_cmake_args)
 ##################################################################
 define_property(CACHED_VARIABLE PROPERTY external_dependencies BRIEF_DOCS asdasd FULL_DOCS asd)
 
-##################################################################
-# macro
-##################################################################
-macro(project_build_shared project)
+#[[
+    增加设置project是否生成shared object的cache选项${project}_build_shared
+    向外提供${project}_build_shared_var_name=_${project}_build_shared与_${project}_build_shared
+    * 默认为跟随 external_build_shared
+    * 提供三个选项
+        * ON
+        * OFF
+        * FOLLOW_EXTERNAL_BUILD_SHARED
+]]
+function(project_build_shared project)
     # to get the _gtest_build_type shared or static
     set(${project}_build_shared ${external_build_shared} CACHE STRING "specifical build the gtest in shared or follow in external_build_shared")
     set_property(CACHE ${project}_build_shared PROPERTY STRINGS "ON" "OFF" "FOLLOW_EXTERNAL_BUILD_SHARED")
@@ -56,7 +62,9 @@ macro(project_build_shared project)
     else()
         set(_${project}_build_shared ${${project}_build_shared})
     endif()
-endmacro(project_build_shared)
+    set(${project}_build_shared_var_name _${project}_build_shared PARENT_SCOPE)
+    set(_${project}_build_shared ${_${project}_build_shared} PARENT_SCOPE)
+endfunction(project_build_shared)
 
 ##################################################################
 # this macro set the project version selected variable tab
@@ -106,16 +114,16 @@ macro(version_tag_matcher project supported_version supported_tag version)
     endif()
 endmacro(version_tag_matcher)
 
-##################################################################
-# this macro
-##################################################################
-macro(external_project_build_type project supported_build_type default_build_type)
-    list(FIND ${supported_build_type} ${${default_build_type}} index)
+#[[
+    * supported_build_type 是一个list对象
+]]
+function(external_project_build_type project supported_build_type default_build_type)
+    list(FIND ${supported_build_type} ${default_build_type} index)
     if(${index} EQUAL -1)
-        message(FATAL_ERROR "default_build_type: ${${default_build_type}} is not in the supported_build_type: ${${supported_build_type}}")
+        message(FATAL_ERROR "default_build_type: ${default_build_type} is not in the supported_build_type: ${supported_build_type}")
     endif()
-    set(${project}_build_type ${${default_build_type}} CACHE STRING "the specifical option for gtest, if the gtest_build_type is set")
-    set_property(CACHE ${project}_build_type PROPERTY STRINGS ${${supported_build_type}})
+    set(${project}_build_type ${default_build_type} CACHE STRING "the specifical option for gtest, if the gtest_build_type is set")
+    set_property(CACHE ${project}_build_type PROPERTY STRINGS ${supported_build_type})
     if("${${project}_build_type}" STREQUAL "FOLLOW_CMAKE_BUILD_TYPE")
         string(TOUPPER ${CMAKE_BUILD_TYPE} _${project}_build_type)
     elseif("${${project}_build_type}" IN_LIST ${supported_build_type})
@@ -123,13 +131,26 @@ macro(external_project_build_type project supported_build_type default_build_typ
     else()
         message(FATAL_ERROR "unsupported gtest_build_type: ${${project}_build_type}")
     endif()
-endmacro(external_project_build_type)
+    set(${project}_build_type_var_name _${project}_build_type PARENT_SCOPE)
+    set(_${project}_build_type ${_${project}_build_type} PARENT_SCOPE)
+endfunction(external_project_build_type)
 
-macro(default_external_project_build_type project)
-    list(APPEND supported_build_type "FOLLOW_CMAKE_BUILD_TYPE" "Release" "Debug")
+#[[
+    生成设置project构建类型的cache选项${project}_build_type
+    向外提供${project}_build_type_var_name=_${project}_build_type与_${project}_build_type
+    * 默认为跟随 CMAKE_BUILD_TYPE
+    * 提供三个选项
+        * Release
+        * Debug
+        * FOLLOW_CMAKE_BUILD_TYPE
+]]
+function(default_external_project_build_type project)
+    list(APPEND SupportedBuildType "FOLLOW_CMAKE_BUILD_TYPE" "Release" "Debug")
     set(default_build_type "FOLLOW_CMAKE_BUILD_TYPE")
-    external_project_build_type(${project} supported_build_type default_build_type)
-endmacro(default_external_project_build_type)
+    external_project_build_type(${project} SupportedBuildType ${default_build_type})
+    set(${project}_build_type_var_name ${${project}_build_type_var_name} PARENT_SCOPE)
+    set(_${project}_build_type ${_${project}_build_type} PARENT_SCOPE)
+endfunction(default_external_project_build_type)
 
 function(default_external_project_install_dir module)
     set(gtest_install_dir ${external_install_dir} CACHE STRING "${module} install dir")
@@ -283,7 +304,7 @@ function(cmake_external_project_common_args external_project_name)
         set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform}_${lower_cmake_build_type})
     elseif(${CMAKE_GENERATOR} MATCHES "Visual Studio")
         set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
-        set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform})
+        set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform}_${lower_cmake_build_type})
         if(${${external_project_name}_EXTERNAL_EXPORT})
             set_cmake_args_variable(cmake_install_prefix ${external_install_dir}/${lower_cmake_build_type}_public)
         else()
