@@ -62,6 +62,7 @@ function(project_build_shared project)
     else()
         set(_${project}_build_shared ${${project}_build_shared})
     endif()
+    message(DEBUG "${project} ExternalProject_Add::CMAKE_BUILD_SHARED(\$\{${project}_build_shared_var_name\})=${_${project}_build_shared}")
     set(${project}_build_shared_var_name _${project}_build_shared PARENT_SCOPE)
     set(_${project}_build_shared ${_${project}_build_shared} PARENT_SCOPE)
 endfunction(project_build_shared)
@@ -145,9 +146,10 @@ endfunction(external_project_build_type)
         * FOLLOW_CMAKE_BUILD_TYPE
 ]]
 function(default_external_project_build_type project)
-    list(APPEND SupportedBuildType "FOLLOW_CMAKE_BUILD_TYPE" "Release" "Debug")
+    list(APPEND SupportedBuildType "FOLLOW_CMAKE_BUILD_TYPE" "RELEASE" "DEBUG")
     set(default_build_type "FOLLOW_CMAKE_BUILD_TYPE")
     external_project_build_type(${project} SupportedBuildType ${default_build_type})
+    message(DEBUG "${project} ExternalProject_Add::CMAKE_BUILD_TYPE(\$\{${project}_build_type_var_name\})=${${${project}_build_type_var_name}}")
     set(${project}_build_type_var_name ${${project}_build_type_var_name} PARENT_SCOPE)
     set(_${project}_build_type ${_${project}_build_type} PARENT_SCOPE)
 endfunction(default_external_project_build_type)
@@ -266,8 +268,6 @@ endmacro(parser_the_arguments)
     @param[in] external_project_name 传入标志名称
 ]]
 function(cmake_external_project_common_args external_project_name)
-    string(TOLOWER ${CMAKE_BUILD_TYPE} lower_cmake_build_type)
-    string(TOLOWER ${CMAKE_GENERATOR_PLATFORM} lower_cmake_generator_platform)
     macro(do_message msg)
         message(DEBUG 
         "${external_project_name} ExternalProject_Add::${msg}")
@@ -276,6 +276,7 @@ function(cmake_external_project_common_args external_project_name)
         string(TOUPPER ${option} upper_option)
         do_message(
         "${upper_option}(${external_project_name}_${option})=${var}")
+        set(${external_project_name}_${option} ${var})
         set(${external_project_name}_${option} ${var} PARENT_SCOPE)
     endmacro(set_args_variable)
     macro(do_cmake_message msg)
@@ -286,8 +287,25 @@ function(cmake_external_project_common_args external_project_name)
         string(TOUPPER ${option} upper_option)
         do_cmake_message(
         "${upper_option}(${external_project_name}_${option})=${var}")
+        set(${external_project_name}_${option} ${var})
         set(${external_project_name}_${option} ${var} PARENT_SCOPE)
     endmacro(set_cmake_args_variable)
+    macro(set_cmake_multi_args_variable option list_var)
+    endmacro(set_cmake_multi_args_variable)
+    
+    default_external_project_build_type(${external_project_name})
+    set(${external_project_name}_build_type_var_name ${${external_project_name}_build_type_var_name} PARENT_SCOPE)
+    set(_${external_project_name}_build_type ${_${external_project_name}_build_type} PARENT_SCOPE)
+    project_build_shared(${external_project_name})
+    set(${external_project_name}_build_shared_var_name ${${external_project_name}_build_shared_var_name} PARENT_SCOPE)
+    set(_${external_project_name}_build_shared ${_${external_project_name}_build_shared} PARENT_SCOPE)
+    string(TOLOWER ${${${external_project_name}_build_type_var_name}} lower_cmake_build_type)
+    string(TOLOWER ${CMAKE_GENERATOR_PLATFORM} lower_cmake_generator_platform)
+    if(${${${external_project_name}_build_shared_var_name}})
+        set(lower_build_shared "shared")
+    else()
+        set(lower_build_shared "static")
+    endif()
      
     set_args_variable(build_in_source OFF)
     set_args_variable(source_dir ${external_download_dir}/${external_project_name})
@@ -299,17 +317,20 @@ function(cmake_external_project_common_args external_project_name)
         * makefiles类型不能多种configuration共存，build_dir install_dir跟随不同的configuration platform变化
         * ${${external_project_name}_EXTERNAL_EXPORT}为True安装到public位置，为False安装到internal位置
     ]]
+    set_cmake_args_variable(cmake_generator_platform "${CMAKE_GENERATOR_PLATFORM}")
+    set_cmake_args_variable(cmake_generator_toolset "${CMAKE_GENERATOR_TOOLSET}")
+    set_cmake_args_variable(cmake_generator_instance "${CMAKE_GENERATOR_INSTANCE}")
+    set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform}_${lower_cmake_build_type}_${lower_build_shared})
+    set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
+    if(${${${external_project_name}_build_shared_var_name}})
+        set(install_postfix "public")
+    else()
+        set(install_postfix "internal")
+    endif()
+    set_cmake_args_variable(cmake_install_prefix ${external_install_dir}/${lower_cmake_generator_platform}_${lower_cmake_build_type}_${install_postfix})
     if(${CMAKE_GENERATOR} MATCHES "Makefiles")
-        set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
-        set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform}_${lower_cmake_build_type})
     elseif(${CMAKE_GENERATOR} MATCHES "Visual Studio")
         set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
-        set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform}_${lower_cmake_build_type})
-        if(${${external_project_name}_EXTERNAL_EXPORT})
-            set_cmake_args_variable(cmake_install_prefix ${external_install_dir}/${lower_cmake_build_type}_public)
-        else()
-            set_cmake_args_variable(cmake_install_prefix ${external_install_dir}/${lower_cmake_build_type}_internal)
-        endif()
     else()
         message(FATAL "${external_project_name} UNKNOWN CMAKE_GENERATOR")
     endif()
@@ -331,4 +352,153 @@ function(cmake_external_project_common_args external_project_name)
     else()
         set_args_variable(install_command "")
     endif()
+    #[[
+        ExternalProject_Add中cmake类型的参数
+        ExternalProject_Add(
+            ...
+            CMAKE_ARGS
+                ${cmake_args}
+        )
+    ]]
+    list(
+        APPEND 
+        _cmake_args 
+        -DCMAKE_BUILD_SHARED=${${${external_project_name}_build_shared_var_name}}
+        -DCMAKE_BUILD_TYPE=${${${external_project_name}_build_type_var_name}}
+        -DCMAKE_INSTALL_PREFIX=${${external_project_name}_cmake_install_prefix}
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    )
+    set_cmake_args_variable(cmake_args "${_cmake_args}")
+    #[[
+        ExternalProject_Add中cmake类型的参数
+        ExternalProject_Add(
+            ...
+            ${external_project_add_args}
+        )
+    ]]
+    list(
+        APPEND
+        _external_project_add_args
+        SOURCE_DIR ${${module}_source_dir}
+        BUILD_IN_SOURCE ${${module}_build_in_source}
+        BINARY_DIR ${${module}_binary_dir}
+        INSTALL_COMMAND ${${module}_install_command}
+        BUILD_COMMAND ${${module}_build_command}
+        CMAKE_GENERATOR ${${module}_cmake_generator}
+        CMAKE_GENERATOR_TOOLSET ${${module}_cmake_generator_toolset}
+        CMAKE_GENERATOR_PLATFORM ${${module}_cmake_generator_platform}
+    )
+    set_args_variable(external_project_add_args "${_external_project_add_args}")
 endfunction(cmake_external_project_common_args)
+
+#[[
+    # 由于参数解析方法的特性，如果想传入list，则将;替换为space，本函数中会将space替换成;
+    #todo: 
+    * 生成target的名称部件，就是把一些固定的判断机制固化，
+    避免编写多个依赖库出现频繁的判断代码，作为external_process中的模块调用而引入
+        * prefix
+        * postfix
+        * extension
+    * 通过提供的一系列变量匹配状态表，获取名称部件
+    * 状态表包含：支持状态类型表，以及对应的名称部件表
+    * 例子
+    param:
+        * SYSTEM_NAME: 当前系统的名称[Windows|Linux]
+        * GENERATOR：构建体系
+            * Visual Studio MSVC-Version IDE-Version
+            * Unix Makefiles
+            * MinGW Makefiles
+        * GENERATOR_PLATFORM：target平台
+            * win32
+            * x64
+            * ARM
+            * ARM64
+        * GENERATOR_TOOLSET：编译工具链
+        * GENERATOR_INSTANCE:
+        * BUILD_SHARED：是否编译为动态库
+        * BUILD_TYPE: 编译类型[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]
+
+        * SYSTEM_NAME_LIST：
+]]
+function(generate_object_name_component statuses components)
+    list(LENGTH ${statuses} size)
+    message(DEBUG "status_registry(${size}): ${${statuses}}")
+    list(LENGTH ${components} size)
+    message(DEBUG "component_registry(${size}): ${${components}}")
+    set(
+        optionsArgs
+    )
+    foreach(status ${${statuses}})
+        set(oneValueArgs ${oneValueArgs} ${status})
+        set(multiValueArgs ${multiValueArgs} ${status}_LIST)
+    endforeach()
+    foreach(component ${${components}})
+        set(TargetValues ${TargetValues} ${component})
+        set(multiValueArgs ${multiValueArgs} ${component}_LIST)
+    endforeach()
+    set(arg_prefix component)
+    cmake_parse_arguments(${arg_prefix} "${optionsArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    # check the list size
+    list(GET multiValueArgs 0 first_list_name)
+    list(GET TargetValues 0 first_target_name)
+    foreach(status_name ${oneValueArgs})
+        set(list_name ${status_name}_LIST)
+        list(LENGTH ${arg_prefix}_${list_name} get_size)
+        message(DEBUG "the status: ${status_name}=${${arg_prefix}_${status_name}}")
+        message(DEBUG "suported status: ${list_name} ${${arg_prefix}_${list_name}}")
+        if(${list_name} STREQUAL ${first_list_name})
+            set(size ${get_size})
+        else()
+            if(${size} EQUAL ${get_size})
+            else()
+                message(FATAL_ERROR "the size of the List change ${size} vs. ${get_size}")
+            endif()
+        endif()
+    endforeach()
+    while(${get_size} GREATER 0)
+        foreach(status_name ${oneValueArgs})
+            set(list_name ${status_name}_LIST)
+            list(GET ${arg_prefix}_${list_name} 0 supported_status)
+            if(${${arg_prefix}_${status_name}} MATCHES ${supported_status})
+                set(matched ON)
+            elseif(${supported_status} STREQUAL "ANY")
+                set(matched ON)
+            else()
+                message(DEBUG "${status_name} not matched: ${${arg_prefix}_${status_name}} vs. ${supported_status}")
+                set(matched OFF)
+                break()
+            endif()
+        endforeach()
+        if(${matched})
+            foreach(target ${TargetValues})
+                list(GET ${arg_prefix}_${target}_LIST 0 _${target})
+                # 由于可能存在
+                string(REPLACE "<list_regex>" ";" back_list ${_${target}})
+                list(APPEND ${target}s ${back_list})
+                #list(APPEND ${target}s "${_${target}}")
+            endforeach()
+        else()
+        endif()
+        foreach(status_name ${multiValueArgs})
+            list(REMOVE_AT ${arg_prefix}_${status_name} 0)
+        endforeach()
+        list(LENGTH ${arg_prefix}_PREFIX_LIST get_size)
+    endwhile()
+    if(DEFINED ${first_target_name}s)
+        list(LENGTH ${first_target_name}s got_target_size)
+        if(${got_target_size} GREATER 1)
+            message(FATAL_ERROR "got target size more than one ${${first_target_name}s}") 
+        endif()
+        foreach(target ${TargetValues})
+            if(${target}s STREQUAL Empty)
+                set(${target}s "")
+            endif()
+            string(TOLOWER ${target} lower_target_name)
+            message(DEBUG "${lower_target_name}: ${${target}s}")
+            set(${lower_target_name} ${${target}s} PARENT_SCOPE)
+        endforeach()
+    else()
+        message(FATAL_ERROR "no supported matched")
+    endif()
+endfunction(generate_object_name_component)
