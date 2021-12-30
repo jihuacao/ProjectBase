@@ -45,9 +45,19 @@ function(project_common_setting)
             set(CMAKE_IMPORT_LIBRARY_PREFIX "")
             set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
         elseif(${CMAKE_GENERATOR_PLATFORM} MATCHES "ARM")
+        elseif(${CMAKE_GENERATOR_PLATFORM} STREQUAL "")
+            message(FATAL_ERROR "platform is not specified")
         else()
         endif()
     elseif(${CMAKE_GENERATOR} MATCHES "Makefiles")
+        if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "")
+            #[[
+            todo: 完善说明 linux中是不用指定platform的，
+            因为编译器只能编译单一平台的object.
+            测试之后发现如果指定PLATFORM CACHE，再次cmake时会出现PLATFORM不匹配的错误
+            ]]
+            # set(CMAKE_GENERATOR_PLATFORM "Default" CACHE INTERNAL "")
+        endif()
     else()
     endif()
     #[[

@@ -48,12 +48,13 @@ function(glog_target)
 
         ExternalProject_Add(
             ext_${module}
+            "${${module}_external_project_add_args}"
             PREFIX ${module} 
+            "${${module}_external_project_add_git_args}"
             GIT_REPOSITORY ${${module}_url}
             GIT_TAG ${${module}_tag}
-            ${external_project_add_args}
             CMAKE_ARGS
-                ${${module}_cmake_args}
+                "${${module}_cmake_args}"
             CMAKE_CACHE_ARGS
                 -DBUILD_SHARED_LIBS:BOOL=${${${module}_build_shared_var_name}}
                 #-DCMAKE_BUILD_TYPE:STRING=${${${module}_build_type_var_name}}
@@ -104,20 +105,32 @@ function(glog_target)
             Windows 
             Windows 
             Windows
+            Linux
+            Linux
+            Linux
+            Linux
             GENERATOR_LIST 
             "Visual Studio" 
             "Visual Studio" 
             "Visual Studio"
             "Visual Studio"
-            GENERATOR_PLATFORM_LIST x64 x64 x64 x64
-            GENERATOR_TOOLSET_LIST ANY ANY ANY ANY
-            GENERATOR_INSTANCE_LIST ANY ANY ANY ANY
-            BUILD_SHARED_LIST ON ON OFF OFF
-            BUILD_TYPE_LIST RELEASE DEBUG RELEASE DEBUG
-            PREFIX_LIST Empty Empty Empty Empty
-            POSTFIX_LIST Empty "d" Empty "d"
-            EXTENSION_LIST "lib" "lib" "lib" "lib"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            GENERATOR_PLATFORM_LIST x64 x64 x64 x64 ANY ANY ANY ANY
+            GENERATOR_TOOLSET_LIST ANY ANY ANY ANY ANY ANY ANY ANY
+            GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY ANY ANY ANY
+            BUILD_SHARED_LIST ON ON OFF OFF ON ON OFF OFF
+            BUILD_TYPE_LIST RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG
+            PREFIX_LIST Empty Empty Empty Empty "lib" "lib" "lib" "lib"
+            POSTFIX_LIST Empty "d" Empty "d" Empty "d" Empty "d"
+            EXTENSION_LIST "lib" "lib" "lib" "lib" "so" "so" "a" "a"
             DEFINITIONS_LIST
+            Empty
+            Empty
+            "GLOG_NO_ABBREVIATED_SEVERITIES<list_regex>OOGLE_GLOG_DLL_DECL="
+            "GLOG_NO_ABBREVIATED_SEVERITIES<list_regex>GOOGLE_GLOG_DLL_DECL="
             Empty
             Empty
             "GLOG_NO_ABBREVIATED_SEVERITIES<list_regex>OOGLE_GLOG_DLL_DECL="

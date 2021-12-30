@@ -300,7 +300,15 @@ function(cmake_external_project_common_args external_project_name)
     set(${external_project_name}_build_shared_var_name ${${external_project_name}_build_shared_var_name} PARENT_SCOPE)
     set(_${external_project_name}_build_shared ${_${external_project_name}_build_shared} PARENT_SCOPE)
     string(TOLOWER ${${${external_project_name}_build_type_var_name}} lower_cmake_build_type)
-    string(TOLOWER ${CMAKE_GENERATOR_PLATFORM} lower_cmake_generator_platform)
+    #[[
+        有些编译器是不用确定PLATFORM的，因为他们只支持单一平台
+        比如Unix Makefiles使用的GNU GCC系列
+    ]]
+    if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "")
+        set(lower_cmake_generator_platform "Default")
+    else()
+        string(TOLOWER ${CMAKE_GENERATOR_PLATFORM} lower_cmake_generator_platform)
+    endif()
     if(${${${external_project_name}_build_shared_var_name}})
         set(lower_build_shared "shared")
     else()
@@ -374,7 +382,7 @@ function(cmake_external_project_common_args external_project_name)
         ExternalProject_Add中cmake类型的参数
         ExternalProject_Add(
             ...
-            ${external_project_add_args}
+            "${external_project_add_args}"
         )
     ]]
     list(
@@ -390,6 +398,19 @@ function(cmake_external_project_common_args external_project_name)
         CMAKE_GENERATOR_PLATFORM ${${module}_cmake_generator_platform}
     )
     set_args_variable(external_project_add_args "${_external_project_add_args}")
+    #[[
+        ExternalProject_Add(
+            ...
+            "${external_project_add_git_args}"
+            ...
+        )
+    ]]
+    list(
+        APPEND
+        _external_project_add_git_args
+        GIT_SHALLOW ON
+    )
+    set_args_variable(external_project_add_git_args "${_external_project_add_git_args}")
 endfunction(cmake_external_project_common_args)
 
 #[[
