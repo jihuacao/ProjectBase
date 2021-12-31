@@ -371,11 +371,11 @@ function(cmake_external_project_common_args external_project_name)
     list(
         APPEND 
         _cmake_args 
-        -DCMAKE_BUILD_SHARED=${${${external_project_name}_build_shared_var_name}}
-        -DCMAKE_BUILD_TYPE=${${${external_project_name}_build_type_var_name}}
-        -DCMAKE_INSTALL_PREFIX=${${external_project_name}_cmake_install_prefix}
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        -DCMAKE_BUILD_SHARED:BOOL=${${${external_project_name}_build_shared_var_name}}
+        -DCMAKE_BUILD_TYPE:STRING=${${${external_project_name}_build_type_var_name}}
+        -DCMAKE_INSTALL_PREFIX:STRING=${${external_project_name}_cmake_install_prefix}
+        -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
     )
     set_cmake_args_variable(cmake_args "${_cmake_args}")
     #[[

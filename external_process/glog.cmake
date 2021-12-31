@@ -62,6 +62,7 @@ function(glog_target)
                 -DBUILD_TESTING:BOOL=OFF
                 -DWITH_GFLAGS:BOOL=OFF
                 -DWITH_THREADS:BOOL=ON
+                -DBUILD_TESTING:BOOL=OFF
                 -DWITH_TLS:BOOL=ON
         )
 
@@ -145,7 +146,8 @@ function(glog_target)
         set_target_properties(
             glog::glog
             PROPERTIES
-            IMPORTED_LOCATION_${${${module}_build_type_var_name}} "${location}"
+            # IMPORTED_LOCATION_${${${module}_build_type_var_name}} "${location}"
+            IMPORTED_LOCATION "${location}"
         )
         add_library(interface_lib${module} INTERFACE)
         target_link_libraries(interface_lib${module} 
