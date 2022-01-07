@@ -1,9 +1,13 @@
 macro(project_base_system_message)
-message("your system name is ${CMAKE_SYSTEM_NAME}, using CMAKE_SYSTEM_NAME to get the system name--${CMAKE_CURRENT_LIST_FILE}")
+    message(STATUS "your system name is ${CMAKE_SYSTEM_NAME}[CMAKE_SYSTEM_NAME]--${CMAKE_CURRENT_LIST_FILE}")
+    message(STATUS "cmake generator: ${CMAKE_GENERATOR}--${CMAKE_CURRENT_LIST_FILE}")
+    message(STATUS "cmake generator platform: ${CMAKE_GENERATOR_PLATFORM}--${CMAKE_CURRENT_LIST_FILE}")
+    message(STATUS "cmake generator toolset: ${CMAKE_GENERATOR_TOOLSET}--${CMAKE_CURRENT_LIST_FILE}")
+    message(STATUS "cmake generator instance: ${CMAKE_GENERATOR_INSTANCE}--${CMAKE_CURRENT_LIST_FILE}")
 endmacro(project_base_system_message)
 
 macro(cmakelists_base_header)
-message(STATUS ${CMAKE_CURRENT_LIST_FILE})
+    message(STATUS ${CMAKE_CURRENT_LIST_FILE})
 endmacro(cmakelists_base_header)
 
 macro(show_all_variables)

@@ -24,6 +24,8 @@ set(PACKAGE_DESCRIPTION "")
 set(PACKAGE_URL "")
 project(${PACKAGE_NAME} VERSION ${PACKAGE_VERSION} LANGUAGES C CXX)
 
+include(cmake/features.cmake)
+
 # add cmake_module to CMAKE_MODULE_PATH
 set(cmake_module_dir ${ProjectBase_SOURCE_DIR}/cmake_module)
 set(CMAKE_MODULE_PATH ${cmake_module_dir} ${CMAKE_MODULE_PATH})
@@ -33,6 +35,7 @@ include(popular_message)
 project_base_system_message()
 
 #生成链接库
+# 关于计算设备的问题，本工程中可能包含有众多计算设备的调用，因此需要在这里进行判断
 set(cm_module_name cm)
 if (OPENCL)
     find_package(OpenCL REQUIRED)
@@ -68,21 +71,33 @@ include_directories(${project_include_dir})
 option(project_base_build_shared_lib "build the shared library or not" ON)
 option(project_base_build_python_interface "build the interface for python or not" OFF)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/external_process/external_setting.cmake)
+external_cmake_args()
 # gflags depend
 include(gflags)
 # glog depend
 include(glog)
 # gtest depend
-include(GTest)
+include(./external_process/gtest.cmake)
+gtest_target()
 # boost depend
 include(boost)
 # eigen3 depend
 include(eigen3)
 # protobuf
 include(protobuf)
+## opencl
+#include(OpenCL)
+if(project_base_using_tbb)
+    include(./external_process/tbb.cmake)
+endif()
 
 # glog depend
 
+if(${OPENCL})
+    # build opencl base
+    add_subdirectory(opencl_base)
+endif()
 # build plugin_manager
 add_subdirectory(plugin_manager)
 # build cmake_module
@@ -129,6 +144,8 @@ add_subdirectory(number_theory)
 add_subdirectory(basic_calculation)
 # build basic_algorithm
 add_subdirectory(basic_algorithm)
+# build algorithm
+add_subdirectory(algorithm)
 
 include(test_engineer_config)
 if(${build_test})
