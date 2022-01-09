@@ -1,4 +1,4 @@
-﻿# base on oatpp v2.2.2
+﻿# base on oatpp 1.2.5
 function(oatpp_target)
     include(popular_message)
     include(external_setting)
@@ -45,7 +45,7 @@ function(oatpp_target)
         target_link_libraries(interface_lib${module} INTERFACE oatpp::oatpp oatpp::oatpp-test)
     else()
         message(DEBUG "OATPP NOT FOUND(TEMP)")
-        message(WARNING "Now oatpp only support static lib")
+        message(WARNING "Now oatpp only support static lib in windows")
 
         ExternalProject_Add(
             ext_${module}
