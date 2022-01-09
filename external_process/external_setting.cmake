@@ -62,7 +62,7 @@ function(project_build_shared project)
     else()
         set(_${project}_build_shared ${${project}_build_shared})
     endif()
-    message(DEBUG "${project} ExternalProject_Add::CMAKE_BUILD_SHARED(\$\{${project}_build_shared_var_name\})=${_${project}_build_shared}")
+    message(DEBUG "${project} ExternalProject_Add::BUILD_SHARED_LIBS(\$\{${project}_build_shared_var_name\})=${_${project}_build_shared}")
     set(${project}_build_shared_var_name _${project}_build_shared PARENT_SCOPE)
     set(_${project}_build_shared ${_${project}_build_shared} PARENT_SCOPE)
 endfunction(project_build_shared)
@@ -371,7 +371,7 @@ function(cmake_external_project_common_args external_project_name)
     list(
         APPEND 
         _cmake_args 
-        -DCMAKE_BUILD_SHARED:BOOL=${${${external_project_name}_build_shared_var_name}}
+        -DBUILD_SHARED_LIBS:BOOL=${${${external_project_name}_build_shared_var_name}}
         -DCMAKE_BUILD_TYPE:STRING=${${${external_project_name}_build_type_var_name}}
         -DCMAKE_INSTALL_PREFIX:STRING=${${external_project_name}_cmake_install_prefix}
         -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
