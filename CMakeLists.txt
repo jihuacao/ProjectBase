@@ -153,3 +153,8 @@ if(${build_test})
 	message(STATUS "build test")
     add_subdirectory(test)
 endif()
+
+# add vscode config
+
+set(PROGRAM_ANYWHERE_TARGET_NAME )
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/vscode-tasks.in ${CMAKE_CURRENT_SOURCE_DIR}/.vscode/tasks.json)

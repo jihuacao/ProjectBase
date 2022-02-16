@@ -4,7 +4,13 @@
         {
             "label": "BuildProgramAnyWhereDebug",
             "type": "shell",
-            "command": "@BUILD_COMMAND@ @BINARY_PATH@/test/program_anywhere/@TARGET_NAME@"
+            "command": "@BUILD_TOOL@",
+            "args": [
+                "@CMAKE_CURRENT_BINARY_DIR@/test/program_anywhere/@PROGRAM_ANYWHERE_TARGET_NAME@"
+                @BUILD_CONFIG@
+                @BUILD_PLATFORM@
+            ],
+            "group": "build"
         }
     ]
 }
