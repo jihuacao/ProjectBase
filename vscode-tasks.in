@@ -1,0 +1,10 @@
+﻿{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "BuildProgramAnyWhereDebug",
+            "type": "shell",
+            "command": "@BUILD_COMMAND@ @BINARY_PATH@/test/program_anywhere/@TARGET_NAME@"
+        }
+    ]
+}

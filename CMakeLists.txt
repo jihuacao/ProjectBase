@@ -76,7 +76,8 @@ external_cmake_args()
 # gflags depend
 include(gflags)
 # glog depend
-include(glog)
+include(${CMAKE_CURRENT_SOURCE_DIR}/external_process/glog.cmake)
+glog_target()
 # gtest depend
 include(./external_process/gtest.cmake)
 gtest_target()
