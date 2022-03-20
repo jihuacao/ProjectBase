@@ -18,6 +18,7 @@ project_base_system_message()
 message(STATUS ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG})
 
 include(../../../external_process/gflags.cmake)
+gflags_target()
 
 set(sources "${${PROJECT_NAME}_SOURCE_DIR}/test_gflags.cpp")
 add_executable(${PROJECT_NAME} ${sources})

@@ -6,4 +6,5 @@ file(
     ${module}_files
     *.hpp
 )
+add_library(cross_platform INTERFACE)
 install(FILES ${${module}_head} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/${module})
