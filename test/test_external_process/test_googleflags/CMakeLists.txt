@@ -6,10 +6,18 @@ get_filename_component(test_dir ${test_external_process_dir} PATH)
 get_filename_component(src_dir ${test_dir} PATH)
 
 set(CMAKE_MODULE_PATH ${src_dir}/external_process/ ${CMAKE_MODULE_PATH})
+
 include(cmake_module_set)
-message("module_path: ${CMAKE_MODULE_PATH}")
+include(common_project_configure)
+project_common_setting()
 include(external_setting)
-include(gflags)
+external_cmake_args()
+include(popular_message)
+cmakelists_base_header()
+project_base_system_message()
+message(STATUS ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG})
+
+include(../../../external_process/gflags.cmake)
 
 set(sources "${${PROJECT_NAME}_SOURCE_DIR}/test_gflags.cpp")
 add_executable(${PROJECT_NAME} ${sources})

@@ -8,139 +8,150 @@ set(module gflags)
 project_base_system_message()
 
 set(gflags_url https://github.com/gflags/gflags.git)
-
-# this is a list contain versions which have the same behavior
 set(${module}_supported_version "2.2.2")
 set(${module}_supported_tag "v2.2.2")
-version_selector(${module} ${module}_supported_version "2.2.2")
-message(STATUS ${${module}_version})
+version_selector(${module} ${module}_supported_version 2.2.2)
 version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
-
-# to get the gfalgs_build_type
 default_external_project_build_type(${module})
-
-# to get the _gflags_build_type shared or static
 project_build_shared(${module})
+cmake_external_project_common_args(${module})
 
 message("gflags: version->${${module}_version} build in->${_${module}_build_type} shared?->${_${module}_build_shared}")
 
 set(GFLAGS_USE_TARGET_NAMESPACE TRUE)
-find_package(${module} ${${module}_version} CONFIG PATHS ${external_install_path})
+option(${module}_need_nothreads "need gflags nothreads or not" OFF)
+set(GFLAGS_NOTHREADS ${gflags_need_nothreads})
+find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${${module}_cmake_install_prefix})
 
 if(${module}_FOUND)
-    message(STATUS "GFLAGS_INCLUDE_DIR: ${GFLAGS_INCLUDE_DIR}")
+    message(STATUS "FOUND GFLAGS_INCLUDE_DIR: ${GFLAGS_INCLUDE_DIR}")
     set(gflags_target_name gflags::gflags)
 else()
-    if(${gflags_version} IN_LIST uniform_version_one)
-        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-            if(gflags_build_type STREQUAL "Debug")
-                if(_gflags_build_shared)
-                    set(gflags_lib_name gflags_debug.lib)
-                    set(gflags_nothreads_lib_name gflags_nothreads_debug.lib)
-                else()
-                    set(gflags_lib_name gflags_static_debug.lib)
-                    set(gflags_nothreads_lib_name gflags_nothread_static_debug.lib)
-                endif()
-            elseif(gflags_build_type STREQUAL "Release")
-                if(_gflags_build_shared)
-                    set(gflags_lib_name gflags.lib)
-                    set(gflags_nothreads_lib_name gflags_nothreads.lib)
-                else()
-                    set(gflags_lib_name gflags_static.lib)
-                    set(gflags_nothreads_lib_name gflags_nothreads_static.lib)
-                endif()
-            endif()
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-            if(gflags_build_type STREQUAL "Debug")
-                if(_gflags_build_shared)
-                    set(gflags_lib_name libflags_debug.so)
-                    set(gflags_nothreads_lib_name libflags_nothreads_debug.so)
-                else()
-                    set(gflags_lib_name libflags_debug.a)
-                    set(gflags_nothreads_lib_name libflags_nothreads_debug.a)
-                endif()
-            elseif(gflags_build_type STREQUAL "Release")
-                if(_gflags_build_shared)
-                    set(gflags_lib_name libflags.so)
-                    set(gflags_nothreads_lib_name libflags_nothreads.so)
-                else()
-                    set(gflags_lib_name libflags.a)
-                    set(gflags_nothreads_lib_name libflags_nothreads.a)
-                endif()
-            endif()
-        endif()
-    else()
-    endif()
-
-    set(${module}_include ${external_install_path}/include)
-    set(${module}_lib_dir ${external_install_path}/lib)
-    set(${module}_lib ${gflags_lib_dir}/${gflags_lib_name})
-
     ExternalProject_Add(
-        _${module}
+        ext_${module}
+        "${${module}_external_project_add_args}"
         PREFIX ${module} 
+        "${${module}_external_project_add_git_args}"
         GIT_REPOSITORY ${${module}_url}
         GIT_TAG ${${module}_tag}
-        SOURCE_DIR "${external_download_dir}/${module}"
-        BUILD_IN_SOURCE 0
-        BUILD_BYPRODUCTS ${gflags_lib_name} ${gflags_nothreads_lib_name}
-        INSTALL_COMMAND make install
-        BUILD_COMMAND make -j 8
+        CMAKE_ARGS
+            "${${module}_cmake_args}"
         CMAKE_CACHE_ARGS
-            -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
-            -DCMAKE_INSTALL_PREFIX:STRING=${external_install_path}
-            -DBUILD_PACKAGING:BOOL=OFF
-            -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
+            -DBUILD_SHARED_LIBS:BOOL=${${${module}_build_shared_var_name}}
+            -DBUILD_PACKAGING:BOOL=ON
             -DBUILD_TESTING:BOOL=OFF
             -DBUILD_gflags_LIB:BOOL=ON
-            -DBUILD_gflags_nothreads_LIB:BOOL=ON
+            -DBUILD_gflags_nothreads_LIB:BOOL=${${module}_need_nothreads}
             -DREGISTER_BUILD_DIR:BOOL=OFF
             -DREGISTER_INSTALL_PREFIX:BOOL=OFF
     )
+    set(${module}_include_dir ${${module}_cmake_install_prefix}/include)
+    set(${module}_lib_dir ${${module}_cmake_install_prefix}/lib)
+    touch_fold(${module}_include_dir)
+    touch_fold(${module}_lib_dir)
 
-    if(${_${module}_build_type} STREQUAL "RELEASE")
-        set(type)
-    else()
-        set(type -debug)
-    endif()
-    if(${_${module}_build_shared})
-        set(posefix so)
-    else()
-        set(posefix a)
-    endif()
+    list(
+        APPEND
+        status_registry
+        SYSTEM_NAME 
+        GENERATOR 
+        GENERATOR_PLATFORM
+        GENERATOR_TOOLSET
+        GENERATOR_INSTANCE
+        BUILD_SHARED
+        BUILD_TYPE
+    )
+    list(
+        APPEND
+        component_registry
+        PREFIX
+        POSTFIX
+        EXTENSION
+        DEFINITIONS
+        LIBS
+    )
+    generate_object_name_component(
+        status_registry
+        component_registry
+        SYSTEM_NAME ${CMAKE_SYSTEM_NAME}
+        GENERATOR ${${module}_cmake_generator}
+        GENERATOR_PLATFORM ${${module}_cmake_generator_platform}
+        GENERATOR_TOOLSET ${${module}_cmake_generator_toolset}
+        GENERATOR_INSTANCE ${${module}_cmake_generator_instance}
+        BUILD_SHARED ${${${module}_build_shared_var_name}}
+        BUILD_TYPE ${${${module}_build_type_var_name}}
+        SYSTEM_NAME_LIST 
+        Windows 
+        Windows 
+        Windows 
+        Windows
+        Linux
+        Linux
+        Linux
+        Linux
+        GENERATOR_LIST 
+        "Visual Studio" 
+        "Visual Studio" 
+        "Visual Studio"
+        "Visual Studio"
+        "Unix Makefiles"
+        "Unix Makefiles"
+        "Unix Makefiles"
+        "Unix Makefiles"
+        GENERATOR_PLATFORM_LIST x64 x64 x64 x64 ANY ANY ANY ANY
+        GENERATOR_TOOLSET_LIST ANY ANY ANY ANY ANY ANY ANY ANY
+        GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY ANY ANY ANY
+        BUILD_SHARED_LIST ON ON OFF OFF ON ON OFF OFF
+        BUILD_TYPE_LIST RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG
+        PREFIX_LIST Empty Empty Empty Empty "lib" "lib" "lib" "lib"
+        POSTFIX_LIST Empty "_debug" "_static" "_static_debug" Empty "d" Empty "d"
+        EXTENSION_LIST "lib" "lib" "lib" "lib" "so" "so" "a" "a"
+        LIBS_LIST "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" Empty Empty Empty Empty
+        DEFINITIONS_LIST
+        "GFLAGS_IS_A_DLL=1"
+        "GFLAGS_IS_A_DLL=1"
+        "GFLAGS_IS_A_DLL=0"
+        "GFLAGS_IS_A_DLL=0"
+        "GFLAGS_IS_A_DLL=1"
+        "GFLAGS_IS_A_DLL=1"
+        "GFLAGS_IS_A_DLL=0"
+        "GFLAGS_IS_A_DLL=0"
+    )
 
     # make sure dir existed
     touch_fold(${module}_include)
     touch_fold(${module}_lib_dir)
 
-    add_library(_${module}_nothreads UNKNOWN IMPORTED)
-    set_target_properties(
-        _${module}_nothreads
-        PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
-        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
-        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir}/libgflags_nothreads${type}.${posefix}"
-    )
-    add_dependencies(_${module}_nothreads _${module})
-    include(CMakeFindDependencyMacro)
-    find_dependency(Threads)
+    if(${module}_need_nothreads)
+        add_library(_${module}_nothreads UNKNOWN IMPORTED)
+        set_target_properties(
+            _${module}_nothreads
+            PROPERTIES
+            IMPORTED_LOCATION "${${module}_lib_dir}/${prefix}gflags_nothreads${postfix}.${extension}"
+        )
+        add_dependencies(_${module}_nothreads ext_${module})
+    else()
+        add_library(_${module}_nothreads INTERFACE)
+    endif()
+    #include(CMakeFindDependencyMacro)
+    #find_dependency(Threads)
+
     add_library(_${module}_thread UNKNOWN IMPORTED)
     set_target_properties(
         _${module}_thread
         PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${${module}_include}"
-        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
-        IMPORTED_LOCATION_${_${module}_build_type} "${${module}_lib_dir}/libgflags${type}.${posefix}"
-        INTERFACE_LINK_LIBRARIES "Threads::Threads"
+        IMPORTED_LOCATION "${${module}_lib_dir}/${prefix}gflags${postfix}.${extension}"
     )
-    add_dependencies(_${module}_thread _${module})
-    add_library(gflags::gflags INTERFACE IMPORTED)
-    set_target_properties(
-        gflags::gflags
+    add_dependencies(_${module}_thread ext_${module})
+
+    add_library(interface_lib${module} INTERFACE)
+    set_target_properties(interface_lib${module}
         PROPERTIES
-        INTERFACE_LINK_LIBRARIES "_${module}_nothreads;_${module}_thread"
+        INTERFACE_INCLUDE_DIRECTORIES "${${module}_include_dir}"
+        INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
+        INTERFACE_LINK_LIBRARIES "_${module}_thread;_${module}_nothreads;${libs}"
+        INTERFACE_COMPILE_DEFINITIONS "${definitions}"
     )
-    add_dependencies(gflags::gflags _${module}_nothreads)
-    add_dependencies(gflags::gflags _${module}_thread)
-    set(${module}_target_name gflags::gflags)
+    add_dependencies(interface_lib${module} _${module}_nothreads _${module}_thread)
+    set(${module}_target_name interface_lib${module})
 endif()
