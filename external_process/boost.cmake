@@ -18,16 +18,16 @@ set(generate_boost_op_name _${module})
 # this should be retain
 set(generate_boost_imported_name boost_generate_target)
 
-# generate a boost component config file to the CMAKE_SOURCE_DIR
+# generate a boost component config file to the CMAKE_CURRENT_SOURCE_DIR
 ## find the config file
-find_file(component_config_file boost_component_config NO_DEFAULT_PATH PATHS ${CMAKE_SOURCE_DIR})
+find_file(component_config_file boost_component_config NO_DEFAULT_PATH PATHS ${CMAKE_CURRENT_SOURCE_DIR})
 if(${component_config_file} STREQUAL "component_config_file-NOTFOUND")
-    message(STATUS "copy boost_component_config to ${CMAKE_SOURCE_DIR}")
-    file(COPY ${ProjectBase_boost_component_config_file_rpath} DESTINATION ${CMAKE_SOURCE_DIR})
+    message(STATUS "copy boost_component_config to ${CMAKE_CURRENT_SOURCE_DIR}")
+    file(COPY ${ProjectBase_boost_component_config_file_rpath} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
 else()
     message(STATUS found:${component_config_file})
 endif()
-set(component_file_rpath ${CMAKE_SOURCE_DIR}/${ProjectBase_boost_component_config_file_name})
+set(component_file_rpath ${CMAKE_CURRENT_SOURCE_DIR}/${ProjectBase_boost_component_config_file_name})
 execute_process(
     COMMAND 
     python

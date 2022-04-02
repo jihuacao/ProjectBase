@@ -459,7 +459,7 @@ function(generate_object_name_component statuses components)
         set(multiValueArgs ${multiValueArgs} ${component}_LIST)
     endforeach()
     set(arg_prefix component)
-    cmake_parse_arguments(${arg_prefix} "${optionsArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    CMAKE_PARSE_ARGUMENTS(${arg_prefix} "${optionsArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     # check the list size
     list(GET multiValueArgs 0 first_list_name)
     list(GET TargetValues 0 first_target_name)

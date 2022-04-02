@@ -74,7 +74,8 @@ option(project_base_build_python_interface "build the interface for python or no
 include(${CMAKE_CURRENT_SOURCE_DIR}/external_process/external_setting.cmake)
 external_cmake_args()
 # gflags depend
-include(gflags)
+include(${CMAKE_CURRENT_SOURCE_DIR}/external_process/gflags.cmake)
+gflags_target()
 # glog depend
 include(${CMAKE_CURRENT_SOURCE_DIR}/external_process/glog.cmake)
 glog_target()
