@@ -1,4 +1,5 @@
 ﻿#include <gtest/gtest.h>
+#include <climits>
 #include <map>
 
 TEST(ProgramAnywhere, HuaWeiTestOne) {

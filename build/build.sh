@@ -2,6 +2,7 @@ usage(){
     echo "help message:"
     echo "--log-level=[DEBUG|RELEASE]"
 }
+log_level="DEBUG"
 ARGS=`getopt \
     -o hab:c:: \
     --long help,along,blong:,component::,log-level:: \
@@ -40,22 +41,36 @@ for arg do
 done
 
 exec_dir=$(pwd)
-shell_dir=$(dirname $0)
-shell_path=$(cd $(dirname $0); pwd)
-output_path=${shell_dir}/build_cache
-mkdir ${output_path}
+shell_dir=$(cd $(dirname $0); pwd)
+output_dir=${shell_dir}/build_cache
+mkdir ${output_dir}
 $(cd ${exec_dir})
+
+system=$(uname)
+if [[ ${system} == "Linux" ]];then
+    echo "Linux"
+    generator="Unix Makefiles"
+    platform=""
+elif [[ ${system} == *"MINGW"* ]];then
+    echo "Windows"
+    generator="Visual Studio 16 2019"
+    platform="x64"
+else
+    echo "None, get system failed!"
+    exit 1
+fi
 
 cmake \
 -DCMAKE_BUILD_TYPE=DEBUG \
--A x64 \
--G "Visual Studio 16 2019" \
+-A "${platform}" \
+-G "${generator}" \
 -S "$(dirname ${shell_dir})" \
 -B "${exec_dir}" \
+-Dexternal_build_shared=OFF \
 -Dexternal_build_shared=OFF \
 -Dvar_external_root_dir="${exec_dir}/external" \
 --log-level=${log_level} \
 -LAH \
 > ${exec_dir}/cmake_config.log
-cp ${exec_dir}/cmake_config.log ${output_path}
-cp ${exec_dir}/CMakeCache.txt ${output_path}
+cp ${exec_dir}/cmake_config.log ${output_dir}
+cp ${exec_dir}/CMakeCache.txt ${output_dir}
