@@ -51,8 +51,14 @@ if [[ ${system} == "Linux" ]];then
     echo "Linux"
     generator="Unix Makefiles"
     platform=""
+elif [[ ${system} == *"CYGWIN"* ]];then
+    echo "WindowsCygwin"
+    generator="Unix Makefiles"
+    cmake_c_compiler="x86_64-w64-mingw32-gcc.exe"
+    cmake_cxx_compiler="x86_64-w64-mingw32-g++.exe"
+    platform=""
 elif [[ ${system} == *"MINGW"* ]];then
-    echo "Windows"
+    echo "WindowsGitBash"
     generator="Visual Studio 16 2019"
     platform="x64"
 else
@@ -66,6 +72,8 @@ cmake \
 -G "${generator}" \
 -S "$(dirname ${shell_dir})" \
 -B "${exec_dir}" \
+-DCMAKE_C_COMPILER=${cmake_c_compiler} \
+-DCMAKE_CXX_COMPILER=${cmake_cxx_compiler} \
 -Dexternal_build_shared=OFF \
 -Dexternal_build_shared=OFF \
 -Dvar_external_root_dir="${exec_dir}/external" \

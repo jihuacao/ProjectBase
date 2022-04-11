@@ -11,8 +11,8 @@ function(gflags_target)
     set(${module}_supported_tag "v2.2.2")
     version_selector(${module} ${module}_supported_version 2.2.2)
     version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
-    default_external_project_build_type(${module})
-    project_build_shared(${module})
+    #default_external_project_build_type(${module})
+    #project_build_shared(${module})
     cmake_external_project_common_args(${module})
 
     message("gflags: version->${${module}_version} build in->${_${module}_build_type} shared?->${_${module}_build_shared}")
@@ -89,6 +89,10 @@ function(gflags_target)
             Linux
             Linux
             Linux
+            CYGWIN
+            CYGWIN
+            CYGWIN
+            CYGWIN
             GENERATOR_LIST 
             "Visual Studio" 
             "Visual Studio" 
@@ -98,16 +102,24 @@ function(gflags_target)
             "Unix Makefiles"
             "Unix Makefiles"
             "Unix Makefiles"
-            GENERATOR_PLATFORM_LIST x64 x64 x64 x64 ANY ANY ANY ANY
-            GENERATOR_TOOLSET_LIST ANY ANY ANY ANY ANY ANY ANY ANY
-            GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY ANY ANY ANY
-            BUILD_SHARED_LIST ON ON OFF OFF ON ON OFF OFF
-            BUILD_TYPE_LIST RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG
-            PREFIX_LIST Empty Empty Empty Empty "lib" "lib" "lib" "lib"
-            POSTFIX_LIST Empty "_debug" "_static" "_static_debug" Empty "d" Empty "d"
-            EXTENSION_LIST "lib" "lib" "lib" "lib" "so" "so" "a" "a"
-            LIBS_LIST "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" Empty Empty Empty Empty
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            GENERATOR_PLATFORM_LIST x64 x64 x64 x64 ANY ANY ANY ANY ANY ANY ANY ANY
+            GENERATOR_TOOLSET_LIST ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY
+            GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY
+            BUILD_SHARED_LIST ON ON OFF OFF ON ON OFF OFF ON ON OFF OFF
+            BUILD_TYPE_LIST RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG
+            PREFIX_LIST Empty Empty Empty Empty "lib" "lib" "lib" "lib" "lib" "lib" "lib"
+            POSTFIX_LIST Empty "_debug" "_static" "_static_debug" Empty "d" Empty "d" Empty "_debug" Empty "_debug"
+            EXTENSION_LIST "lib" "lib" "lib" "lib" "so" "so" "a" "a" "dll.a" "a" "dll.a" "a"
+            LIBS_LIST "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" Empty Empty Empty Empty Empty Empty Empty Empty
             DEFINITIONS_LIST
+            "GFLAGS_IS_A_DLL=1"
+            "GFLAGS_IS_A_DLL=1"
+            "GFLAGS_IS_A_DLL=0"
+            "GFLAGS_IS_A_DLL=0"
             "GFLAGS_IS_A_DLL=1"
             "GFLAGS_IS_A_DLL=1"
             "GFLAGS_IS_A_DLL=0"
@@ -153,6 +165,6 @@ function(gflags_target)
             INTERFACE_COMPILE_DEFINITIONS "${definitions}"
         )
         add_dependencies(interface_lib${module} _${module}_nothreads _${module}_thread)
-        set(${module}_target_name interface_lib${module} PARENT_SCOPE)
     endif()
+    set(${module}_target_name interface_lib${module} PARENT_SCOPE)
 endfunction(gflags_target)

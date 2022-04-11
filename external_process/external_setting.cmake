@@ -329,14 +329,16 @@ function(cmake_external_project_common_args external_project_name)
     set_cmake_args_variable(cmake_generator_toolset "${CMAKE_GENERATOR_TOOLSET}")
     set_cmake_args_variable(cmake_generator_instance "${CMAKE_GENERATOR_INSTANCE}")
     set_args_variable(binary_dir ${external_build_dir}/${external_project_name}_${lower_cmake_generator_platform}_${lower_cmake_build_type}_${lower_build_shared})
-    set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
+    #set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
     if(${${${external_project_name}_build_shared_var_name}})
         set(install_postfix "public")
     else()
         set(install_postfix "internal")
     endif()
     set_cmake_args_variable(cmake_install_prefix ${external_install_dir}/${lower_cmake_generator_platform}_${lower_cmake_build_type}_${install_postfix})
+    # [[设置GENERATOR]]
     if(${CMAKE_GENERATOR} MATCHES "Makefiles")
+        set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
     elseif(${CMAKE_GENERATOR} MATCHES "Visual Studio")
         set_cmake_args_variable(cmake_generator ${CMAKE_GENERATOR})
     else()
@@ -460,7 +462,7 @@ function(generate_object_name_component statuses components)
     endforeach()
     set(arg_prefix component)
     CMAKE_PARSE_ARGUMENTS(${arg_prefix} "${optionsArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    # check the list size
+    # 检查multiValueArgs提供的可选项数是否一致
     list(GET multiValueArgs 0 first_list_name)
     list(GET TargetValues 0 first_target_name)
     foreach(status_name ${oneValueArgs})
@@ -477,11 +479,16 @@ function(generate_object_name_component statuses components)
             endif()
         endif()
     endforeach()
+    
+    #[[
+    * 循环支持状态,判断是否与当前状态匹配.
+    * 每次循环会移除组件的第0可选项，当组件没有可选项时，退出循环，这意味着可能会得到多于1个的组件名称.
+    ]]
     while(${get_size} GREATER 0)
         foreach(status_name ${oneValueArgs})
             set(list_name ${status_name}_LIST)
             list(GET ${arg_prefix}_${list_name} 0 supported_status)
-            if(${${arg_prefix}_${status_name}} MATCHES ${supported_status})
+            if("${${arg_prefix}_${status_name}}" MATCHES "${supported_status}")
                 set(matched ON)
             elseif(${supported_status} STREQUAL "ANY")
                 set(matched ON)
@@ -491,26 +498,35 @@ function(generate_object_name_component statuses components)
                 break()
             endif()
         endforeach()
+        # 如果匹配上，则提取组件名称
         if(${matched})
             foreach(target ${TargetValues})
                 list(GET ${arg_prefix}_${target}_LIST 0 _${target})
-                # 由于可能存在
+                #[[
+                * 由于组件单项中还可能存在列表，这会与实际想要的单项相矛盾
+                * 因此如果组件单项中存在列表，则应该使用<list_regex>替换空格
+                ]]
                 string(REPLACE "<list_regex>" ";" back_list ${_${target}})
                 list(APPEND ${target}s ${back_list})
                 #list(APPEND ${target}s "${_${target}}")
             endforeach()
         else()
         endif()
+        # 移除组件可选项第一项
         foreach(status_name ${multiValueArgs})
             list(REMOVE_AT ${arg_prefix}_${status_name} 0)
         endforeach()
         list(LENGTH ${arg_prefix}_PREFIX_LIST get_size)
     endwhile()
+    #[[
+    * 由于上面机制，可能存在多个匹配项
+    ]]
     if(DEFINED ${first_target_name}s)
         list(LENGTH ${first_target_name}s got_target_size)
         if(${got_target_size} GREATER 1)
             message(FATAL_ERROR "got target size more than one ${${first_target_name}s}") 
         endif()
+        # 对于单项为空的情况，使用了Empty代表，需要替换为""
         foreach(target ${TargetValues})
             if(${target}s STREQUAL Empty)
                 set(${target}s "")
