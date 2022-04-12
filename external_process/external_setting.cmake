@@ -427,6 +427,8 @@ endfunction(cmake_external_project_common_args)
     * 状态表包含：支持状态类型表，以及对应的名称部件表
     * 例子
     param:
+        * statuses 状态注册表，提供状态字段，进行匹配过滤组件名称
+        * components 组件注册表，提供组件集合，匹配之后进行
         * SYSTEM_NAME: 当前系统的名称[Windows|Linux]
         * GENERATOR：构建体系
             * Visual Studio MSVC-Version IDE-Version
@@ -452,7 +454,18 @@ function(generate_object_name_component statuses components)
     set(
         optionsArgs
     )
+    #[[
+    * 把CMAKE_PARSE_ARGUMENTS解析结构收集起来
+      * status是作为匹配状态
+      * component是作为匹配之后想获得的目标值
+      * 存在oneValueArgs
+        * status当前状态信息，用来跟status匹配列表进行匹配
+      * 存在multiValueArgs
+        * 由status构建的status匹配列表
+        * 由component构建的component匹配列表
+    ]]
     foreach(status ${${statuses}})
+        set(StatusValues ${StatusValues} ${status})
         set(oneValueArgs ${oneValueArgs} ${status})
         set(multiValueArgs ${multiValueArgs} ${status}_LIST)
     endforeach()
@@ -461,11 +474,12 @@ function(generate_object_name_component statuses components)
         set(multiValueArgs ${multiValueArgs} ${component}_LIST)
     endforeach()
     set(arg_prefix component)
+    #[[]]
     CMAKE_PARSE_ARGUMENTS(${arg_prefix} "${optionsArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    # 检查multiValueArgs提供的可选项数是否一致
+    #[[检查multiValueArgs中系统信息匹配项提供的可选匹配数是否一致]]
     list(GET multiValueArgs 0 first_list_name)
     list(GET TargetValues 0 first_target_name)
-    foreach(status_name ${oneValueArgs})
+    foreach(status_name ${StatusValues})
         set(list_name ${status_name}_LIST)
         list(LENGTH ${arg_prefix}_${list_name} get_size)
         message(DEBUG "the status: ${status_name}=${${arg_prefix}_${status_name}}")
@@ -475,7 +489,21 @@ function(generate_object_name_component statuses components)
         else()
             if(${size} EQUAL ${get_size})
             else()
-                message(FATAL_ERROR "the size of the List change ${size} vs. ${get_size}")
+                message(FATAL_ERROR "the size of the List change ${size} vs. ${get_size} at ${list_name}")
+            endif()
+        endif()
+    endforeach()
+    #[[检查multiValueArgs中的组件项提供的可选匹配数是否一致]]
+    foreach(component_name ${TargetValues})
+        set(list_name ${component_name}_LIST)
+        list(LENGTH ${arg_prefix}_${list_name} get_size)
+        message(DEBUG "supported component: ${list_name} ${${arg_prefix}_${list_name}}")
+        if("${list_name}" STREQUAL "${fit_target_name}")
+            set(size ${get_size})
+        else()
+            if(${size} EQUAL ${get_size})
+            else()
+                message(FATAL_ERROR "the size of the List change ${size} vs. ${get_size} at ${list_name}")
             endif()
         endif()
     endforeach()

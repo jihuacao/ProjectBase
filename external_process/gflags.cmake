@@ -4,15 +4,14 @@ function(gflags_target)
     include(ExternalProject)
     include(external_setting)
     include(fold_operation)
+
     set(module gflags)
 
-    set(gflags_url https://github.com/gflags/gflags.git)
+    set(${module}_url https://github.com/gflags/gflags.git)
     set(${module}_supported_version "2.2.2")
     set(${module}_supported_tag "v2.2.2")
     version_selector(${module} ${module}_supported_version 2.2.2)
     version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
-    #default_external_project_build_type(${module})
-    #project_build_shared(${module})
     cmake_external_project_common_args(${module})
 
     message("gflags: version->${${module}_version} build in->${_${module}_build_type} shared?->${_${module}_build_shared}")
@@ -37,6 +36,8 @@ function(gflags_target)
             CMAKE_ARGS
                 "${${module}_cmake_args}"
             CMAKE_CACHE_ARGS
+                #[[这里有个问题，为什么没有把BUILD_SHARED_LIBS放到${module}_cmake_args中，
+                同时${module}_cmake_args中又保留了没有用的CMAKE_BUILD_SHARED?]]
                 -DBUILD_SHARED_LIBS:BOOL=${${${module}_build_shared_var_name}}
                 -DBUILD_PACKAGING:BOOL=ON
                 -DBUILD_TESTING:BOOL=OFF
@@ -111,9 +112,9 @@ function(gflags_target)
             GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY
             BUILD_SHARED_LIST ON ON OFF OFF ON ON OFF OFF ON ON OFF OFF
             BUILD_TYPE_LIST RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG
-            PREFIX_LIST Empty Empty Empty Empty "lib" "lib" "lib" "lib" "lib" "lib" "lib"
+            PREFIX_LIST Empty Empty Empty Empty "lib" "lib" "lib" "lib" "lib" "lib" "lib" "lib"
             POSTFIX_LIST Empty "_debug" "_static" "_static_debug" Empty "d" Empty "d" Empty "_debug" Empty "_debug"
-            EXTENSION_LIST "lib" "lib" "lib" "lib" "so" "so" "a" "a" "dll.a" "a" "dll.a" "a"
+            EXTENSION_LIST "lib" "lib" "lib" "lib" "so" "so" "a" "a" "dll.a" "dll.a" "a" "a"
             LIBS_LIST "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" "shlwapi.lib" Empty Empty Empty Empty Empty Empty Empty Empty
             DEFINITIONS_LIST
             "GFLAGS_IS_A_DLL=1"

@@ -75,7 +75,6 @@ cmake \
 -DCMAKE_C_COMPILER=${cmake_c_compiler} \
 -DCMAKE_CXX_COMPILER=${cmake_cxx_compiler} \
 -Dexternal_build_shared=OFF \
--Dexternal_build_shared=OFF \
 -Dvar_external_root_dir="${exec_dir}/external" \
 --log-level=${log_level} \
 -LAH \

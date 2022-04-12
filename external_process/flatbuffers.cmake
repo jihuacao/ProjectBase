@@ -88,21 +88,33 @@ function(flatbuffers_target)
             Linux
             Linux
             Linux
+            CYGWIN
+            CYGWIN
+            CYGWIN
+            CYGWIN
             GENERATOR_LIST 
             "Visual Studio"
             "Unix Makefiles"
             "Unix Makefiles"
             "Unix Makefiles"
             "Unix Makefiles"
-            GENERATOR_PLATFORM_LIST x64 ANY ANY ANY ANY
-            GENERATOR_TOOLSET_LIST ANY ANY ANY ANY ANY
-            GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY
-            BUILD_SHARED_LIST ANY ON ON OFF OFF
-            BUILD_TYPE_LIST ANY RELEASE DEBUG RELEASE DEBUG
-            PREFIX_LIST Empty "lib" "lib" "lib" "lib"
-            POSTFIX_LIST Empty Empty "d" Empty "d"
-            EXTENSION_LIST "lib" "so" "so" "a" "a"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            GENERATOR_PLATFORM_LIST x64 ANY ANY ANY ANY ANY ANY ANY ANY
+            GENERATOR_TOOLSET_LIST ANY ANY ANY ANY ANY ANY ANY ANY ANY
+            GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY ANY ANY ANY ANY
+            BUILD_SHARED_LIST ANY ON ON OFF OFF ON ON OFF OFF
+            BUILD_TYPE_LIST ANY RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG
+            PREFIX_LIST Empty "lib" "lib" "lib" "lib" "lib" "lib" "lib" "lib"
+            POSTFIX_LIST Empty Empty "d" Empty "d" Empty "d" Empty "d"
+            EXTENSION_LIST "lib" "so" "so" "a" "a" "dll.a" "dll.a" "a" "a"
             DEFINITIONS_LIST
+            Empty
+            Empty
+            Empty
+            Empty
             Empty
             Empty
             Empty

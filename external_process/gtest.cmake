@@ -11,9 +11,6 @@
 function(gtest_target)
     include(popular_message)
     include(external_setting)
-    #cmakelists_base_header()
-    #project_base_system_message()
-
     include(ExternalProject)
     include(fold_operation)
 
@@ -26,9 +23,9 @@ function(gtest_target)
     set(${module}_supported_tag v1.10.x v1.8.x)
     version_selector(${module} ${module}_supported_version 1.10.0)
     version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
-    default_external_project_build_type(${module})
-    project_build_shared(${module})
     cmake_external_project_common_args(${module})
+
+    message("gtest: version->${${module}_version} build in->${${module}_build_type} shared?->${${module}_build_shared}")
 
     find_package(GTest ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${${module}_cmake_install_prefix} ${${module}_binary_dir})
 
@@ -38,30 +35,23 @@ function(gtest_target)
         target_link_libraries(interface_lib${module} INTERFACE GTest::gmock)
     else()
         set(${module}_disable_pthreads OFF CACHE BOOL "disable thread of gtest or not")
+        # [[直接确认使用pthreads]]
         set_property(CACHE ${module}_disable_pthreads PROPERTY ADVANCED)
         set_property(CACHE ${module}_disable_pthreads PROPERTY STRINGS "ON" "OFF")
 
-        message("gtest: version->${${module}_version} build in->${${module}_build_type} shared?->${${module}_build_shared}")
-
         # todo: 存在一个问题，如果git repo已经在本地存在，它仍然会重新clone？
         ExternalProject_Add(
-            _${module}
+            ext_${module}
+            "${${module}_external_project_add_args}"
             PREFIX ${module} 
+            "${${module}_external_project_add_git_args}"
             GIT_REPOSITORY ${${module}_url}
             GIT_TAG ${${module}_tag}
-            SOURCE_DIR ${${module}_source_dir}
-            BUILD_IN_SOURCE ${${module}_build_in_source}
-            BINARY_DIR ${${module}_binary_dir}
-            INSTALL_COMMAND ${${module}_install_command}
-            BUILD_COMMAND ${${module}_build_command}
-            CMAKE_GENERATOR ${${module}_cmake_generator}
-            CMAKE_GENERATOR_TOOLSET ${${module}_cmake_generator_toolset}
-            CMAKE_GENERATOR_PLATFORM ${${module}_cmake_generator_platform}
+            CMAKE_ARGS
+                "${${module}_cmake_args}"
             CMAKE_CACHE_ARGS
                 -DBUILD_GMOCK:BOOL=ON
-                -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
-                -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
-                -DCMAKE_INSTALL_PREFIX:STRING=${${module}_cmake_install_prefix}
+                -DBUILD_SHARED_LIBS:BOOL=${${${module}_build_shared_var_name}}
                 -DINSTALL_GTEST:BOOL=ON
                 -Dgmock_build_tests:BOOL=OFF
                 -Dgtest_build_samples:BOOL=OFF
@@ -71,54 +61,100 @@ function(gtest_target)
                 -Dgtest_hide_internal_symbols:BOOL=OFF
         )
 
-        string(TOUPPER ${_${module}_build_type} _${module}_build_type)
-        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-            if(_${module}_build_type STREQUAL "DEBUG")
-                set(gtest_lib_name gtestd.lib)
-                set(gmock_lib_name gmockd.lib)
-            elseif(_${module}_build_type STREQUAL "RELEASE")
-                set(gtest_lib_name gtest.lib)
-                set(gmock_lib_name gmock.lib)
-            endif()
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-            if(_${module}_build_type STREQUAL "DEBUG")
-                if(_${module}_build_shared)
-                    set(gtest_lib_name libgtestd.so)
-                    set(gmock_lib_name libgmockd.so)
-                else()
-                    set(gtest_lib_name libgtestd.a)
-                    set(gmock_lib_name libgmockd.a)
-                endif()
-            elseif(_${module}_build_type STREQUAL "RELEASE")
-                if(_${module}_build_shared)
-                    set(gtest_lib_name libgtest.so)
-                    set(gmock_lib_name libgmock.so)
-                else()
-                    set(gtest_lib_name libgtest.a)
-                    set(gmock_lib_name libgmock.a)
-                endif()
-            endif()
-        else()
-            message(FATAL_ERROR error occur while getting system: ${CMAKE_SYSTEM_NAME})
-        endif()
-
-        set(${module}_definition "")
         set(${module}_include_dir ${${module}_cmake_install_prefix}/include)
         set(${module}_lib_dir ${${module}_cmake_install_prefix}/lib)
-        set(${module}_gtest_lib ${${module}_lib_dir}/${gtest_lib_name})
-        set(${module}_gmock_lib ${${module}_lib_dir}/${gmock_lib_name})
-        if(_${${module}_build_shared})
-            set(${module}_definition "${${module}_definition};GTEST_LINKED_AS_SHARED_LIBRARY")
-        else()
-        endif()
+        touch_fold(${module}_include_dir)
+        touch_fold(${module}_lib_dir)
+
+        list(
+            APPEND
+            status_registry
+            SYSTEM_NAME 
+            GENERATOR 
+            GENERATOR_PLATFORM
+            GENERATOR_TOOLSET
+            GENERATOR_INSTANCE
+            BUILD_SHARED
+            BUILD_TYPE
+        )
+        list(
+            APPEND
+            component_registry
+            PREFIX
+            POSTFIX
+            EXTENSION
+            DEFINITIONS
+            LIBS
+        )
+        generate_object_name_component(
+            status_registry
+            component_registry
+            SYSTEM_NAME ${CMAKE_SYSTEM_NAME}
+            GENERATOR ${${module}_cmake_generator}
+            GENERATOR_PLATFORM ${${module}_cmake_generator_platform}
+            GENERATOR_TOOLSET ${${module}_cmake_generator_toolset}
+            GENERATOR_INSTANCE ${${module}_cmake_generator_instance}
+            BUILD_SHARED ${${${module}_build_shared_var_name}}
+            BUILD_TYPE ${${${module}_build_type_var_name}}
+            SYSTEM_NAME_LIST 
+            Windows 
+            Windows 
+            Windows 
+            Windows
+            Linux
+            Linux
+            Linux
+            Linux
+            CYGWIN
+            CYGWIN
+            CYGWIN
+            CYGWIN
+            GENERATOR_LIST 
+            "Visual Studio" 
+            "Visual Studio" 
+            "Visual Studio"
+            "Visual Studio"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            "Unix Makefiles"
+            GENERATOR_PLATFORM_LIST x64 x64 x64 x64 ANY ANY ANY ANY ANY ANY ANY ANY
+            GENERATOR_TOOLSET_LIST ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY
+            GENERATOR_INSTANCE_LIST ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY ANY
+            BUILD_SHARED_LIST ON ON OFF OFF ON ON OFF OFF ON ON OFF OFF
+            BUILD_TYPE_LIST RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG RELEASE DEBUG
+            PREFIX_LIST Empty Empty Empty Empty "lib" "lib" "lib" "lib" "lib" "lib" "lib" "lib"
+            POSTFIX_LIST Empty "d" Empty "d" Empty "d" Empty "d" Empty "d" Empty "d"
+            EXTENSION_LIST "lib" "lib" "lib" "lib" "so" "so" "a" "a" "dll.a" "dll.a" "a" "a"
+            LIBS_LIST Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty Empty
+            DEFINITIONS_LIST
+            "GTEST_LINKED_AS_SHARED_LIBRARY=1"
+            "GTEST_LINKED_AS_SHARED_LIBRARY=1"
+            Empty
+            Empty
+            "GTEST_LINKED_AS_SHARED_LIBRARY=1"
+            "GTEST_LINKED_AS_SHARED_LIBRARY=1"
+            Empty
+            Empty
+            "GTEST_LINKED_AS_SHARED_LIBRARY=1"
+            "GTEST_LINKED_AS_SHARED_LIBRARY=1"
+            Empty
+            Empty
+        )
+
+        set(${module}_definition "")
+        set(${module}_gtest_lib "${${module}_lib_dir}/${prefix}gtest${postfix}.${extension}")
+        set(${module}_gmock_lib "${${module}_lib_dir}/${prefix}gmock${postfix}.${extension}")
         if(${${module}_disable_pthreads})
             set(dep )
         else()
             set(dep Threads::Threads)
         endif()
         # make sure the dir existed
-        touch_fold(${module}_include_dir)
-        touch_fold(${module}_lib_dir)
         if(${${module}_disable_pthreads})
         else()
             include(CMakeFindDependencyMacro)
@@ -153,10 +189,8 @@ function(gtest_target)
             INTERFACE_INCLUDE_DIRECTORIES "${${module}_include_dir}"
             INTERFACE_LINK_DIRECTORIES "${${module}_lib_dir}"
             )
-        add_dependencies(interface_lib${module} PRIVATE _${module})
+        add_dependencies(interface_lib${module} PRIVATE ext_${module})
     endif()
     set(gtest_module_name ${module} PARENT_SCOPE)
     set(${module}_target_name interface_lib${module} PARENT_SCOPE)
-    #set(gtest_module_name ${module} CACHE INTERNAL "module name")
-    #set(${module}_target_name interface_lib${module} CACHE INTERNAL "")
 endfunction(gtest_target)

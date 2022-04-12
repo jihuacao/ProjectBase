@@ -119,6 +119,7 @@ for ep_target in ${target_folder[@]}; do
                 dir_not_empty_check "${output_dir}" output_dir
                 mkdir ${output_dir}
                 echo "rm ${output_dir}/* -rf" && rm ${output_dir}/* -rf
+                : '运行cmake进行配置'
                 cmake \
                 -A "${platform}" \
                 -G "${generator}" \
@@ -129,13 +130,23 @@ for ep_target in ${target_folder[@]}; do
                 -DCMAKE_BUILD_TYPE="${configuration}" \
                 -Dvar_external_root_dir="${output_root}/external" \
                 -Dexternal_build_shared="${shared}" \
-                --log-level=DEBUG
-                # -LAH 2>&1 1>"${output_dir}/cmake_config.log"
-                # cmd.exe /C "\"D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat\" x64 \
-                # && msbuild -p:configuration=${configuration} -p:platform=x64 ${output_dir}/${ep_target}.sln"
-
-                cd ${output_dir}
-                make
+                --log-level=DEBUG \
+                -LAH 2>&1 1>"${output_dir}/cmake_config.log"
+                : '运行构建'
+                if [[ ${system} == "Linux" ]]; then
+                    echo "test for ${system} is not completed"
+                elif [[ ${system} == *"MINGW"* ]]; then
+                    cmd.exe /C "\"D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat\" x64 \
+                    && msbuild -p:configuration=${configuration} -p:platform=x64 ${output_dir}/${ep_target}.sln"
+                elif [[ ${system} == *"CYGWIN"* ]]; then
+                    cd ${output_dir}
+                    make
+                else
+                    echo "${system} is not defined"
+                    exit 1
+                fi
+                
+                : '需要进行是否成功构建的检查'
                 # exit 1
             done
         done
