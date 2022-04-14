@@ -17,6 +17,8 @@ cmakelists_base_header()
 project_base_system_message()
 message(STATUS ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps")
+
 include(../../../external_process/gflags.cmake)
 gflags_target()
 

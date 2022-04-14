@@ -378,6 +378,13 @@ function(cmake_external_project_common_args external_project_name)
         -DCMAKE_INSTALL_PREFIX:STRING=${${external_project_name}_cmake_install_prefix}
         -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
+        -DCMAKE_AR:FILEPATH=${CMAKE_AR}
+        -DCMAKE_LINKER:FILEPATH=${CMAKE_LINKER}
+        -DCMAKE_NM:FILEPATH=${CMAKE_NM}
+        -DCMAKE_OBJCOPY:FILEPATH=${CMAKE_OBJCOPY}
+        -DCMAKE_OBJDUMP:FILEPATH=${CMAKE_OBJDUMP}
+        -DCMAKE_RANLIB:FILEPATH=${CMAKE_RANLIB}
+        -DCMAKE_DLLTOOl:FILEPATH=${CMAKE_DLLTOOL}
     )
     set_cmake_args_variable(cmake_args "${_cmake_args}")
     #[[
