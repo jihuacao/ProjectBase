@@ -5,6 +5,7 @@ BuildDir=""
 Platform=""
 Configuration=""
 BuildShare=OFF
+ExternalBuildShare=OFF
 Generator=""
 Compiler=""
 Linker=""
@@ -26,6 +27,7 @@ ARGS=`getopt \
     --long platform:: \
     --long configuration:: \
     --long build_share \
+    --long external_build_share \
     --long generator:: \
     --long compiler:: \
     --long linker:: \
@@ -46,6 +48,8 @@ while true ; do
             echo "configuration: $2"; Configuration=$2; shift 2 ;;
         --build_share)
             echo "build with share: $2"; BuildShare=ON; shift 1 ;;
+        --external_build_share)
+            echo "build with share: $2"; ExternalBuildShare=ON; shift 1 ;;
         --generator)
             echo "generator: $2"; Generator=$2; shift 2 ;;
         --compiler)
@@ -99,7 +103,8 @@ ${system_diff_options} \
 -G "${Generator}" \
 -S "${project_root}" \
 -B "${BuildDir}" \
--Dexternal_build_shared=${BuildShare} \
+-DBUILD_SHARED_LIBS=ON \
+-Dexternal_build_shared=${ExternalBuildShare} \
 -Dvar_external_root_dir="${external_source_dir}" \
 ${BuildOptions} \
 --log-level=DEBUG \
