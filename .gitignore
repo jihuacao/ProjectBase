@@ -40,3 +40,4 @@ latex/*
 DOXYGEN_OUTPUT
 doc/*
 .vscode/*
+BinaryOut
