@@ -52,9 +52,10 @@ list(
     "1.71.0"
     )
 
+set(boost_download_base_url  https://boostorg.jfrog.io/artifactory/main/release  CACHE STRING "base url for boost download")
 set(
     ${module}_supported_url 
-    https://dl.bintray.com/${url_label_name}org/release/1.71.0/source/${url_label_name}_1_71_0.tar.gz
+    ${boost_download_base_url}/1.71.0/source/${url_label_name}_1_71_0.tar.gz
     )
 
 set(
@@ -65,6 +66,8 @@ set(
 version_selector(${module} ${module}_all_version "1.71.0")
 
 default_external_project_build_type(${module})
+
+cmake_external_project_common_args(${module})
 
 project_build_shared(${module})
 
@@ -132,6 +135,19 @@ function(download_and_build_boost)
     else()
         set(_link static)
     endif()
+    ## 这里可以使用git进行下载boost
+    #set(target download_boost)
+    #ExternalProject_Add(
+    #    ${target}
+    #    "${${module}_external_project_add_args}"
+    #    PREFIX ${module}
+    #    "${${module}_external_project_add_git_args}"
+    #    GIT_REPOSITORY https://github.com/boostorg/boost.git
+    #    GIT_TAG boost-${${module}_version}
+    #    CONFIG_COMMAND "cd ${var_external_download_dir}/${target} && ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${${module}_cmake_install_prefix} > bootstrap_info.txt"
+    #    BUILD_COMMAND "cd ${var_external_download_dir}/${target} && ./b2 clean"
+    #    INSTALL_COMMAND "cd ${var_external_download_dir}/${target} && ./b2 install variant=${_variant} link=${_link} runtime-link=${_link} threading=multi --prefix=${${module}_cmake_install_prefix} > b2_info.txt"
+    #)
     # 构建方法：https://www.boost.org/doc/libs/1_66_0/more/getting_started/unix-variants.html
     # 该链接包含了boost库组件的命名规则：要应用该规则，需要在编译时增加**--layout=tagged参数 这里不是用这些命名规则，避免麻烦**
     # threading |   variant
@@ -145,6 +161,7 @@ function(download_and_build_boost)
     # link控制的是是否生成静态库，当link为shared时不起作用，当link为static时生成.a
     # runtime-link控制的是是否生成动态库，当runtime-link为shared时生成.so，当runtime-link为static时不起作用
     add_custom_target(${generate_boost_op_name}
+        echo "done"
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir} tar -xvf ${download_file_name} >./decompression_info.txt
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} > bootstrap_info.txt
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 clean
