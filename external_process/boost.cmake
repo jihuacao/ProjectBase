@@ -50,17 +50,20 @@ list(
     APPEND 
     ${module}_all_version 
     "1.71.0"
+    "1.81.0"
     )
 
 set(boost_download_base_url  https://boostorg.jfrog.io/artifactory/main/release  CACHE STRING "base url for boost download")
 set(
     ${module}_supported_url 
     ${boost_download_base_url}/1.71.0/source/${url_label_name}_1_71_0.tar.gz
+    https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
     )
 
 set(
     ${module}_supported_hash
     96b34f7468f26a141f6020efb813f1a2f3dfb9797ecf76a7d7cbd843cc95f5bd
+    205666dea9f6a7cfed87c7a6dfbeb52a2c1b9de55712c9c1a87735d7181452b6
     )
 
 version_selector(${module} ${module}_all_version "1.71.0")
@@ -89,8 +92,10 @@ else()
 endif()
 if(${_${module}_build_shared})
     set(Boost_USE_STATIC_LIBS OFF)
+    set(Boost_USE_STATIC_RUNTIME OFF)
 else()
     set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_USE_STATIC_RUNTIME ON)
 endif()
 message(STATUS "Prefix Configuration:
 ````````Boost_USE_DEBUG_LIBS: ${Boost_USE_DEBUG_LIBS}
@@ -103,8 +108,9 @@ message(STATUS "Prefix Configuration:
 ````````Boost_VERBOSE: ${Boost_VERBOSE}
 ````````Boost_DEBUG: ${Boost_DEBUG}")
 
-message(${external_install_path})
-find_package(Boost ${${module}_version} COMPONENTS ${${module}_with} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
+message(STATUS ${external_install_path})
+#find_package(Boost ${${module}_version} COMPONENTS ${${module}_with} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
+find_package(Boost ${${module}_version} COMPONENTS ${${module}_with} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${${module}_cmake_install_prefix})
 
 function(download_and_build_boost)
     version_url_hash_match(${module} ${module}_all_version ${module}_supported_url ${module}_supported_hash ${module}_version)
@@ -163,9 +169,9 @@ function(download_and_build_boost)
     add_custom_target(${generate_boost_op_name}
         echo "done"
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir} tar -xvf ${download_file_name} >./decompression_info.txt
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${external_install_path} > bootstrap_info.txt
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./bootstrap.sh --with-libraries=${with_component_option} --prefix=${${module}_cmake_install_prefix} > bootstrap_info.txt
         COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 clean
-        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install variant=${_variant} link=${_link} runtime-link=${_link} threading=multi --prefix=${external_install_path}> b2_info.txt
+        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install variant=${_variant} link=${_link} runtime-link=${_link} threading=multi --prefix=${${module}_cmake_install_prefix} > b2_info.txt
         #COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${url_label_name}_${url_version_name} ./b2 install --prefix=${external_install_path} > b2_install_info.txt
     )
     add_dependencies(${generate_boost_op_name} ${target})
@@ -248,13 +254,13 @@ if(Boost_FOUND)
     else()
         message(DEBUG "NOT TOTAL FOUND(TEMP)")
         download_and_build_boost()
-        build_boost_target(${module}_version ${module}_with _${module}_build_shared _${module}_build_type external_install_path)
+        build_boost_target(${module}_version ${module}_with _${module}_build_shared _${module}_build_type ${${module}_cmake_install_prefix})
         add_total_boost_component_link()
     endif()
 else()
     message(DEBUG "BOOST NOT FOUND(TEMP)")
     download_and_build_boost()
-    build_boost_target(${module}_version ${module}_with _${module}_build_shared _${module}_build_type external_install_path)
+    build_boost_target(${module}_version ${module}_with _${module}_build_shared _${module}_build_type ${${module}_cmake_install_prefix})
     add_total_boost_component_link()
 endif()
 

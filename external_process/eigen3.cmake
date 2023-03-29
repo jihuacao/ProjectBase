@@ -10,7 +10,9 @@ set(${module}_target_name Eigen3::Eigen)
 set(${module}_supported_version 3.3.7)
 version_selector(${module} ${module}_supported_version 3.3.7)
 
-find_package(Eigen3 ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
+cmake_external_project_common_args(${module})
+
+find_package(Eigen3 ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${${module}_cmake_install_prefix})
 
 function(fix_eigen_target_name)
     get_target_property(i Eigen3::Eigen IMPORTED)
@@ -50,11 +52,11 @@ else()
         CMAKE_CACHE_ARGS
             -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
             -DBUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
-            -DCMAKE_INSTALL_PREFIX:STRING=${external_install_path}
+            -DCMAKE_INSTALL_PREFIX:STRING=${${module}_cmake_install_prefix}
     )
 
     # make sure the dir exist
-    set(include_dir ${external_install_path}/include/eigen3)
+    set(include_dir ${${module}_cmake_install_path}/include/eigen3)
     touch_fold(include_dir)
 
     #add_library(${${module}_target_name} UNKNOWN IMPORTED GLOBAL)

@@ -13,5 +13,4 @@ source ${bash_dir}/build.sh \
 --generator="Unix Makefiles" \
 --compiler=gcc \
 --build_share \
---external_build_share \
 --linker=ld

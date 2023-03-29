@@ -88,6 +88,8 @@ include(boost)
 include(eigen3)
 # protobuf
 include(protobuf)
+include(./external_process/flatbuffers.cmake)
+flatbuffers_target()
 ## opencl
 #include(OpenCL)
 if(project_base_using_tbb)

@@ -2,3 +2,5 @@ python=OFF
 graph=OFF
 system=ON
 filesystem=ON
+json=ON
+headers=ON

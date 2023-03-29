@@ -28,5 +28,5 @@ TEST_P(Total, K){
 
 };
 
-//INSTANTIATE_TEST_SUITE_P(Permutaion, Total, testing::Values(total_input(nullptr, 1), total_input(nullptr, 1)));
-INSTANTIATE_TEST_SUITE_P(Permutaion, Total, testing::Values(generate_data()));
+INSTANTIATE_TEST_SUITE_P(Permutaion, Total, testing::Values(total_input(nullptr, 1), total_input(nullptr, 1)));
+//INSTANTIATE_TEST_SUITE_P(Permutaion, Total, testing::Values(generate_data()));

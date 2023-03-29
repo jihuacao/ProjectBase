@@ -12,7 +12,9 @@ obj_name_provide(CMAKE_BUILD_TYPE project_base_build_shared_lib module)
  #生成链接库
 add_library(${${module}_target_name} ${${module}_build_link_type} ${DIR_LIB_SRCS})
 target_link_libraries(${${module}_target_name} PUBLIC ${boost_target_name})
-#add_dependencies(${${module}_target_name} ${boost_target_name})
+add_dependencies(${${module}_target_name} ${boost_target_name})
+target_link_libraries(${${module}_target_name} PUBLIC ${${glog_module_name}_target_name})
+add_dependencies(${${module}_target_name} ${${glog_module_name}_target_name})
 #target_link_libraries(${${module}_target_name} PUBLIC ${eigen3_target_name})
 #add_dependencies(${${module}_target_name} ${eigen3_target_name})
 

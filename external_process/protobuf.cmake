@@ -19,8 +19,10 @@ default_external_project_build_type(${module})
 
 project_build_shared(${module})
 
+cmake_external_project_common_args(${module})
+
 message(STATUS "finding ${module} with version: ${${module}_version}")
-find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${external_install_path})
+find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${${module}_cmake_install_prefix})
 
 function(fix_protobuf_target_name)
 endfunction(fix_protobuf_target_name)
@@ -39,39 +41,39 @@ else()
 
     version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
 
-    set(${module}_include ${external_install_path}/include)
-    set(${module}_lib_dir ${external_install_path}/lib)
+    set(${module}_include ${${module}_cmake_install_prefix}/include)
+    set(${module}_lib_dir ${${module}_cmake_install_prefix}/lib)
     if(_${module}_build_type STREQUAL "RELEASE")
         if(_${module}_build_shared)
             set(soname libprotobuf.so)
             set(soname-lite libprotobuf-lite.so)
             set(soname-c libprotoc.so)
-            set(location ${external_install_path}/lib/libprotobuf.so)
-            set(location-lite ${external_install_path}/lib/libprotobuf-lite.so)
-            set(location-c ${external_install_path}/lib/libprotoc.so)
+            set(location ${${module}_cmake_install_prefix}/lib/libprotobuf.so)
+            set(location-lite ${${module}_cmake_install_prefix}/lib/libprotobuf-lite.so)
+            set(location-c ${${module}_cmake_install_prefix}/lib/libprotoc.so)
         else()
             set(soname libprotobufd.so)
             set(soname-lite libprotobuf-lited.so)
             set(soname-c libprotocd.so)
-            set(location ${external_install_path}/lib/libprotobufd.so)
-            set(location-lite ${external_install_path}/lib/libprotobuf-lited.so)
-            set(location-c ${external_install_path}/lib/libprotocd.so)
+            set(location ${${module}_cmake_install_prefix}/lib/libprotobufd.so)
+            set(location-lite ${${module}_cmake_install_prefix}/lib/libprotobuf-lited.so)
+            set(location-c ${${module}_cmake_install_prefix}/lib/libprotocd.so)
         endif()
     else()
         if(_${module}_build_shared)
             set(soname libprotobuf.a)
             set(soname-lite libprotobuf-lite.a)
             set(soname-c libprotoc.a)
-            set(location ${external_install_path}/lib/libprotobuf.a)
-            set(location-lite ${external_install_path}/lib/libprotobuf-lite.a)
-            set(location-c ${external_install_path}/lib/libprotoc.a)
+            set(location ${${module}_cmake_install_prefix}/lib/libprotobuf.a)
+            set(location-lite ${${module}_cmake_install_prefix}/lib/libprotobuf-lite.a)
+            set(location-c ${${module}_cmake_install_prefix}/lib/libprotoc.a)
         else()
             set(soname libprotobufd.a)
             set(soname-lite libprotobuf-lited.a)
             set(soname-c libprotocd.a)
-            set(location ${external_install_path}/lib/libprotobufd.a)
-            set(location-lite ${external_install_path}/lib/libprotobuf-lited.a)
-            set(location-c ${external_install_path}/lib/libprotocd.a)
+            set(location ${${module}_cmake_install_prefix}/lib/libprotobufd.a)
+            set(location-lite ${${module}_cmake_install_prefix}/lib/libprotobuf-lited.a)
+            set(location-c ${${module}_cmake_install_prefix}/lib/libprotocd.a)
         endif()
     endif()
 
@@ -89,15 +91,15 @@ else()
 #        UPDATE_DISCONNECTED ON
 #
 #        CONFIGURE_COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} ./autogen.sh
-#        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} ./configure --prefix=${external_install_path}
+#        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} ./configure --prefix=${${module}_cmake_install_prefix}
 #
 #        BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} make -j 8
 #
 #        TEST_COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} make check
 #
 #        INSTALL_COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} make install
-#        #COMMAND ${CMAKE_COMMAND} -E chdir ${external_install_path} mkdir include/google/protobuf/cmake
-#        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} cp -rf ./cmake ${external_install_path}/include/google/protobuf
+#        #COMMAND ${CMAKE_COMMAND} -E chdir ${${module}_cmake_install_prefix} mkdir include/google/protobuf/cmake
+#        COMMAND ${CMAKE_COMMAND} -E chdir ${external_download_dir}/${module} cp -rf ./cmake ${${module}_cmake_install_prefix}/include/google/protobuf
 #    )
 
 #第二套构建方法，使用cmake
@@ -121,7 +123,7 @@ else()
         CMAKE_COMMAND ${CMAKE_COMMAND} -E chdir ${build_dir} cmake ${cmake_dir}
         CMAKE_CACHE_ARGS
             -DCMAKE_BUILD_TYPE:STRING=${_${module}_build_type}
-            -DCMAKE_INSTALL_PREFIX:STRING=${external_install_path}
+            -DCMAKE_INSTALL_PREFIX:STRING=${${module}_cmake_install_prefix}
             -Dprotobuf_WITH_ZLIB:BOOL=ON
             -Dprotobuf_BUILD_SHARED_LIBS:BOOL=${_${module}_build_shared}
             -Dprotobuf_BUILD_EXAMPLES:BOOL=ON
@@ -166,8 +168,8 @@ else()
         ${generate_${module}_op_name}
     )
     ## make sure the dir exist
-    #set(include_dir ${external_install_path}/include)
-    #set(lib_dir ${external_install_path}/lib)
+    #set(include_dir ${${module}_cmake_install_prefix}/include)
+    #set(lib_dir ${${module}_cmake_install_prefix}/lib)
     #touch_fold(include_dir)
     #touch_fold(lib_dir)
 
