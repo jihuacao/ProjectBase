@@ -1,4 +1,4 @@
-#include <google/protobuf/message.h>
+#include <opencv2/imgcodecs.hpp>
 
 int main(int* argc, char** argv){
     google::protobuf::NewCallback(nullptr);

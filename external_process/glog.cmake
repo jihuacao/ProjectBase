@@ -17,7 +17,7 @@ function(glog_target)
     version_selector(${module} ${module}_supported_version 0.4.0)
     version_tag_matcher(${module} ${module}_supported_version ${module}_supported_tag ${module}_version)
     cmake_external_project_common_args(${module})
-    message("${module}: version->${${module}_version} build in->${${${module}_build_type_var_name}} shared?->${${${module}_build_shared_var_name}}")
+    message(STATUS "${module}: version->${${module}_version} build in->${${${module}_build_type_var_name}} shared?->${${${module}_build_shared_var_name}}")
 
     find_package(${module} ${${module}_version} CONFIG NO_CMAKE_PACKAGE_REGISTRY PATHS ${${module}_cmake_install_prefix})
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(test_protobuf)
+project(test_opencv)
 
 get_filename_component(test_external_process_dir ${${PROJECT_NAME}_SOURCE_DIR} PATH)
 get_filename_component(test_dir ${test_external_process_dir} PATH)
@@ -18,16 +18,16 @@ cmakelists_base_header()
 project_base_system_message()
 message(STATUS ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG})
 
-include(protobuf)
-protobuf_target()
-show_target_properties(${${protobuf_module_name}_target_name})
-get_target_property(in ${${protobuf_module_name}_target_name} IMPORTED_SONAME_RELEASE)
+include(opencv)
+opencv_target()
+show_target_properties(${${opencv_module_name}_target_name})
+get_target_property(in ${${opencv_module_name}_target_name} IMPORTED_SONAME_RELEASE)
 
-set(sources "${${PROJECT_NAME}_SOURCE_DIR}/test_protobuf.cpp")
+set(sources "${${PROJECT_NAME}_SOURCE_DIR}/test_opencv.cpp")
 add_executable(${PROJECT_NAME} ${sources})
-target_link_libraries(${PROJECT_NAME} ${${protobuf_module_name}_target_name})
+target_link_libraries(${PROJECT_NAME} ${${opencv_module_name}_target_name})
 target_compile_options(${PROJECT_NAME} PRIVATE -std=c++11)
-add_dependencies(${PROJECT_NAME} ${${protobuf_module_name}_target_name})
+add_dependencies(${PROJECT_NAME} ${${opencv_module_name}_target_name})
 
 # install multilanguage
 ## header

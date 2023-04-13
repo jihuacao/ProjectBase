@@ -123,7 +123,7 @@ function(external_project_build_type project supported_build_type default_build_
     if(${index} EQUAL -1)
         message(FATAL_ERROR "default_build_type: ${default_build_type} is not in the supported_build_type: ${supported_build_type}")
     endif()
-    set(${project}_build_type ${default_build_type} CACHE STRING "the specifical option for gtest, if the gtest_build_type is set")
+    set(${project}_build_type ${default_build_type} CACHE STRING "the specifical option for external project, if the gtest_build_type is set")
     set_property(CACHE ${project}_build_type PROPERTY STRINGS ${supported_build_type})
     if("${${project}_build_type}" STREQUAL "FOLLOW_CMAKE_BUILD_TYPE")
         string(TOUPPER ${CMAKE_BUILD_TYPE} _${project}_build_type)
@@ -146,7 +146,7 @@ endfunction(external_project_build_type)
         * FOLLOW_CMAKE_BUILD_TYPE
 ]]
 function(default_external_project_build_type project)
-    list(APPEND SupportedBuildType "FOLLOW_CMAKE_BUILD_TYPE" "RELEASE" "DEBUG")
+    list(APPEND SupportedBuildType "FOLLOW_CMAKE_BUILD_TYPE" "RELEASE" "DEBUG" "Debug" "Release")
     set(default_build_type "FOLLOW_CMAKE_BUILD_TYPE")
     external_project_build_type(${project} SupportedBuildType ${default_build_type})
     message(DEBUG "${project} ExternalProject_Add::CMAKE_BUILD_TYPE(\$\{${project}_build_type_var_name\})=${${${project}_build_type_var_name}}")
@@ -372,6 +372,7 @@ function(cmake_external_project_common_args external_project_name)
         APPEND 
         _cmake_args 
         -DCMAKE_BUILD_SHARED:BOOL=${${${external_project_name}_build_shared_var_name}}
+        -DBUILD_SHARED_LIBS:BOOL=${${${external_project_name}_build_shared_var_name}}
         -DCMAKE_BUILD_TYPE:STRING=${${${external_project_name}_build_type_var_name}}
         -DCMAKE_INSTALL_PREFIX:STRING=${${external_project_name}_cmake_install_prefix}
         -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
@@ -412,6 +413,17 @@ function(cmake_external_project_common_args external_project_name)
     )
     set_args_variable(external_project_add_git_args "${_external_project_add_git_args}")
 endfunction(cmake_external_project_common_args)
+
+#[[
+    本函数提供基础参数ExternalProject_Add中的通过url下载压缩包类型，
+    基于external_project_name以及前置version_s
+]]
+function(download_package_external_project_common_args external_project_name)
+    list(
+        APPEND
+        _external_project_
+    )
+endfunction(download_package_external_project_common_args)
 
 #[[
     # 由于参数解析方法的特性，如果想传入list，则将;替换为space，本函数中会将space替换成;

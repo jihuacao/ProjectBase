@@ -1,4 +1,6 @@
 # ProjectBase
+## requirements
+* cmake==3.19.8
 
 this project provide a few of feature for project developing
 v0.0.1:

@@ -4,6 +4,9 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/config.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/beast/core/detail/base64.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -18,76 +21,23 @@
 #include <boost/beast/http.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/beast/core/detail/base64.hpp>
 
-#include <boost/json.hpp>
+#include <boost/json/src.hpp>
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-// Return a reasonable mime type based on the extension of a file.
-beast::string_view
-mime_type(beast::string_view path)
-{
-    using beast::iequals;
-    auto const ext = [&path]
-    {
-        auto const pos = path.rfind(".");
-        if(pos == beast::string_view::npos)
-            return beast::string_view{};
-        return path.substr(pos);
-    }();
-    if(iequals(ext, ".htm"))  return "text/html";
-    if(iequals(ext, ".html")) return "text/html";
-    if(iequals(ext, ".php"))  return "text/html";
-    if(iequals(ext, ".css"))  return "text/css";
-    if(iequals(ext, ".txt"))  return "text/plain";
-    if(iequals(ext, ".js"))   return "application/javascript";
-    if(iequals(ext, ".json")) return "application/json";
-    if(iequals(ext, ".xml"))  return "application/xml";
-    if(iequals(ext, ".swf"))  return "application/x-shockwave-flash";
-    if(iequals(ext, ".flv"))  return "video/x-flv";
-    if(iequals(ext, ".png"))  return "image/png";
-    if(iequals(ext, ".jpe"))  return "image/jpeg";
-    if(iequals(ext, ".jpeg")) return "image/jpeg";
-    if(iequals(ext, ".jpg"))  return "image/jpeg";
-    if(iequals(ext, ".gif"))  return "image/gif";
-    if(iequals(ext, ".bmp"))  return "image/bmp";
-    if(iequals(ext, ".ico"))  return "image/vnd.microsoft.icon";
-    if(iequals(ext, ".tiff")) return "image/tiff";
-    if(iequals(ext, ".tif"))  return "image/tiff";
-    if(iequals(ext, ".svg"))  return "image/svg+xml";
-    if(iequals(ext, ".svgz")) return "image/svg+xml";
-    return "application/text";
-}
-
-// Append an HTTP rel-path to a local filesystem path.
-// The returned path is normalized for the platform.
-std::string
-path_cat(
-    beast::string_view base,
-    beast::string_view path)
-{
-    if(base.empty())
-        return std::string(path);
-    std::string result(base);
-#ifdef BOOST_MSVC
-    char constexpr path_separator = '\\';
-    if(result.back() == path_separator)
-        result.resize(result.size() - 1);
-    result.append(path.data(), path.size());
-    for(auto& c : result)
-        if(c == '/')
-            c = path_separator;
-#else
-    char constexpr path_separator = '/';
-    if(result.back() == path_separator)
-        result.resize(result.size() - 1);
-    result.append(path.data(), path.size());
-#endif
-    return result;
-}
+typedef struct {
+    boost::string_view taskid;
+    boost::string_view msg;
+} ErrorPack;
 
 // Return a response for the given request.
 //
@@ -95,99 +45,108 @@ path_cat(
 // request), is type-erased in message_generator.
 template <class Body, class Allocator>
 http::message_generator
-handle_request(
-    beast::string_view doc_root,
-    http::request<Body, http::basic_fields<Allocator>>&& req)
+handle_request(http::request<Body, http::basic_fields<Allocator>>&& req)
 {
     // Returns a bad request response
-    auto const bad_request =
-    [&req](beast::string_view why)
+    auto const failed_call =
+    [&req](const ErrorPack& ep)
     {
         http::response<http::string_body> res{http::status::bad_request, req.version()};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, "text/html");
+        res.set(http::field::content_type, "application/json");
         res.keep_alive(req.keep_alive());
-        res.body() = std::string(why);
-        res.prepare_payload();
-        return res;
-    };
-
-    // Returns a not found response
-    auto const not_found =
-    [&req](beast::string_view target)
-    {
-        http::response<http::string_body> res{http::status::not_found, req.version()};
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, "text/html");
-        res.keep_alive(req.keep_alive());
-        res.body() = "The resource '" + std::string(target) + "' was not found.";
-        res.prepare_payload();
-        return res;
-    };
-
-    // Returns a server error response
-    auto const server_error =
-    [&req](beast::string_view what)
-    {
-        http::response<http::string_body> res{http::status::internal_server_error, req.version()};
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, "text/html");
-        res.keep_alive(req.keep_alive());
-        res.body() = "An error occurred: '" + std::string(what) + "'";
+        boost::json::object data;
+        data["taskID"] = ep.taskid;
+        data["isSuccess"] = false;
+        data["message"] = ep.msg;
+        res.body() = boost::json::serialize(data);
         res.prepare_payload();
         return res;
     };
 
     // Make sure we can handle the method
-    if( req.method() != http::verb::get && 
-        req.method() != http::verb::head)
-        return bad_request("Unknown HTTP-method");
-
-    // Request path must be absolute and not contain "..".
-    if( req.target().empty() ||
-        req.target()[0] != '/' ||
-        req.target().find("..") != beast::string_view::npos)
-        return bad_request("Illegal request-target");
-
-    // Build the path to the requested file
-    std::string path = path_cat(doc_root, req.target());
-    if(req.target().back() == '/')
-        path.append("index.html");
-
-    // Attempt to open the file
-    beast::error_code ec;
-    http::file_body::value_type body;
-    body.open(path.c_str(), beast::file_mode::scan, ec);
-
-    // Handle the case where the file doesn't exist
-    if(ec == beast::errc::no_such_file_or_directory)
-        return not_found(req.target());
-
-    // Handle an unknown error
-    if(ec)
-        return server_error(ec.message());
-
-    // Cache the size since we need it after the move
-    auto const size = body.size();
-
-    // Respond to HEAD request
-    if(req.method() == http::verb::head)
-    {
-        http::response<http::empty_body> res{http::status::ok, req.version()};
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, mime_type(path));
-        res.content_length(size);
-        res.keep_alive(req.keep_alive());
-        return res;
+    if( req.method() != http::verb::get && req.method() != http::verb::post){
+        auto ep = ErrorPack();
+        ep.taskid = "";
+        ep.msg = "Unknown HTTP-method";
+        return failed_call(ep);
     }
 
-    // Respond to GET request
-    http::response<http::file_body> res{
+    // Request path must be absolute and not contain "..".
+    if( req.target().empty() || req.target()[0] != '/' || req.target().compare(boost::string_view("/api"))){
+        auto ep = ErrorPack();
+        ep.taskid = "";
+        ep.msg = "Illegal request-target";
+        return failed_call(ep);
+    }
+    
+    boost::json::error_code json_ec;
+    auto reqj = boost::json::value_to<boost::json::object>(boost::json::parse(req.body(), json_ec));
+    auto taskidi = reqj.find("taskID");
+    boost::string_view taskid("");
+    if (taskidi == reqj.end()){
+        auto ep = ErrorPack();
+        ep.taskid = "";
+        ep.msg = "taskID not found";
+        return failed_call(ep);
+    }
+    else{
+        taskid = boost::json::value_to<boost::string_view>(taskidi->value());
+    }
+
+    auto imgbase64i = reqj.find("imgBase64");
+    cv::Mat img;
+    if (imgbase64i == reqj.end()){
+        auto ep = ErrorPack();
+        ep.taskid = taskid;
+        ep.msg = "imgBase64 not found";
+        return failed_call(ep);
+    }
+    else{
+        boost::string_view imagebase64 = boost::json::value_to<boost::string_view>(imgbase64i->value());
+        // todo: decode base64 and change to opencv
+        std::size_t len = imagebase64.size();
+        std::string output;
+        output.resize(boost::beast::detail::base64::decoded_size(len));
+        auto result = boost::beast::detail::base64::decode(&output[0], imagebase64.data(), len);
+        output.resize(result.first);
+        // todo: string to opencv image
+        std::vector<unsigned char> data(output.begin(), output.end());
+        img = cv::imdecode(data, cv::IMREAD_UNCHANGED);
+        //cv::imwrite("a.jpg", img);
+    }
+
+    // todo: do the predict
+
+    // Attempt to open the file
+    http::string_body::value_type body;
+    boost::json::object data;
+    data["taskID"] = "task";
+    data["isSuccess"] = true;
+    data["message"] = "OK";
+    boost::json::object result;
+    result["isAlarm"] = false;
+    result["timestamp"] = "";
+    result["timecost"] = "0ms";
+    boost::json::array positions;
+    int num = 2;
+    for (auto n = 0; n < num; ++n){
+        positions.push_back(
+            {0.0, 0.0, 0.0, 0.0, "0.9", "test"}
+        );
+    }
+    result["positions"] = positions;
+    data["result"] = result;
+    body = boost::json::serialize(data);
+
+    auto const size = body.size();
+
+    http::response<http::string_body> res{
         std::piecewise_construct,
         std::make_tuple(std::move(body)),
         std::make_tuple(http::status::ok, req.version())};
     res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-    res.set(http::field::content_type, mime_type(path));
+    res.set(http::field::content_type, "application/json");
     res.content_length(size);
     res.keep_alive(req.keep_alive());
     return res;
@@ -207,17 +166,20 @@ class session : public std::enable_shared_from_this<session>
 {
     beast::tcp_stream stream_;
     beast::flat_buffer buffer_;
-    std::shared_ptr<std::string const> doc_root_;
-    http::request<http::string_body> req_;
+    //std::shared_ptr<std::string const> doc_root_;
+    //http::request<http::string_body> req_;
+    http::request_parser<http::string_body> reqp_;
 
 public:
     // Take ownership of the stream
     session(
-        tcp::socket&& socket,
-        std::shared_ptr<std::string const> const& doc_root)
+        tcp::socket&& socket
+        //, std::shared_ptr<std::string const> const& doc_root
+        )
         : stream_(std::move(socket))
-        , doc_root_(doc_root)
+        //, doc_root_(doc_root)
     {
+        reqp_.body_limit((std::numeric_limits<std::uint64_t>::max)());
     }
 
     // Start the asynchronous operation
@@ -237,15 +199,10 @@ public:
     void
     do_read()
     {
-        // Make the request empty before reading,
-        // otherwise the operation behavior is undefined.
-        req_ = {};
-
-        // Set the timeout.
         stream_.expires_after(std::chrono::seconds(30));
 
         // Read a request
-        http::async_read(stream_, buffer_, req_,
+        http::async_read(stream_, buffer_, reqp_,
             beast::bind_front_handler(
                 &session::on_read,
                 shared_from_this()));
@@ -267,7 +224,9 @@ public:
 
         // Send the response
         send_response(
-            handle_request(*doc_root_, std::move(req_)));
+            handle_request(
+                //*doc_root_, 
+                std::move(reqp_.get())));
     }
 
     void
@@ -323,16 +282,17 @@ class listener : public std::enable_shared_from_this<listener>
 {
     net::io_context& ioc_;
     tcp::acceptor acceptor_;
-    std::shared_ptr<std::string const> doc_root_;
+    //std::shared_ptr<std::string const> doc_root_;
 
 public:
     listener(
-        net::io_context& ioc,
-        tcp::endpoint endpoint,
-        std::shared_ptr<std::string const> const& doc_root)
+        net::io_context& ioc
+        , tcp::endpoint endpoint
+        //, std::shared_ptr<std::string const> const& doc_root
+        )
         : ioc_(ioc)
         , acceptor_(net::make_strand(ioc))
-        , doc_root_(doc_root)
+        //, doc_root_(doc_root)
     {
         beast::error_code ec;
 
@@ -401,8 +361,9 @@ private:
         {
             // Create the session and run it
             std::make_shared<session>(
-                std::move(socket),
-                doc_root_)->run();
+                std::move(socket)
+                //, doc_root_
+                )->run();
         }
 
         // Accept another connection
@@ -415,7 +376,7 @@ private:
 int main(int argc, char* argv[])
 {
     // Check command line arguments.
-    if (argc != 5)
+    if (argc != 4)
     {
         std::cerr <<
             "Usage: http-server-async <address> <port> <doc_root> <threads>\n" <<
@@ -425,8 +386,8 @@ int main(int argc, char* argv[])
     }
     auto const address = net::ip::make_address(argv[1]);
     auto const port = static_cast<unsigned short>(std::atoi(argv[2]));
-    auto const doc_root = std::make_shared<std::string>(argv[3]);
-    auto const threads = std::max<int>(1, std::atoi(argv[4]));
+    //auto const doc_root = std::make_shared<std::string>(argv[3]);
+    auto const threads = std::max<int>(1, std::atoi(argv[3]));
 
     // The io_context is required for all I/O
     net::io_context ioc{threads};
@@ -434,8 +395,9 @@ int main(int argc, char* argv[])
     // Create and launch a listening port
     std::make_shared<listener>(
         ioc,
-        tcp::endpoint{address, port},
-        doc_root)->run();
+        tcp::endpoint{address, port}
+        //, doc_root
+        )->run();
 
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;
