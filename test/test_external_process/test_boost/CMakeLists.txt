@@ -15,25 +15,25 @@ include(boost)
 
 set(sources "${CMAKE_CURRENT_SOURCE_DIR}/test_boost.cpp")
 add_executable(${PROJECT_NAME} ${sources})
-target_compile_options(${PROJECT_NAME} PRIVATE -std=c++11)
+target_compile_options(${PROJECT_NAME} PRIVATE -std=c++14)
 target_link_libraries(${PROJECT_NAME} ${boost_target_name}) 
 add_dependencies(${PROJECT_NAME} ${boost_target_name})
 #target_link_libraries(${PROJECT_NAME} Boost::boost) 
 #add_dependencies(${PROJECT_NAME} Boost::boost)
 show_target_properties(${PROJECT_NAME})
 
-add_executable(
-    app 
-    "${CMAKE_CURRENT_SOURCE_DIR}/app.cpp"
-    )
-
-find_package(
-    OpenCV
-    REQUIRED
-)
-target_compile_options(app PRIVATE -std=c++11)
-add_compile_options(-I /usr/include/ -fpermissive)
-add_link_options(-L /usr/lib/x86_64-linux-gnu/)
-target_link_libraries(app ${boost_target_name} ${OpenCV_LIBS} pthread)# /usr/lib/x86_64-linux-gnu/libopencv_highgui.a /usr/lib/x86_64-linux-gnu/libopencv_core.a) 
-add_dependencies(app ${boost_target_name})
-show_target_properties(app)
+#add_executable(
+#    app 
+#    "${CMAKE_CURRENT_SOURCE_DIR}/app.cpp"
+#    )
+#
+#find_package(
+#    OpenCV
+#    REQUIRED
+#)
+#target_compile_options(app PRIVATE -std=c++11)
+#add_compile_options(-I /usr/include/ -fpermissive)
+#add_link_options(-L /usr/lib/x86_64-linux-gnu/)
+#target_link_libraries(app ${boost_target_name} ${OpenCV_LIBS} pthread)# /usr/lib/x86_64-linux-gnu/libopencv_highgui.a /usr/lib/x86_64-linux-gnu/libopencv_core.a) 
+#add_dependencies(app ${boost_target_name})
+#show_target_properties(app)
