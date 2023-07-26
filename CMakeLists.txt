@@ -150,6 +150,8 @@ add_subdirectory(basic_calculation)
 add_subdirectory(basic_algorithm)
 # build algorithm
 add_subdirectory(algorithm)
+# build log system
+add_subdirectory(log_system)
 
 include(test_engineer_config)
 if(${build_test})

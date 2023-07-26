@@ -1,3 +1,4 @@
 external
 cmake_config.log
 CMakeCache.txt
+InstallOut
