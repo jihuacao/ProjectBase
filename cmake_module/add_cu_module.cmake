@@ -5,7 +5,8 @@
 # @return 
 # @time 2023-07-07
 # @author cjh
-macro(add_base_module module_name)
+macro(add_cu_base_module module_name)
+    enable_language(CUDA)
     ## compile method 
     include(popular_message)
     cmakelists_base_header()
@@ -36,4 +37,4 @@ macro(add_base_module module_name)
         add_subdirectory(${module}_test)
     else()
     endif()
-endmacro(add_base_module)
+endmacro(add_cu_base_module)

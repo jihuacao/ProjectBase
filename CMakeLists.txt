@@ -152,6 +152,8 @@ add_subdirectory(basic_algorithm)
 add_subdirectory(algorithm)
 # build log system
 add_subdirectory(log_system)
+# build cuda operation
+add_subdirectory(cu_ops)
 
 include(test_engineer_config)
 if(${build_test})
