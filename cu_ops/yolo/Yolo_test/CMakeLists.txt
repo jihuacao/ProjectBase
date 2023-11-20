@@ -1,0 +1,8 @@
+include(add_binary)
+enable_language(CUDA)
+include_directories(/usr/local/cuda/include)
+link_directories(/usr/local/cuda/lib64)
+include_directories(/usr/include/x86_64-linux-gnu)
+link_directories(/usr/lib/x86_64-linux-gnu)
+add_base_test(Yolo)
+target_link_libraries(${YoloTest_target_name} nvinfer cudart)

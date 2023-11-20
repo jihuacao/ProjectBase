@@ -38,17 +38,6 @@ inline T *get_next_ptr(size_t num_elem, void *&workspace, size_t &workspace_size
     return ptr;
 }
 
-#ifndef CUDA_CHECK
-#define CUDA_CHECK(callstr)\
-    {\
-        cudaError_t error_code = callstr;\
-        if (error_code != cudaSuccess) {\
-            std::cerr << "CUDA error " << error_code << " at " << __FILE__ << ":" << __LINE__;\
-            assert(0);\
-        }\
-    }
-#endif  // CUDA_CHECK
-
 __device__ float Logist(float data) { return 1.0f / (1.0f + expf(-data)); };
 
 __global__ void CalDetection(const float *input, float *output, int noElements,
@@ -256,7 +245,8 @@ IPluginV2IOExt* YoloLayerPlugin::clone() const TRT_NOEXCEPT {
 void YoloLayerPlugin::forwardGpu(const float* const* inputs, float *output, cudaStream_t stream, int batchSize) {
   int outputElem = 1 + mMaxOutObject * sizeof(Detection) / sizeof(float);
   for (int idx = 0; idx < batchSize; ++idx) {
-    CUDA_CHECK(cudaMemsetAsync(output + idx * outputElem, 0, sizeof(float), stream));
+    auto e = cudaMemsetAsync(output + idx * outputElem, 0, sizeof(float), stream);
+    CUDA_CHECK(e);
   }
   int numElem = 0;
   for (unsigned int i = 0; i < mYoloKernel.size(); ++i) {

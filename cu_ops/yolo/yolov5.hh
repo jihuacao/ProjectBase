@@ -33,6 +33,21 @@
 
 #endif  // __MACROS_H
 
+#include <stdexcept>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#ifndef CUDA_CHECK
+#define CUDA_CHECK(callstr)\
+    {\
+        cudaError_t error_code = callstr;\
+        if (error_code != cudaSuccess) {\
+            std::cerr << "CUDA error " << error_code << " at " << __FILE__ << ":" << __LINE__;\
+            assert(0);\
+        }\
+    }
+#endif  // CUDA_CHECK
+
 // For INT8, you need prepare the calibration dataset, please refer to
 // https://github.com/wang-xinyu/tensorrtx/tree/master/yolov5#int8-quantization
 #define USE_FP16  // set USE_INT8 or USE_FP16 or USE_FP32
@@ -146,8 +161,8 @@ public:
 
   void detachFromContext() TRT_NOEXCEPT override;
 
- private:
   void forwardGpu(const float* const* inputs, float *output, cudaStream_t stream, int batchSize = 1);
+ private:
   int mThreadCount = 256;
   const char* mPluginNamespace;
   int mKernelCount;

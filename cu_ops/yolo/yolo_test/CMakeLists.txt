@@ -1,5 +1,0 @@
-include(add_binary)
-enable_language(CUDA)
-include_directories(/usr/local/cuda/include)
-link_directories(/usr/local/cuda/lib)
-add_base_test(Yolo)
