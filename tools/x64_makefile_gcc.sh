@@ -17,4 +17,5 @@ source ${bash_dir}/build.sh \
 --compiler=gcc \
 --build_share \
 --linker=ld \
---build-options=" -DCMAKE_INSTALL_PREFIX=${InstallDir}"
+--build-options="-DCMAKE_INSTALL_PREFIX=${InstallDir}" \
+--build-options="-DCMAKE_CUDA_FLAGS="-G""

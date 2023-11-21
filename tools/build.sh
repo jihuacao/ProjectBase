@@ -62,7 +62,7 @@ while true ; do
                 *)  echo "Option $1, argument $2" ; shift 2;;
             esac ;;
         --build-options)
-            echo "build options: $2"; BuildOptions=$2; shift 2 ;;
+            echo "build options: $2"; BuildOptions="${BuildOptions[@]} $2"; shift 2 ;;
         --log-level)
             log_level_info(){
                 echo "set log level to $1"
@@ -97,6 +97,7 @@ else
 fi
 
 #echo " \
+echo ${BuildOptions[@]}
 cmake \
 -DCMAKE_BUILD_TYPE=${Configuration} \
 ${system_diff_options} \
@@ -106,7 +107,7 @@ ${system_diff_options} \
 -DBUILD_SHARED_LIBS=ON \
 -Dexternal_build_shared=${ExternalBuildShare} \
 -Dvar_external_root_dir="${external_source_dir}" \
-${BuildOptions} \
+$(echo ${BuildOptions[@]}) \
 --log-level=DEBUG \
 -LAH \
 > ${BuildDir}/cmake_config.log
