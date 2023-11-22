@@ -53,4 +53,4 @@ macro(add_binary target_module_name)
         RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin 
         LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
         ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-endmacro(add_base_test)
+endmacro(add_binary)

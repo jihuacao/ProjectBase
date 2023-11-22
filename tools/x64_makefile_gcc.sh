@@ -18,4 +18,6 @@ source ${bash_dir}/build.sh \
 --build_share \
 --linker=ld \
 --build-options="-DCMAKE_INSTALL_PREFIX=${InstallDir}" \
---build-options="-DCMAKE_CUDA_FLAGS="-G""
+--config-file=./cuda.cmake
+#--build-options="-DCMAKE_CUDA_FLAGS="--generate-code=arch=compute_61,code=compute_61""
+#--build-options="-DCMAKE_CUDA_FLAGS="--generate-code=arch=compute_61,code=sm_61""

@@ -23,6 +23,7 @@ usage(){
 ARGS=`getopt \
     -o hab:: \
     -o c:: \
+    --long config-file:: \
     --long build_dir:: \
     --long platform:: \
     --long configuration:: \
@@ -40,6 +41,8 @@ if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 eval set -- "${ARGS}"
 while true ; do
     case "$1" in
+        --config-file)
+            echo "config file:$2"; ConfigFile=$2; shift 2;;
         --build_dir)
             echo "build dir: $2"; BuildDir=$2; shift 2 ;;
         --platform)
@@ -101,6 +104,7 @@ echo ${BuildOptions[@]}
 cmake \
 -DCMAKE_BUILD_TYPE=${Configuration} \
 ${system_diff_options} \
+-C "${ConfigFile}" \
 -G "${Generator}" \
 -S "${project_root}" \
 -B "${BuildDir}" \
